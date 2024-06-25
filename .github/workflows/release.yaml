@@ -18,11 +18,13 @@ jobs:
         uses: actions/setup-node@v3.0.0
         with:
           node-version: '16'
-      - name: Pnpm install and build
+      - name: Yarn install and build
         run: |
-          pnpm install --registry https://registry.npmmirror.com --dir ./frontend
-          echo "Build frontend..."
-          cd ./frontend && pnpm run build
+          cd frontend && rm -f yarn.lock && yarn install --registry https://registry.npmmirror.com --legacy-peer-deps
+          yarn build
+#          pnpm install --registry https://registry.npmmirror.com --dir ./frontend
+#          echo "Build frontend..."
+#          cd ./frontend && pnpm run build
       - name: upload frontend release
         uses: actions/upload-artifact@v2
         with:
