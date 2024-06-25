@@ -89,7 +89,7 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: build
-        run: cd scripts && ./docker_publish.sh "" "backend"
+        run: cd scripts && ./docker_publish.sh ${{ secrets.DOCKER_USERNAME }} "backend"
 #
 #      - name: push image
 #        run: |
