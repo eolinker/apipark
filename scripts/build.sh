@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 cd "$(dirname "$0")/../"
 LOCAL_PATH=$(pwd)
@@ -53,12 +53,12 @@ env_check() {
   fi
   echo "Npm is installed."
 
-  # 检查是否安装了 pnpm
-  if ! command -v pnpm &> /dev/null; then
-    echo_error "Pnpm is not installed. Please install Pnpm."
-    exit 1
-  fi
-  echo "Pnpm is installed."
+#  # 检查是否安装了 pnpm
+#  if ! command -v pnpm &> /dev/null; then
+#    echo_error "Pnpm is not installed. Please install Pnpm."
+#    exit 1
+#  fi
+#  echo "Pnpm is installed."
 
   # 如果所有检查都通过，打印环境检查通过的消息
   echo_info "All required tools are installed."
