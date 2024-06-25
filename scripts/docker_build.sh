@@ -16,7 +16,8 @@ fi
 source ./scripts/common.sh
 APP="apipark"
 
-cp cmd/${APP} scripts/cmd/
+
+mkdir -p scripts/cmd/ && cp cmd/${APP} scripts/cmd/
 
 VERSION=$(gen_version)
 
