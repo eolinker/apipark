@@ -24,9 +24,6 @@ jobs:
           pnpm install --registry https://registry.npmmirror.com --dir ./frontend
           echo "Build frontend..."
           cd ./frontend && pnpm run build
-#          cd frontend && rm -f yarn.lock && yarn install --registry https://registry.npmmirror.com --legacy-peer-deps
-#          yarn build
-
       - name: upload frontend release
         uses: actions/upload-artifact@v2
         with:
@@ -60,7 +57,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v3.1.0
         with:
           version: latest
-          args: release --rm-dist
+          args: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #      - name: upload release
@@ -92,7 +89,7 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: build
-        run: cd scripts && ./docker_publish.sh
+        run: cd scripts && ./docker_publish.sh "" "backend"
 #
 #      - name: push image
 #        run: |

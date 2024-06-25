@@ -12,15 +12,19 @@ App="apipark"
 if [[ "${User}" == "" ]];then
   User="eolinker"
 fi
+BuildMode=$2
+if [[ "${BuildMode}" == "" ]];then
+  BuildMode="all"
+fi
 Version=$(gen_version)
 ImageName="${User}/${App}"
 echo "docker manifest rm  \"${ImageName}:${Version}\""
 docker manifest rm "${ImageName}:${Version}"
 
 set -e
-./scripts/docker_build.sh amd64
+./scripts/docker_build.sh amd64 "" "${BuildMode}"
 
-./scripts/docker_build.sh arm64
+./scripts/docker_build.sh arm64 "" "${BuildMode}"
 
 
 

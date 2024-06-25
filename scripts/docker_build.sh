@@ -6,8 +6,12 @@ cd "$(dirname "$0")/../"
 LOCAL_PATH=$(pwd)
 ARCH=$1
 User=$2
+BuildMode=$3
+if [[ "${BuildMode}" == "" ]];then
+  BuildMode="all"
+fi
 # 编译可执行文件
-./scripts/build.sh "cmd" "" "all" ${ARCH}
+./scripts/build.sh "cmd" "" "${BuildMode}" ${ARCH}
 
 source ./scripts/common.sh
 APP="apipark"
