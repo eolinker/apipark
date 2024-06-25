@@ -22,9 +22,9 @@ echo "docker manifest rm  \"${ImageName}:${Version}\""
 docker manifest rm "${ImageName}:${Version}"
 
 set -e
-./scripts/docker_build.sh amd64 "" "${BuildMode}"
+./scripts/docker_build.sh amd64 ${User} "${BuildMode}"
 
-./scripts/docker_build.sh arm64 "" "${BuildMode}"
+./scripts/docker_build.sh arm64 ${User} "${BuildMode}"
 
 
 
