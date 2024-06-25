@@ -1,0 +1,50 @@
+# .goreleaser.yml
+dist: build
+
+builds:
+  - id: apipark
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    goarm:
+      - "6"
+    gomips:
+      - hardfloat
+    goamd64:
+      - v1
+    targets:
+      - linux_arm64
+      - linux_amd64
+      - darwin_arm64
+      - darwin_amd64
+    tags:
+      - release
+      - mysql
+    dir: ./
+    main: ./
+    binary: apipark
+    builder: go
+    gobinary: go
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w
+      - -X 'github.com/eolinker/apipark/common/version.Version=${VERSION}'
+      - -X 'github.com/eolinker/apipark/common/version.goversion=$(go version)'
+      - -X 'github.com/eolinker/apipark/common/version.gitcommit=$(git rev-parse HEAD)'
+      - -X 'github.com/eolinker/apipark/common/version.BuildTime=$(date -u +"%Y-%m-%dT%H:%M:%SZ")'
+      - -X 'github.com/eolinker/apipark/common/version.builduser=$(id -u -n)'
+
+archives:
+  - id: default
+    format: tar.gz
+    wrap_in_directory: "apipark_{{ .Tag }}"
+    name_template: "apipark_{{ .Tag }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - src: 'scripts/resource/*'
+        dst: /
+        strip_parent: true
+

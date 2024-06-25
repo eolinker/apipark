@@ -1,0 +1,96 @@
+system:
+  - name: user_manager
+    cname: '成员管理'
+    desc: '成员管理'
+  - name: user_group
+    cname: '用户组管理'
+    desc: '用户组管理'
+  - name: team_manager
+    cname: '团队管理'
+    desc: '团队管理'
+  - name: organization_manager
+    cname: '组织管理'
+    desc: '组织管理'
+  - name: role_manager
+    cname: '角色管理'
+    desc: '角色管理'
+  - name: system_permission_setting
+    cname: '系统权限设置'
+    desc: '系统权限设置'
+  - name: devops
+    cname: '运维管理'
+    desc: '运维管理'
+  - name: environs_setting
+    cname: '环境管理'
+    desc: '环境管理'
+  - name: service_categories_setting
+    cname: '服务类目管理'
+    desc: '管理服务广场内的服务类目'
+team:
+  - name: project_manager
+    cname: '项目管理'
+    desc: '项目管理'
+  - name: project_view
+    cname: '项目查看'
+    desc: '项目查看'
+  - name: team_permission_setting
+    cname: '团队权限管理'
+    desc: '团队权限管理'
+  - name: team_setting
+    cname: '团队设置'
+    desc: '团队设置'
+  - name: member_setting
+    cname: '成员管理'
+    desc: '成员管理'
+project:
+  - name: project_setting
+    cname: '系统设置'
+    desc: '管理系统设置'
+  - name: member_setting
+    cname: '成员管理'
+    desc: '成员管理'
+  - name: api_manager
+    cname: 'API管理'
+    desc: 'API管理'
+  - name: api_view
+    cname: 'API查看'
+    desc: 'API查看'
+  - name: upstream_manager
+    cname: '上游管理'
+    desc: '上游管理'
+  - name: upstream_view
+    cname: '上游查看'
+    desc: '上游查看'
+  - name: service_manager
+    cname: '服务管理'
+    desc: '服务管理'
+  - name: service_view
+    cname: '服务查看'
+    desc: '服务查看'
+  - name: subscribe_view
+    cname: '订阅查看'
+    desc: '查看订阅的第三方服务'
+  - name: subscribe_apply
+    cname: '申请订阅'
+    desc: '申请订阅第三方服务'
+  - name: subscribers_manager
+    cname: '订阅方管理'
+    desc: '管理订阅的第三方服务, 新增，删除订阅方'
+  - name: subscribe_approval
+    cname: '订阅审批'
+    desc: '审批订阅申请'
+  - name: authentication_view
+    cname: '查看鉴权'
+    desc: '查看鉴权配置'
+  - name: authentication_manager
+    cname: '鉴权管理'
+    desc: '新增/编辑/删除鉴权信息'
+  - name: publish_manager
+    cname: '发布管理'
+    desc: '申请\执行发布, 删除版本'
+  - name: publish_approve
+    cname: '发布审批'
+    desc: '审批发布申请'
+  - name: permission_manager
+    cname: '权限管理'
+    desc: '权限管理'
