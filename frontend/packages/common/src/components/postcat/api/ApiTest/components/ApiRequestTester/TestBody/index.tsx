@@ -114,7 +114,6 @@ export function TestBody({ bodyApiRef, onContentTypeChange }: TestBodyProps) {
   const updateRequestBody = (data: TestBodyType) => {
     setApiBodyTypeValue(data.apiBodyType)
     setContentType(data.contentType)
-    //console.log(data)
     if (data.apiBodyType === ApiBodyType.FormData) {
       formDataApiRef.current?.updateRows(data.data as BodyParamsType[])
     }

@@ -34,4 +34,4 @@ echo -e "  log_expire: ${ERROR_EXPIRE}" >> config.yml
 echo -e "  log_period: ${ERROR_PERIOD}" >> config.yml
 
 cat config.yml
-./aoplatform
+./apipark

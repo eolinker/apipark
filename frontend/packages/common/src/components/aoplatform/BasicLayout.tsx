@@ -48,7 +48,7 @@ const { Header, Sider, Content } = Layout;
             <Header className="border-0 border-b border-solid border-b-BORDER flex items-center px-[20px]">
                 <div className="w-[175px] flex items-center">
                   <img
-                    className="h-[32px]"
+                    className="h-[28px]"
                     src={Logo}
                   />
                 </div>
