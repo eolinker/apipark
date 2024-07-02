@@ -3,15 +3,15 @@
 if [ ! -d "work" ]; then
   mkdir -p work
 fi
-# aoplatform 二进制程序的路径
-AOPLATFORM_BIN="./aoplatform"
+APP="apipark"
+APP_BIN="./${APP}"
 DATE=$(date "+%Y-%m-%d %H:%M:%S")
 
-# 日志文件的路径，这里使用当前目录下的 aoplatform.log 文件
-LOG_FILE="work/aoplatform-${DATE}.log"
+# 日志文件的路径
+LOG_FILE="work/${APP}-${DATE}.log"
 
 # PID 文件的路径，用于存储进程 ID
-PID_FILE="work/aoplatform.pid"
+PID_FILE="work/${APP}.pid"
 
 is_program_running() {
     # 使用 ps 命令查找程序，并通过 grep 过滤结果
@@ -27,18 +27,18 @@ is_program_running() {
 start() {
     # 创建新的日志文件
     date "+%Y-%m-%d %H:%M:%S" >> "$LOG_FILE"
-    echo "Starting aoplatform..." >> "$LOG_FILE"
+    echo "Starting ${APP}..." >> "$LOG_FILE"
 
-    # 启动 aoplatform 并重定向输出到日志文件
+    # 启动并重定向输出到日志文件
     # 使用 nohup 和 & 让程序在后台运行
-    nohup "$AOPLATFORM_BIN" >> "$LOG_FILE" 2>&1 &
+    nohup "$APP_BIN" >> "$LOG_FILE" 2>&1 &
     PID=$!
     echo ${PID} > "$PID_FILE"
     sleep 3
     if is_program_running ${PID}; then
-        echo "aoplatform started with PID ${PID}, output is being logged to $LOG_FILE"
+        echo "${APP} started with PID ${PID}, output is being logged to $LOG_FILE"
     else
-        echo "aoplatform failed to start, see $LOG_FILE for details"
+        echo "${APP} failed to start, see $LOG_FILE for details"
         cat "$LOG_FILE"
         exit 1
     fi
@@ -52,7 +52,7 @@ stop() {
 
     # 检查 PID 是否存在
     if [ -z "$PID" ]; then
-        echo "No aoplatform process is running."
+        echo "No ${APP} process is running."
         return
     fi
 
@@ -61,10 +61,10 @@ stop() {
 
     # 确认进程是否已停止
     if kill -0 "$PID" 2>/dev/null; then
-        echo "aoplatform is still running, attempting to force stop."
+        echo "${APP} is still running, attempting to force stop."
         kill -9 "$PID"
     else
-        echo "aoplatform stopped successfully."
+        echo "${APP} stopped successfully."
     fi
 
     # 删除 PID 文件
