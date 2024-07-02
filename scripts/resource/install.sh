@@ -2,7 +2,7 @@
 
 set -e
 
-appName="aoplatform"
+appName="apipark"
 
 OUTPUT_DIR=""
 if [ -z "$1" ]; then
