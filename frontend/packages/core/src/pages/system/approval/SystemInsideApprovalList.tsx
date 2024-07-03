@@ -1,8 +1,8 @@
 /*
  * @Date: 2024-01-31 15:00:11
  * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-07 17:36:19
- * @FilePath: \frontend\packages\core\src\pages\system\approval\SystemInsideApprovalList.tsx
+ * @LastEditTime: 2024-07-02 17:13:12
+ * @FilePath: \frontend\node_modules\.pnpm\node_modules\core\src\pages\system\approval\SystemInsideApprovalList.tsx
  */
 import {ActionType, ProColumns} from "@ant-design/pro-components";
 import  {FC, useEffect, useMemo, useRef, useState} from "react";
@@ -60,7 +60,7 @@ const SystemInsideApprovalList:FC = ()=>{
                     return subscribeRef.current?.save('pass').then((res)=>res === true && manualReloadTable())
                 },
                 width:600,
-                okText:'确认',
+                okText:type === 'approval' ? '通过' : '确认',
                 cancelText:type === 'approval' ?'取消':'关闭',
                 okButtonProps:{
                     disabled : type === 'approval' ? !checkAccess('project.mySystem.publish.approval', accessData): false
