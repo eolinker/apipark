@@ -1,7 +1,7 @@
 /*
  * @Date: 2024-01-31 15:00:11
  * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-07 17:36:28
+ * @LastEditTime: 2024-07-02 17:06:19
  * @FilePath: \frontend\packages\core\src\pages\system\upstream\SystemInsideUpstreamContent.tsx
  */
 import { App, Badge, Button, Col, Divider, Form, Input, InputNumber, Radio, Row, Select, Spin, Switch, Tabs} from "antd";
@@ -107,7 +107,7 @@ const SystemInsideUpstreamContent= forwardRef<SystemInsideUpstreamContentHandle>
                     if(data.upstream?.[p.id]){
                         setFormStatus(pre=>({...pre, [p.id]:true}))
                     }
-                    data.upstream = {...data.upstream, [p.id] : (data.upstream?.[p.id] ? {...data.upstream[p.id], nodes:data.upstream[p.id].nodes ?? [{_id:uuidv4()}]} : {driver:'static', scheme:'HTTP', balance: 'round-robin',limitPeerSecond:5,timeout: 10000,proxyHeaders: [],retry:3})}
+                    data.upstream = {...data.upstream, [p.id] : (data.upstream?.[p.id] ? {...data.upstream[p.id], nodes: (data.upstream[p.id].nodes ? [...data.upstream[p.id].nodes,{_id:uuidv4()}] : [{_id:uuidv4()}])} : {driver:'static', scheme:'HTTP', balance: 'round-robin',limitPeerSecond:5,timeout: 10000,proxyHeaders: [],retry:3})}
                 }
                 setFormDataFromApi(data.upstream)
             }else{

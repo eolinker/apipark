@@ -840,7 +840,7 @@ export const IntelligentPluginConfig =  forwardRef<IntelligentPluginConfigHandle
         <div  className="pl-[12px]">
             <FormProvider form={form}>
                 <SchemaField
-                    schema={finalSchema}
+                    schema={schema}
                     scope={{ useAsyncDataSource, getSkillData,formTab,form }}
                 />
             </FormProvider>
