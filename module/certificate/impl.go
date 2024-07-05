@@ -3,8 +3,10 @@ package certificate
 import (
 	"context"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"github.com/eolinker/eosc/log"
+	"gorm.io/gorm"
 	"time"
 
 	"github.com/eolinker/apipark/gateway"
@@ -94,10 +96,10 @@ func (m *imlCertificate) save(ctx context.Context, id string, partitionId string
 	return out, nil
 }
 
-func (m *imlCertificate) dynamicClient(ctx context.Context, clusterId string) (gateway.IDynamicClient, error) {
+func (m *imlCertificate) syncGateway(ctx context.Context, clusterId string, releaseInfo *gateway.DynamicRelease, online bool) error {
 	client, err := m.clusterService.GatewayClient(ctx, clusterId)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer func() {
 		err := client.Close(ctx)
@@ -105,8 +107,16 @@ func (m *imlCertificate) dynamicClient(ctx context.Context, clusterId string) (g
 			log.Warn("close apinto client:", err)
 		}
 	}()
-	return client.Dynamic("certificate")
+	dynamicClient, err := client.Dynamic("certificate")
+	if err != nil {
+		return err
+	}
+	if online {
+		return dynamicClient.Online(ctx, releaseInfo)
+	}
+	return dynamicClient.Offline(ctx, releaseInfo)
 }
+
 func (m *imlCertificate) Create(ctx context.Context, partitionId string, create *certificatedto.FileInput) error {
 	_, err := m.partitionService.Get(ctx, partitionId)
 	if err != nil {
@@ -120,11 +130,7 @@ func (m *imlCertificate) Create(ctx context.Context, partitionId string, create 
 		id := uuid.New().String()
 		version := time.Now().Format("20060102150405")
 		for _, c := range clusters {
-			client, err := m.dynamicClient(ctx, c.Uuid)
-			if err != nil {
-				return err
-			}
-			cfg := &gateway.DynamicRelease{
+			err = m.syncGateway(ctx, c.Uuid, &gateway.DynamicRelease{
 				BasicItem: &gateway.BasicItem{
 					ID:          id,
 					Description: "",
@@ -137,8 +143,7 @@ func (m *imlCertificate) Create(ctx context.Context, partitionId string, create 
 					"key": create.Key,
 					"pem": create.Cert,
 				},
-			}
-			err = client.Online(ctx, cfg)
+			}, true)
 			if err != nil {
 				return err
 			}
@@ -164,11 +169,7 @@ func (m *imlCertificate) Update(ctx context.Context, id string, edit *certificat
 	return m.transaction.Transaction(ctx, func(ctx context.Context) error {
 		version := time.Now().Format("20060102150405")
 		for _, c := range clusters {
-			client, err := m.dynamicClient(ctx, c.Uuid)
-			if err != nil {
-				return err
-			}
-			cfg := &gateway.DynamicRelease{
+			err = m.syncGateway(ctx, c.Uuid, &gateway.DynamicRelease{
 				BasicItem: &gateway.BasicItem{
 					ID:          id,
 					Description: "",
@@ -181,8 +182,7 @@ func (m *imlCertificate) Update(ctx context.Context, id string, edit *certificat
 					"key": edit.Key,
 					"pem": edit.Cert,
 				},
-			}
-			err = client.Online(ctx, cfg)
+			}, true)
 			if err != nil {
 				return err
 			}
@@ -216,5 +216,29 @@ func (m *imlCertificate) Detail(ctx context.Context, id string) (*certificatedto
 }
 
 func (m *imlCertificate) Delete(ctx context.Context, id string) error {
-	return m.service.Delete(ctx, id)
+	cert, _, err := m.service.Get(ctx, id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil
+		}
+		return err
+	}
+	clusters, err := m.clusterService.ListByClusters(ctx, cert.Partition)
+	if err != nil {
+		return err
+	}
+	return m.transaction.Transaction(ctx, func(ctx context.Context) error {
+		for _, c := range clusters {
+			err = m.syncGateway(ctx, c.Uuid, &gateway.DynamicRelease{
+				BasicItem: &gateway.BasicItem{
+					ID:          id,
+					Description: "",
+				},
+			}, false)
+			if err != nil {
+				return err
+			}
+		}
+		return m.service.Delete(ctx, id)
+	})
 }
