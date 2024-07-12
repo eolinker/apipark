@@ -2,7 +2,7 @@ package core
 
 import (
 	"net/http"
-
+	
 	"github.com/eolinker/go-common/pm3"
 )
 
@@ -15,9 +15,5 @@ func (p *plugin) partitionApi() []pm3.Api {
 		pm3.CreateApiWidthDoc(http.MethodDelete, "/api/v1/partition", []string{"context", "query:id"}, []string{"id"}, p.partitionController.Delete),
 		pm3.CreateApiWidthDoc(http.MethodGet, "/api/v1/simple/partitions", []string{"context"}, []string{"partitions"}, p.partitionController.Simple),
 		pm3.CreateApiWidthDoc(http.MethodGet, "/api/v1/simple/partitions/cluster", []string{"context"}, []string{"partitions"}, p.partitionController.SimpleWithCluster),
-		pm3.CreateApiWidthDoc(http.MethodPost, "/api/v1/partition/monitor", []string{"context", "query:partition", "body"}, []string{"info"}, p.partitionController.SaveMonitorConfig),
-		pm3.CreateApiWidthDoc(http.MethodGet, "/api/v1/partition/monitor", []string{"context", "query:partition"}, []string{"info"}, p.partitionController.GetMonitorConfig),
-		pm3.CreateApiWidthDoc(http.MethodDelete, "/api/v1/partition/monitor", []string{"context", "query:partition"}, nil, p.partitionController.DeleteMonitorConfig),
-		pm3.CreateApiWidthDoc(http.MethodGet, "/api/v1/simple/monitor/partitions", []string{"context"}, []string{"partitions"}, p.partitionController.MonitorPartitions),
 	}
 }

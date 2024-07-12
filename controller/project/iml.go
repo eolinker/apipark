@@ -1,19 +1,15 @@
 package project
 
 import (
-	project_monitor "github.com/eolinker/apipark/module/project-monitor"
-	project_monitor_dto "github.com/eolinker/apipark/module/project-monitor/dto"
-
 	"github.com/eolinker/apipark/module/project"
 	project_dto "github.com/eolinker/apipark/module/project/dto"
 	"github.com/gin-gonic/gin"
 )
 
 var (
-	_ IProjectController        = (*imlProjectController)(nil)
-	_ IProjectMemberController  = (*imlProjectMemberController)(nil)
-	_ IProjectMonitorController = (*imlProjectMonitorController)(nil)
-	_ IAppController            = (*imlAppController)(nil)
+	_ IProjectController       = (*imlProjectController)(nil)
+	_ IProjectMemberController = (*imlProjectMemberController)(nil)
+	_ IAppController           = (*imlAppController)(nil)
 )
 
 type imlProjectController struct {
@@ -78,14 +74,6 @@ func (i *imlProjectMemberController) RemoveMember(ctx *gin.Context, pid string, 
 
 func (i *imlProjectMemberController) EditProjectMember(ctx *gin.Context, pid string, uid string, edit *project_dto.EditProjectMember) error {
 	return i.module.EditProjectMember(ctx, pid, uid, edit.Roles)
-}
-
-type imlProjectMonitorController struct {
-	module project_monitor.IProjectMonitor `autowired:""`
-}
-
-func (i *imlProjectMonitorController) MonitorPartitions(ctx *gin.Context, pid string) ([]*project_monitor_dto.MonitorPartition, error) {
-	return i.module.MonitorPartitions(ctx, pid)
 }
 
 type imlAppController struct {

@@ -2,27 +2,21 @@ package partition
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/eolinker/apipark/gateway/admin"
 	"github.com/eolinker/apipark/service/organization"
 	"github.com/eolinker/eosc/log"
 	"strings"
-	"time"
-
+	
 	"github.com/eolinker/go-common/store"
-
+	
 	"github.com/eolinker/apipark/gateway"
-
-	"github.com/eolinker/apipark/module/monitor/driver"
-
+	
 	"gorm.io/gorm"
-
-	"github.com/eolinker/apipark/service/monitor"
-
+	
 	"github.com/google/uuid"
-
+	
 	"github.com/eolinker/ap-account/service/account"
 	paritiondto "github.com/eolinker/apipark/module/partition/dto"
 	"github.com/eolinker/apipark/service/cluster"
@@ -40,8 +34,8 @@ type imlPartition struct {
 	organizationService organization.IOrganizationService `autowired:""`
 	clusterService      cluster.IClusterService           `autowired:""`
 	userNameService     account.IAccountService           `autowired:""`
-	monitorService      monitor.IMonitorService           `autowired:""`
-	transaction         store.ITransaction                `autowired:""`
+	//monitorService      monitor.IMonitorService           `autowired:""`
+	transaction store.ITransaction `autowired:""`
 }
 
 func (m *imlPartition) CheckCluster(ctx context.Context, address ...string) ([]*paritiondto.Node, error) {
@@ -59,7 +53,7 @@ func (m *imlPartition) CheckCluster(ctx context.Context, address ...string) ([]*
 		}
 	})
 	nodeStatus(ctx, nodesOut)
-
+	
 	return nodesOut, nil
 }
 
@@ -68,7 +62,7 @@ func (m *imlPartition) ResetCluster(ctx context.Context, partitionId string, add
 	if err != nil {
 		return nil, err
 	}
-
+	
 	nodes, err := m.clusterService.UpdateAddress(ctx, info.Cluster, address)
 	if err != nil {
 		return nil, err
@@ -86,7 +80,7 @@ func (m *imlPartition) ResetCluster(ctx context.Context, partitionId string, add
 			Gateways: i.Server,
 		}
 	})
-
+	
 	nodeStatus(ctx, nodesOut)
 	return nodesOut, nil
 }
@@ -122,174 +116,8 @@ func (m *imlPartition) ClusterNodes(ctx context.Context, partitionId string) ([]
 		}
 	})
 	nodeStatus(ctx, nodesOut)
-
+	
 	return nodesOut, nil
-}
-
-func (m *imlPartition) DeleteMonitorConfig(ctx context.Context, partitionId string) error {
-	_, err := m.monitorService.GetByPartition(ctx, partitionId)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil
-		}
-		return err
-	}
-
-	return m.transaction.Transaction(ctx, func(ctx context.Context) error {
-		clusters, err := m.clusterService.ListByClusters(ctx, partitionId)
-		if err != nil {
-			return err
-		}
-		err = m.monitorService.DeleteByPartition(ctx, partitionId)
-		if err != nil {
-			return err
-		}
-		id := fmt.Sprintf("%s_influxdb", partitionId)
-		for _, c := range clusters {
-			err := m.dynamicClient(ctx, c.Uuid, "influxdbv2", func(client gateway.IDynamicClient) error {
-				return client.Offline(ctx, &gateway.DynamicRelease{
-					BasicItem: &gateway.BasicItem{ID: id},
-				})
-			})
-			if err != nil {
-				return err
-			}
-
-		}
-		return nil
-	})
-}
-
-func (m *imlPartition) MonitorPartitions(ctx context.Context) ([]*paritiondto.MonitorPartition, error) {
-	list, err := m.partitionService.Search(ctx, "", nil, "create_at asc")
-	if err != nil {
-		return nil, err
-	}
-	partitionIds := utils.SliceToSlice(list, func(i *partition.Partition) string {
-		return i.UUID
-	})
-	monitorMap, err := m.monitorService.MapByPartition(ctx, partitionIds...)
-	if err != nil {
-		return nil, err
-	}
-	return utils.SliceToSlice(list, func(i *partition.Partition) *paritiondto.MonitorPartition {
-		_, ok := monitorMap[i.UUID]
-		return &paritiondto.MonitorPartition{
-			Id:            i.UUID,
-			Name:          i.Name,
-			EnableMonitor: ok,
-		}
-	}), nil
-}
-
-func (m *imlPartition) dynamicClient(ctx context.Context, clusterId string, resource string, f func(gateway.IDynamicClient) error) error {
-	client, err := m.clusterService.GatewayClient(ctx, clusterId)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		err := client.Close(ctx)
-		if err != nil {
-			log.Warn("close apinto client:", err)
-		}
-	}()
-	dynamic, err := client.Dynamic(resource)
-	if err != nil {
-		return err
-	}
-	return f(dynamic)
-}
-
-func (m *imlPartition) SaveMonitorConfig(ctx context.Context, partition string, cfg *paritiondto.SaveMonitorConfig) (*paritiondto.MonitorConfig, error) {
-	_, err := m.partitionService.Get(ctx, partition)
-	if err != nil {
-		return nil, err
-	}
-
-	data, _ := json.Marshal(cfg.Config)
-	err = driver.Check(cfg.Driver, string(data))
-	if err != nil {
-		return nil, err
-	}
-
-	executor, err := driver.CreateExecutor(cfg.Driver, string(data))
-	if err != nil {
-		return nil, err
-	}
-	err = executor.Init(ctx)
-	if err != nil {
-		return nil, err
-	}
-	clusters, err := m.clusterService.ListByClusters(ctx, partition)
-	if err != nil {
-		return nil, err
-	}
-	version := time.Now().Format("20060102150405")
-	id := fmt.Sprintf("%s_influxdb", partition)
-	for _, c := range clusters {
-		err := m.dynamicClient(ctx, c.Uuid, "influxdbv2", func(client gateway.IDynamicClient) error {
-			pubCfg := &gateway.DynamicRelease{
-				BasicItem: &gateway.BasicItem{
-					ID:          id,
-					Description: "",
-					Version:     version,
-					MatchLabels: map[string]string{
-						"module": "monitor",
-					},
-				},
-				Attr: map[string]interface{}{
-					"org":    cfg.Config["org"],
-					"token":  cfg.Config["token"],
-					"url":    cfg.Config["addr"],
-					"bucket": "apinto",
-					"scopes": []string{"monitor"},
-				},
-			}
-			return client.Online(ctx, pubCfg)
-		})
-		if err != nil {
-			return nil, err
-		}
-
-	}
-
-	err = m.monitorService.Save(ctx, &monitor.SaveMonitor{
-		Partition: partition,
-		Driver:    cfg.Driver,
-		Config:    string(data),
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return m.GetMonitorConfig(ctx, partition)
-}
-
-func (m *imlPartition) GetMonitorConfig(ctx context.Context, partition string) (*paritiondto.MonitorConfig, error) {
-	_, err := m.partitionService.Get(ctx, partition)
-	if err != nil {
-		return nil, err
-
-	}
-	info, err := m.monitorService.GetByPartition(ctx, partition)
-	if err != nil {
-		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, err
-		}
-		return &paritiondto.MonitorConfig{
-			Driver: "influxdb-v2",
-			Config: map[string]interface{}{},
-		}, nil
-	}
-	cfg := make(map[string]interface{})
-	err = json.Unmarshal([]byte(info.Config), &cfg)
-	if err != nil {
-		return nil, err
-	}
-	return &paritiondto.MonitorConfig{
-		Driver: info.Driver,
-		Config: cfg,
-	}, nil
 }
 
 func (m *imlPartition) CreatePartition(ctx context.Context, create *paritiondto.Create) (*paritiondto.Detail, error) {
@@ -338,7 +166,7 @@ func (m *imlPartition) Search(ctx context.Context, keyword string) ([]*paritiond
 		return nil, err
 	}
 	items := utils.SliceToSlice(partitions, func(i *partition.Partition) *paritiondto.Item {
-
+		
 		return &paritiondto.Item{
 			Creator:     auto.UUID(i.Creator),
 			Updater:     auto.UUID(i.Updater),
@@ -359,7 +187,7 @@ func (m *imlPartition) Search(ctx context.Context, keyword string) ([]*paritiond
 			item.ClusterNum = counts[item.Id]
 		}
 	}
-
+	
 	return items, nil
 }
 
@@ -384,7 +212,7 @@ func (m *imlPartition) Get(ctx context.Context, id string) (*paritiondto.Detail,
 			break
 		}
 	}
-
+	
 	pd := &paritiondto.Detail{
 		Creator:     auto.UUID(pm.Creator),
 		Updater:     auto.UUID(pm.Updater),
@@ -427,7 +255,7 @@ func (m *imlPartition) Delete(ctx context.Context, id string) error {
 		}
 		return m.partitionService.Delete(ctx, id)
 	})
-
+	
 }
 
 func (m *imlPartition) Simple(ctx context.Context) ([]*paritiondto.Simple, error) {
@@ -458,19 +286,19 @@ func (m *imlPartition) SimpleByIds(ctx context.Context, ids []string) ([]*pariti
 		}
 	})
 	return pd, nil
-
+	
 }
 func (m *imlPartition) SimpleWithCluster(ctx context.Context) ([]*paritiondto.SimpleWithCluster, error) {
 	pm, err := m.partitionService.Search(ctx, "", nil)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	clusterList, err := m.clusterService.List(ctx)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	clusterMap := utils.SliceToMapArrayO(clusterList, func(i *cluster.Cluster) (string, *paritiondto.Cluster) {
 		return i.Partition, &paritiondto.Cluster{
 			Id:          i.Uuid,
