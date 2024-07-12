@@ -4,32 +4,29 @@ import (
 	"github.com/eolinker/apipark/controller/common"
 	plugin_partition "github.com/eolinker/apipark/controller/plugin-partition"
 	"net/http"
-
+	
 	"github.com/eolinker/apipark/controller/topology"
-
-	"github.com/eolinker/apipark/controller/monitor"
-
+	
 	dynamic_module "github.com/eolinker/apipark/controller/dynamic-module"
-
-	external_app "github.com/eolinker/apipark/controller/external-app"
+	
 	"github.com/eolinker/apipark/controller/release"
-
+	
 	project_authorization "github.com/eolinker/apipark/controller/project-authorization"
-
+	
 	"github.com/eolinker/apipark/controller/subscribe"
-
+	
 	"github.com/eolinker/apipark/controller/api"
-
+	
 	"github.com/eolinker/apipark/controller/upstream"
-
+	
 	"github.com/eolinker/apipark/controller/service"
-
+	
 	"github.com/eolinker/apipark/controller/catalogue"
-
+	
 	"github.com/eolinker/apipark/controller/project"
-
+	
 	"github.com/eolinker/apipark/controller/my_team"
-
+	
 	"github.com/eolinker/apipark/controller/certificate"
 	organization2 "github.com/eolinker/apipark/controller/organization"
 	"github.com/eolinker/apipark/controller/partition"
@@ -50,7 +47,7 @@ func (d *Driver) Access() map[string][]string {
 }
 
 func (d *Driver) Create() (pm3.IPlugin, error) {
-
+	
 	p := new(plugin)
 	autowire.Autowired(p)
 	return p, nil
@@ -65,7 +62,6 @@ type plugin struct {
 	appController                  project.IAppController                                `autowired:""`
 	projectController              project.IProjectController                            `autowired:""`
 	projectMemberController        project.IProjectMemberController                      `autowired:""`
-	projectMonitorController       project.IProjectMonitorController                     `autowired:""`
 	serviceController              service.IServiceController                            `autowired:""`
 	catalogueController            catalogue.ICatalogueController                        `autowired:""`
 	upstreamController             upstream.IUpstreamController                          `autowired:""`
@@ -74,9 +70,7 @@ type plugin struct {
 	projectAuthorizationController project_authorization.IProjectAuthorizationController `autowired:""`
 	releaseController              release.IReleaseController                            `autowired:""`
 	subscribeApprovalController    subscribe.ISubscribeApprovalController                `autowired:""`
-	externalAppController          external_app.IExternalAppController                   `autowired:""`
 	dynamicModuleController        dynamic_module.IDynamicModuleController               `autowired:""`
-	monitorStatisticController     monitor.IMonitorStatisticController                   `autowired:""`
 	topologyController             topology.ITopologyController                          `autowired:""`
 	pluginPartitionController      plugin_partition.IPluginPartitionController           `autowired:""`
 	commonController               common.ICommonController                              `autowired:""`
@@ -98,9 +92,7 @@ func (p *plugin) OnComplete() {
 	p.apis = append(p.apis, p.subscribeApis()...)
 	p.apis = append(p.apis, p.projectAuthorizationApis()...)
 	p.apis = append(p.apis, p.releaseApis()...)
-	p.apis = append(p.apis, p.ExternalAppApi()...)
 	p.apis = append(p.apis, p.DynamicModuleApis()...)
-	p.apis = append(p.apis, p.monitorStatisticApis()...)
 	p.apis = append(p.apis, p.TopologyApis()...)
 	p.apis = append(p.apis, p.PartitionPluginApi()...)
 	p.apis = append(p.apis, p.commonApis()...)

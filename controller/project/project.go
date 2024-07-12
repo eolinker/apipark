@@ -2,12 +2,10 @@ package project
 
 import (
 	"reflect"
-
-	project_monitor_dto "github.com/eolinker/apipark/module/project-monitor/dto"
-
+	
 	project_dto "github.com/eolinker/apipark/module/project/dto"
 	"github.com/gin-gonic/gin"
-
+	
 	"github.com/eolinker/go-common/autowire"
 )
 
@@ -43,15 +41,10 @@ type IProjectMemberController interface {
 	SimpleMembersToAdd(ctx *gin.Context, pid string, keyword string) ([]*project_dto.TeamMemberToAdd, error)
 }
 
-type IProjectMonitorController interface {
-	// MonitorPartitions 获取项目监控分区列表
-	MonitorPartitions(ctx *gin.Context, pid string) ([]*project_monitor_dto.MonitorPartition, error)
-}
-
 type IAppController interface {
 	// CreateApp 创建应用
 	CreateApp(ctx *gin.Context, teamID string, project *project_dto.CreateApp) (*project_dto.App, error)
-
+	
 	UpdateApp(ctx *gin.Context, appId string, project *project_dto.UpdateApp) (*project_dto.App, error)
 	SearchMyApps(ctx *gin.Context, teamId string, keyword string) ([]*project_dto.AppItem, error)
 	// SimpleApps 获取简易项目列表
@@ -68,10 +61,7 @@ func init() {
 	autowire.Auto[IProjectMemberController](func() reflect.Value {
 		return reflect.ValueOf(new(imlProjectMemberController))
 	})
-	autowire.Auto[IProjectMonitorController](func() reflect.Value {
-		return reflect.ValueOf(new(imlProjectMonitorController))
-	})
-
+	
 	autowire.Auto[IAppController](func() reflect.Value {
 		return reflect.ValueOf(new(imlAppController))
 	})
