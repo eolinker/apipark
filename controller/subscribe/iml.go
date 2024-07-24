@@ -2,6 +2,7 @@ package subscribe
 
 import (
 	"fmt"
+
 	"github.com/gin-gonic/gin"
 
 	"github.com/eolinker/apipark/module/subscribe"
@@ -16,9 +17,9 @@ type imlSubscribeController struct {
 	module subscribe.ISubscribeModule `autowired:""`
 }
 
-func (i *imlSubscribeController) PartitionServices(ctx *gin.Context, app string) ([]*subscribe_dto.PartitionServiceItem, error) {
-	return i.module.PartitionServices(ctx, app)
-}
+//func (i *imlSubscribeController) PartitionServices(ctx *gin.Context, app string) ([]*subscribe_dto.PartitionServiceItem, error) {
+//	return i.module.PartitionServices(ctx, app)
+//}
 
 func (i *imlSubscribeController) SearchSubscriptions(ctx *gin.Context, partitionId string, projectId string, keyword string) ([]*subscribe_dto.SubscriptionItem, error) {
 	return i.module.SearchSubscriptions(ctx, partitionId, projectId, keyword)

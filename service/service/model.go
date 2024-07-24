@@ -12,49 +12,46 @@ const (
 )
 
 type Service struct {
-	Id           string
-	Name         string
-	Description  string
-	Logo         string
-	ServiceType  string
-	Project      string
-	Team         string
-	Organization string
-	Catalogue    string
-	Status       string
-	CreateTime   time.Time
-	UpdateTime   time.Time
+	Id          string
+	Name        string
+	Description string
+	Logo        string
+	ServiceType string
+	Project     string
+	Team        string
+	Catalogue   string
+	Status      string
+	CreateTime  time.Time
+	UpdateTime  time.Time
 }
 
 func FromEntity(e *service.Service) *Service {
 	return &Service{
-		Id:           e.UUID,
-		Name:         e.Name,
-		Description:  e.Description,
-		Logo:         e.Logo,
-		ServiceType:  e.ServiceType,
-		Project:      e.Project,
-		Team:         e.Team,
-		Organization: e.Organization,
-		Catalogue:    e.Catalogue,
-		Status:       e.Status,
-		CreateTime:   e.CreateAt,
-		UpdateTime:   e.UpdateAt,
+		Id:          e.UUID,
+		Name:        e.Name,
+		Description: e.Description,
+		Logo:        e.Logo,
+		ServiceType: e.ServiceType,
+		Project:     e.Project,
+		Team:        e.Team,
+		Catalogue:   e.Catalogue,
+		Status:      e.Status,
+		CreateTime:  e.CreateAt,
+		UpdateTime:  e.UpdateAt,
 	}
 }
 
 type CreateService struct {
-	Uuid         string
-	Name         string
-	Description  string
-	Logo         string
-	ServiceType  string
-	Project      string
-	Team         string
-	Organization string
-	Catalogue    string
-	Status       string
-	Tag          string
+	Uuid        string
+	Name        string
+	Description string
+	Logo        string
+	ServiceType string
+	Project     string
+	Team        string
+	Catalogue   string
+	Status      string
+	Tag         string
 }
 
 type EditService struct {

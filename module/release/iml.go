@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/eolinker/apipark/service/partition"
+
 	projectDiff "github.com/eolinker/apipark/module/project_diff"
 	"github.com/eolinker/apipark/module/release/dto"
 	"github.com/eolinker/apipark/service/api"
@@ -28,14 +30,14 @@ var (
 )
 
 type imlReleaseModule struct {
-	projectDiffModule       projectDiff.IProjectDiffModule    `autowired:""`
-	releaseService          release.IReleaseService           `autowired:""`
-	projectPartitionService project.IProjectPartitionsService `autowired:""`
-	apiService              api.IAPIService                   `autowired:""`
-	upstreamService         upstream.IUpstreamService         `autowired:""`
-	publishService          publish.IPublishService           `autowired:""`
-	transaction             store.ITransaction                `autowired:""`
-	projectService          project.IProjectService           `autowired:""`
+	projectDiffModule projectDiff.IProjectDiffModule `autowired:""`
+	releaseService    release.IReleaseService        `autowired:""`
+	apiService        api.IAPIService                `autowired:""`
+	upstreamService   upstream.IUpstreamService      `autowired:""`
+	publishService    publish.IPublishService        `autowired:""`
+	transaction       store.ITransaction             `autowired:""`
+	projectService    project.IProjectService        `autowired:""`
+	partitionService  partition.IPartitionService    `autowired:""`
 }
 
 func (m *imlReleaseModule) Create(ctx context.Context, projectId string, input *dto.CreateInput) (string, error) {
@@ -47,7 +49,7 @@ func (m *imlReleaseModule) Create(ctx context.Context, projectId string, input *
 		}
 		return "", err
 	}
-	partitions, err := m.projectPartitionService.ListByProject(ctx, projectId)
+	partitions, err := m.partitionService.List(ctx)
 	if err != nil {
 		return "", fmt.Errorf("partitions not set:%w", err)
 	}
@@ -107,8 +109,8 @@ func (m *imlReleaseModule) Create(ctx context.Context, projectId string, input *
 			return c.Key, c.UUID
 		})
 	})
-	if !m.releaseService.Completeness(utils.SliceToSlice(partitions, func(s *project.Partition) string {
-		return s.Partition
+	if !m.releaseService.Completeness(utils.SliceToSlice(partitions, func(s *partition.Partition) string {
+		return s.UUID
 	}), apiUUIDS, apiProxy, apiDocs, upstreams) {
 		return "", errors.New("completeness check failed")
 	}

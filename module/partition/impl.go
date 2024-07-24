@@ -4,19 +4,19 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/eolinker/apipark/gateway/admin"
-	"github.com/eolinker/apipark/service/organization"
-	"github.com/eolinker/eosc/log"
 	"strings"
-	
+
+	"github.com/eolinker/apipark/gateway/admin"
+	"github.com/eolinker/eosc/log"
+
 	"github.com/eolinker/go-common/store"
-	
+
 	"github.com/eolinker/apipark/gateway"
-	
+
 	"gorm.io/gorm"
-	
+
 	"github.com/google/uuid"
-	
+
 	"github.com/eolinker/ap-account/service/account"
 	paritiondto "github.com/eolinker/apipark/module/partition/dto"
 	"github.com/eolinker/apipark/service/cluster"
@@ -30,10 +30,10 @@ var (
 )
 
 type imlPartition struct {
-	partitionService    partition.IPartitionService       `autowired:""`
-	organizationService organization.IOrganizationService `autowired:""`
-	clusterService      cluster.IClusterService           `autowired:""`
-	userNameService     account.IAccountService           `autowired:""`
+	partitionService partition.IPartitionService `autowired:""`
+	//organizationService organization.IOrganizationService `autowired:""`
+	clusterService  cluster.IClusterService `autowired:""`
+	userNameService account.IAccountService `autowired:""`
 	//monitorService      monitor.IMonitorService           `autowired:""`
 	transaction store.ITransaction `autowired:""`
 }
@@ -53,7 +53,7 @@ func (m *imlPartition) CheckCluster(ctx context.Context, address ...string) ([]*
 		}
 	})
 	nodeStatus(ctx, nodesOut)
-	
+
 	return nodesOut, nil
 }
 
@@ -62,7 +62,7 @@ func (m *imlPartition) ResetCluster(ctx context.Context, partitionId string, add
 	if err != nil {
 		return nil, err
 	}
-	
+
 	nodes, err := m.clusterService.UpdateAddress(ctx, info.Cluster, address)
 	if err != nil {
 		return nil, err
@@ -80,7 +80,7 @@ func (m *imlPartition) ResetCluster(ctx context.Context, partitionId string, add
 			Gateways: i.Server,
 		}
 	})
-	
+
 	nodeStatus(ctx, nodesOut)
 	return nodesOut, nil
 }
@@ -116,7 +116,7 @@ func (m *imlPartition) ClusterNodes(ctx context.Context, partitionId string) ([]
 		}
 	})
 	nodeStatus(ctx, nodesOut)
-	
+
 	return nodesOut, nil
 }
 
@@ -166,7 +166,7 @@ func (m *imlPartition) Search(ctx context.Context, keyword string) ([]*paritiond
 		return nil, err
 	}
 	items := utils.SliceToSlice(partitions, func(i *partition.Partition) *paritiondto.Item {
-		
+
 		return &paritiondto.Item{
 			Creator:     auto.UUID(i.Creator),
 			Updater:     auto.UUID(i.Updater),
@@ -187,7 +187,7 @@ func (m *imlPartition) Search(ctx context.Context, keyword string) ([]*paritiond
 			item.ClusterNum = counts[item.Id]
 		}
 	}
-	
+
 	return items, nil
 }
 
@@ -196,23 +196,23 @@ func (m *imlPartition) Get(ctx context.Context, id string) (*paritiondto.Detail,
 	if err != nil {
 		return nil, err
 	}
-	oDetails, err := m.organizationService.Search(ctx, "")
-	if err != nil {
-		return nil, err
-	}
-	canDelete := true
-	for _, o := range oDetails {
-		for _, p := range o.Partitions {
-			if p == id {
-				canDelete = false
-				break
-			}
-		}
-		if !canDelete {
-			break
-		}
-	}
-	
+	//oDetails, err := m.organizationService.Search(ctx, "")
+	//if err != nil {
+	//	return nil, err
+	//}
+	//canDelete := true
+	//for _, o := range oDetails {
+	//	for _, p := range o.Partitions {
+	//		if p == id {
+	//			canDelete = false
+	//			break
+	//		}
+	//	}
+	//	if !canDelete {
+	//		break
+	//	}
+	//}
+
 	pd := &paritiondto.Detail{
 		Creator:     auto.UUID(pm.Creator),
 		Updater:     auto.UUID(pm.Updater),
@@ -222,7 +222,7 @@ func (m *imlPartition) Get(ctx context.Context, id string) (*paritiondto.Detail,
 		Prefix:      pm.Prefix,
 		CreateTime:  auto.TimeLabel(pm.CreateTime),
 		UpdateTime:  auto.TimeLabel(pm.UpdateTime),
-		CanDelete:   canDelete,
+		//CanDelete:   canDelete,
 	}
 	return pd, nil
 }
@@ -255,7 +255,7 @@ func (m *imlPartition) Delete(ctx context.Context, id string) error {
 		}
 		return m.partitionService.Delete(ctx, id)
 	})
-	
+
 }
 
 func (m *imlPartition) Simple(ctx context.Context) ([]*paritiondto.Simple, error) {
@@ -286,19 +286,19 @@ func (m *imlPartition) SimpleByIds(ctx context.Context, ids []string) ([]*pariti
 		}
 	})
 	return pd, nil
-	
+
 }
 func (m *imlPartition) SimpleWithCluster(ctx context.Context) ([]*paritiondto.SimpleWithCluster, error) {
 	pm, err := m.partitionService.Search(ctx, "", nil)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	clusterList, err := m.clusterService.List(ctx)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	clusterMap := utils.SliceToMapArrayO(clusterList, func(i *cluster.Cluster) (string, *paritiondto.Cluster) {
 		return i.Partition, &paritiondto.Cluster{
 			Id:          i.Uuid,

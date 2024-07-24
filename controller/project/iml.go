@@ -21,7 +21,7 @@ func (i *imlProjectController) SearchMyProjects(ctx *gin.Context, teamId string,
 }
 
 func (i *imlProjectController) SimpleProjects(ctx *gin.Context, keyword string, partition string) ([]*project_dto.SimpleProjectItem, error) {
-	return i.module.SimpleProjects(ctx, keyword, partition)
+	return i.module.SimpleProjects(ctx, keyword)
 }
 
 func (i *imlProjectController) MySimpleProjects(ctx *gin.Context, keyword string) ([]*project_dto.SimpleProjectItem, error) {

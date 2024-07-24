@@ -24,7 +24,7 @@ type ISubscribeModule interface {
 	DeleteSubscription(ctx context.Context, pid string, uuid string) error
 	// RevokeApply 取消申请
 	RevokeApply(ctx context.Context, app string, uuid string) error
-	PartitionServices(ctx context.Context, app string) ([]*subscribe_dto.PartitionServiceItem, error)
+	//PartitionServices(ctx context.Context, app string) ([]*subscribe_dto.PartitionServiceItem, error)
 }
 
 type ISubscribeApprovalModule interface {

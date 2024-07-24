@@ -11,7 +11,6 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/eolinker/apipark/service/organization"
 	"github.com/eolinker/apipark/service/team"
 
 	"github.com/google/uuid"
@@ -36,26 +35,15 @@ var (
 )
 
 type imlApiModule struct {
-	organizationService     organization.IOrganizationService `autowired:""`
-	teamService             team.ITeamService                 `autowired:""`
-	projectService          project.IProjectService           `autowired:""`
-	projectPartitionService project.IProjectPartitionsService `autowired:""`
-	apiService              api.IAPIService                   `autowired:""`
-	upstreamService         upstream.IUpstreamService         `autowired:""`
-	transaction             store.ITransaction                `autowired:""`
+	teamService     team.ITeamService         `autowired:""`
+	projectService  project.IProjectService   `autowired:""`
+	apiService      api.IAPIService           `autowired:""`
+	upstreamService upstream.IUpstreamService `autowired:""`
+	transaction     store.ITransaction        `autowired:""`
 }
 
-func (i *imlApiModule) SimpleList(ctx context.Context, partitionId string, input *api_dto.ListInput) ([]*api_dto.ApiSimpleItem, error) {
+func (i *imlApiModule) SimpleList(ctx context.Context, input *api_dto.ListInput) ([]*api_dto.ApiSimpleItem, error) {
 	projectIds := input.Projects
-	if partitionId != "" {
-		pp, err := i.projectPartitionService.ListByPartition(ctx, partitionId)
-		if err != nil {
-			return nil, err
-		}
-		projectIds = utils.SliceToSlice(pp, func(p *project.Partition) string {
-			return p.Project
-		})
-	}
 	w := make(map[string]interface{})
 	if len(projectIds) > 0 {
 		w["project"] = projectIds
@@ -455,23 +443,11 @@ func (i *imlApiModule) Prefix(ctx context.Context, pid string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	tInfo, err := i.teamService.Get(ctx, pInfo.Team)
-	if err != nil {
-		return "", err
-	}
-	oInfo, err := i.organizationService.Get(ctx, tInfo.Organization)
-	if err != nil {
-		return "", err
-	}
-	if oInfo.Prefix != "" {
-		if oInfo.Prefix[0] != '/' {
-			oInfo.Prefix = fmt.Sprintf("/%s", strings.TrimSuffix(oInfo.Prefix, "/"))
-		}
-	}
+
 	if pInfo.Prefix != "" {
 		if pInfo.Prefix[0] != '/' {
 			pInfo.Prefix = fmt.Sprintf("/%s", strings.TrimSuffix(pInfo.Prefix, "/"))
 		}
 	}
-	return strings.TrimSuffix(fmt.Sprintf("%s%s", oInfo.Prefix, pInfo.Prefix), "/"), nil
+	return strings.TrimSuffix(pInfo.Prefix, "/"), nil
 }

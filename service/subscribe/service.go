@@ -20,7 +20,7 @@ type ISubscribeService interface {
 	MySubscribeServices(ctx context.Context, application string, projectIds []string, serviceIDs []string, partitionIds ...string) ([]*Subscribe, error)
 	UpdateSubscribeStatus(ctx context.Context, application string, service string, status int) error
 	ListBySubscribeStatus(ctx context.Context, projectId string, status int) ([]*Subscribe, error)
-	SubscribersByProject(ctx context.Context, partition string, projectIds ...string) ([]*Subscribe, error)
+	SubscribersByProject(ctx context.Context, projectIds ...string) ([]*Subscribe, error)
 	Subscribers(ctx context.Context, project string, status int) ([]*Subscribe, error)
 	SubscriptionsByApplication(ctx context.Context, applicationIds ...string) ([]*Subscribe, error)
 }

@@ -19,19 +19,8 @@ type IProjectService interface {
 	AppList(ctx context.Context, appIds ...string) ([]*Project, error)
 }
 
-type IProjectPartitionsService interface {
-	ListByProject(ctx context.Context, projectIDs ...string) ([]*Partition, error)
-	ListByPartition(ctx context.Context, partition ...string) ([]*Partition, error)
-	Save(ctx context.Context, projectID string, partitions []string) error
-	Delete(ctx context.Context, projectID string) error
-	GetByProject(ctx context.Context, projectID string) ([]string, error)
-}
-
 func init() {
 	autowire.Auto[IProjectService](func() reflect.Value {
 		return reflect.ValueOf(new(imlProjectService))
-	})
-	autowire.Auto[IProjectPartitionsService](func() reflect.Value {
-		return reflect.ValueOf(new(imlProjectPartitionService))
 	})
 }

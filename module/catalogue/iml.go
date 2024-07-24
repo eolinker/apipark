@@ -42,21 +42,20 @@ var (
 )
 
 type imlCatalogueModule struct {
-	catalogueService        catalogue.ICatalogueService       `autowired:""`
-	projectService          project.IProjectService           `autowired:""`
-	projectPartitionService project.IProjectPartitionsService `autowired:""`
-	apiService              api.IAPIService                   `autowired:""`
-	serviceService          service.IServiceService           `autowired:""`
-	serviceApiService       service.IApiService               `autowired:""`
-	serviceTagService       service.ITagService               `autowired:""`
-	servicePartitionService service.IPartitionsService        `autowired:""`
-	serviceDocService       service.IDocService               `autowired:""`
-	tagService              tag.ITagService                   `autowired:""`
-	releaseService          release.IReleaseService           `autowired:""`
-	subscribeService        subscribe.ISubscribeService       `autowired:""`
-	subscribeApplyService   subscribe.ISubscribeApplyService  `autowired:""`
-	partitionService        partition.IPartitionService       `autowired:""`
-	transaction             store.ITransaction                `autowired:""`
+	catalogueService        catalogue.ICatalogueService      `autowired:""`
+	projectService          project.IProjectService          `autowired:""`
+	apiService              api.IAPIService                  `autowired:""`
+	serviceService          service.IServiceService          `autowired:""`
+	serviceApiService       service.IApiService              `autowired:""`
+	serviceTagService       service.ITagService              `autowired:""`
+	servicePartitionService service.IPartitionsService       `autowired:""`
+	serviceDocService       service.IDocService              `autowired:""`
+	tagService              tag.ITagService                  `autowired:""`
+	releaseService          release.IReleaseService          `autowired:""`
+	subscribeService        subscribe.ISubscribeService      `autowired:""`
+	subscribeApplyService   subscribe.ISubscribeApplyService `autowired:""`
+	partitionService        partition.IPartitionService      `autowired:""`
+	transaction             store.ITransaction               `autowired:""`
 
 	root *Root
 }
@@ -70,31 +69,10 @@ func (i *imlCatalogueModule) Subscribe(ctx context.Context, subscribeInfo *catal
 	if err != nil {
 		return fmt.Errorf("get service failed: %w", err)
 	}
-	// 获取服务可用分区
-	servicePartitions, err := i.servicePartitionService.PartitionsByService(ctx, subscribeInfo.Service)
-	if err != nil {
-		return fmt.Errorf("get service partitions failed: %w", err)
-	}
-	partitions, has := servicePartitions[subscribeInfo.Service]
-	if !has || len(partitions) == 0 {
-		// 没有可用分区，不给申请
-		return fmt.Errorf("service has no available partitions")
-	}
-	partitionMap := utils.SliceToMapO(partitions, func(t string) (string, struct{}) {
-		return t, struct{}{}
-	})
 
 	userId := utils.UserId(ctx)
 	return i.transaction.Transaction(ctx, func(ctx context.Context) error {
-		availablePartitions := make([]string, 0, len(subscribeInfo.Partitions))
-		for _, p := range subscribeInfo.Partitions {
-			if _, has := partitionMap[p]; has {
-				availablePartitions = append(availablePartitions, p)
-			}
-		}
-		if len(availablePartitions) == 0 {
-			return fmt.Errorf("service has no available partitions")
-		}
+
 		projects := make([]string, 0, len(subscribeInfo.Applications))
 
 		for _, pid := range subscribeInfo.Applications {
@@ -114,18 +92,15 @@ func (i *imlCatalogueModule) Subscribe(ctx context.Context, subscribeInfo *catal
 			applyID := uuid.New().String()
 			// 创建一条审核申请
 			err = i.subscribeApplyService.Create(ctx, &subscribe.CreateApply{
-				Uuid:              applyID,
-				Service:           subscribeInfo.Service,
-				Project:           s.Project,
-				Team:              s.Team,
-				ApplyPartitions:   availablePartitions,
-				Application:       pid,
-				ApplyTeam:         pInfo.Team,
-				ApplyOrganization: pInfo.Organization,
-				Reason:            subscribeInfo.Reason,
-				Organization:      s.Organization,
-				Status:            subscribe.ApplyStatusReview,
-				Applier:           userId,
+				Uuid:        applyID,
+				Service:     subscribeInfo.Service,
+				Project:     s.Project,
+				Team:        s.Team,
+				Application: pid,
+				ApplyTeam:   pInfo.Team,
+				Reason:      subscribeInfo.Reason,
+				Status:      subscribe.ApplyStatusReview,
+				Applier:     userId,
 			})
 			if err != nil {
 				return err
@@ -136,12 +111,28 @@ func (i *imlCatalogueModule) Subscribe(ctx context.Context, subscribeInfo *catal
 				if !errors.Is(err, gorm.ErrRecordNotFound) {
 					return err
 				}
-				for _, p := range availablePartitions {
+				err = i.subscribeService.Create(ctx, &subscribe.CreateSubscribe{
+					Uuid:        uuid.New().String(),
+					Service:     subscribeInfo.Service,
+					Project:     s.Project,
+					Application: pid,
+					ApplyStatus: subscribe.ApplyStatusReview,
+					From:        subscribe.FromSubscribe,
+				})
+				if err != nil {
+					return err
+				}
+
+			} else {
+				subscriberMap := utils.SliceToMap(subscriber, func(t *subscribe.Subscribe) string {
+					return t.Application
+				})
+				v, has := subscriberMap[pid]
+				if !has {
 					err = i.subscribeService.Create(ctx, &subscribe.CreateSubscribe{
 						Uuid:        uuid.New().String(),
 						Service:     subscribeInfo.Service,
 						Project:     s.Project,
-						Partition:   p,
 						Application: pid,
 						ApplyStatus: subscribe.ApplyStatusReview,
 						From:        subscribe.FromSubscribe,
@@ -149,37 +140,13 @@ func (i *imlCatalogueModule) Subscribe(ctx context.Context, subscribeInfo *catal
 					if err != nil {
 						return err
 					}
+				} else if v.ApplyStatus != subscribe.ApplyStatusSubscribe {
+					status := subscribe.ApplyStatusReview
+					err = i.subscribeService.Save(ctx, v.Id, &subscribe.UpdateSubscribe{
+						ApplyStatus: &status,
+					})
 				}
-				if err != nil {
-					return err
-				}
-			} else {
-				subscriberMap := utils.SliceToMap(subscriber, func(t *subscribe.Subscribe) string {
-					return t.Partition
-				})
-				for _, p := range availablePartitions {
-					v, has := subscriberMap[p]
-					if !has {
-						err = i.subscribeService.Create(ctx, &subscribe.CreateSubscribe{
-							Uuid:        uuid.New().String(),
-							Service:     subscribeInfo.Service,
-							Project:     s.Project,
-							Partition:   p,
-							Application: pid,
-							ApplyStatus: subscribe.ApplyStatusReview,
-							From:        subscribe.FromSubscribe,
-						})
-						if err != nil {
-							return err
-						}
-					} else if v.ApplyStatus != subscribe.ApplyStatusSubscribe {
-						status := subscribe.ApplyStatusReview
-						err = i.subscribeService.Save(ctx, v.Id, &subscribe.UpdateSubscribe{
-							ApplyStatus: &status,
-						})
-					}
 
-				}
 			}
 
 			projects = append(projects, pid)
@@ -207,27 +174,8 @@ func (i *imlCatalogueModule) ServiceDetail(ctx context.Context, sid string) (*ca
 	} else {
 		docStr = doc.Doc
 	}
-	servicePartitions, err := i.servicePartitionService.List(ctx, sid)
-	if err != nil {
-		return nil, fmt.Errorf("get service partitions failed: %w", err)
-	}
-	servicePartitionIds := utils.SliceToSlice(servicePartitions, func(t *service.Partition) string {
-		return t.Pid
-	})
-	projectPartitions, err := i.projectPartitionService.ListByProject(ctx, s.Project)
-	if err != nil {
-		return nil, err
-	}
-	projectPartitionIds := utils.SliceToSlice(projectPartitions, func(t *project.Partition) string {
-		return t.Partition
-	})
 
-	partitionIds := utils.Intersection(servicePartitionIds, projectPartitionIds)
-	if len(partitionIds) == 0 {
-		return nil, fmt.Errorf("no partition")
-	}
-
-	globalPartitions, err := i.partitionService.List(ctx, partitionIds...)
+	globalPartitions, err := i.partitionService.List(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -247,10 +195,9 @@ func (i *imlCatalogueModule) ServiceDetail(ctx context.Context, sid string) (*ca
 				Description: s.Description,
 				Document:    docStr,
 				Basic: &catalogue_dto.ServiceBasic{
-					Organization: auto.UUID(s.Organization),
-					Project:      auto.UUID(s.Project),
-					Team:         auto.UUID(s.Team),
-					ApiNum:       0,
+					Project: auto.UUID(s.Project),
+					Team:    auto.UUID(s.Team),
+					ApiNum:  0,
 				},
 				Partition: partitions,
 			}, nil
@@ -330,7 +277,6 @@ func (i *imlCatalogueModule) ServiceDetail(ctx context.Context, sid string) (*ca
 		Description: s.Description,
 		Document:    docStr,
 		Basic: &catalogue_dto.ServiceBasic{
-			Organization:  auto.UUID(s.Organization),
 			Project:       auto.UUID(s.Project),
 			Team:          auto.UUID(s.Team),
 			ApiNum:        len(apis),
@@ -342,13 +288,7 @@ func (i *imlCatalogueModule) ServiceDetail(ctx context.Context, sid string) (*ca
 }
 
 func (i *imlCatalogueModule) Services(ctx context.Context, keyword string) ([]*catalogue_dto.ServiceItem, error) {
-	projectPartitions, err := i.projectPartitionService.ListByProject(ctx)
-	if err != nil {
-		return nil, err
-	}
-	projectPartitionMap := utils.SliceToMapArrayO(projectPartitions, func(t *project.Partition) (string, string) {
-		return t.Project, t.Partition
-	})
+
 	serviceTags, err := i.serviceTagService.List(ctx, nil, nil)
 	if err != nil {
 		return nil, err
@@ -356,10 +296,6 @@ func (i *imlCatalogueModule) Services(ctx context.Context, keyword string) ([]*c
 	serviceTagMap := utils.SliceToMapArrayO(serviceTags, func(t *service.Tag) (string, string) {
 		return t.Sid, t.Tid
 	})
-	servicePartitionMap, err := i.servicePartitionService.PartitionsByService(ctx)
-	if err != nil {
-		return nil, err
-	}
 
 	items, err := i.serviceService.Search(ctx, keyword, nil)
 	if err != nil {
@@ -391,16 +327,16 @@ func (i *imlCatalogueModule) Services(ctx context.Context, keyword string) ([]*c
 		if !ok || apiNum < 1 {
 			continue
 		}
-		ps := utils.Intersection(servicePartitionMap[v.Id], projectPartitionMap[v.Project])
-		if len(ps) < 1 {
-			continue
-		}
+		//ps := utils.Intersection(servicePartitionMap[v.Id], projectPartitionMap[v.Project])
+		//if len(ps) < 1 {
+		//	continue
+		//}
 		result = append(result, &catalogue_dto.ServiceItem{
-			Id:            v.Id,
-			Name:          v.Name,
-			Tags:          auto.List(serviceTagMap[v.Id]),
-			Catalogue:     auto.UUID(v.Catalogue),
-			Partition:     auto.List(ps),
+			Id:        v.Id,
+			Name:      v.Name,
+			Tags:      auto.List(serviceTagMap[v.Id]),
+			Catalogue: auto.UUID(v.Catalogue),
+			//Partition:     auto.List(ps),
 			ApiNum:        apiNum,
 			SubscriberNum: subscribeCount[v.Id],
 			Description:   v.Description,

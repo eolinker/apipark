@@ -18,7 +18,7 @@ type IApiModule interface {
 	Search(ctx context.Context, keyword string, pid string) ([]*api_dto.ApiItem, error)
 	// SimpleSearch 获取API简要列表
 	SimpleSearch(ctx context.Context, keyword string, pid string) ([]*api_dto.ApiSimpleItem, error)
-	SimpleList(ctx context.Context, partitionId string, input *api_dto.ListInput) ([]*api_dto.ApiSimpleItem, error)
+	SimpleList(ctx context.Context, input *api_dto.ListInput) ([]*api_dto.ApiSimpleItem, error)
 	// Create 创建API
 	Create(ctx context.Context, pid string, dto *api_dto.CreateApi) (*api_dto.ApiSimpleDetail, error)
 	// Edit 编辑API

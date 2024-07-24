@@ -39,25 +39,24 @@ var (
 )
 
 type imlPublishModule struct {
-	projectDiffModule       projectDiff.IProjectDiffModule    `autowired:""`
-	publishService          publish.IPublishService           `autowired:""`
-	apiService              api.IAPIService                   `autowired:""`
-	upstreamService         upstream.IUpstreamService         `autowired:""`
-	releaseService          release.IReleaseService           `autowired:""`
-	projectPartitionService project.IProjectPartitionsService `autowired:""`
-	clusterService          cluster.IClusterService           `autowired:""`
-	partitionService        partition.IPartitionService       `autowired:""`
-	projectService          project.IProjectService           `autowired:""`
+	projectDiffModule projectDiff.IProjectDiffModule `autowired:""`
+	publishService    publish.IPublishService        `autowired:""`
+	apiService        api.IAPIService                `autowired:""`
+	upstreamService   upstream.IUpstreamService      `autowired:""`
+	releaseService    release.IReleaseService        `autowired:""`
+	clusterService    cluster.IClusterService        `autowired:""`
+	partitionService  partition.IPartitionService    `autowired:""`
+	projectService    project.IProjectService        `autowired:""`
 }
 
 func (m *imlPublishModule) initGateway(ctx context.Context, partitionId string, clientDriver gateway.IClientDriver) error {
 
-	projectPartitions, err := m.projectPartitionService.ListByPartition(ctx, partitionId)
+	projects, err := m.projectService.List(ctx)
 	if err != nil {
 		return err
 	}
-	projectIds := utils.SliceToSlice(projectPartitions, func(p *project.Partition) string {
-		return p.Project
+	projectIds := utils.SliceToSlice(projects, func(p *project.Project) string {
+		return p.Id
 	})
 	for _, projectId := range projectIds {
 		releaseInfo, err := m.getProjectRelease(ctx, projectId, partitionId)
@@ -530,10 +529,13 @@ func (m *imlPublishModule) Publish(ctx context.Context, project string, id strin
 	if flow.Status != publish.StatusAccept {
 		return errors.New("只有通过状态才能发布")
 	}
-	partitionIds, err := m.projectPartitionService.GetByProject(ctx, project)
+	partitions, err := m.partitionService.List(ctx)
 	if err != nil {
 		return err
 	}
+	partitionIds := utils.SliceToSlice(partitions, func(p *partition.Partition) string {
+		return p.UUID
+	})
 	projectReleaseMap, err := m.getReleaseInfo(ctx, project, flow.Release, flow.Release, partitionIds)
 	if err != nil {
 		return err

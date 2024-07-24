@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/eolinker/apipark/service/partition"
 	"github.com/eolinker/eosc/log"
 	"gorm.io/gorm"
@@ -34,55 +35,54 @@ var (
 )
 
 type imlSubscribeModule struct {
-	partitionService        partition.IPartitionService       `autowired:""`
-	projectService          project.IProjectService           `autowired:""`
-	projectPartitionService project.IProjectPartitionsService `autowired:""`
-	subscribeService        subscribe.ISubscribeService       `autowired:""`
-	subscribeApplyService   subscribe.ISubscribeApplyService  `autowired:""`
-	serviceService          service.IServiceService           `autowired:""`
-	clusterService          cluster.IClusterService           `autowired:""`
-	transaction             store.ITransaction                `autowired:""`
+	partitionService      partition.IPartitionService      `autowired:""`
+	projectService        project.IProjectService          `autowired:""`
+	subscribeService      subscribe.ISubscribeService      `autowired:""`
+	subscribeApplyService subscribe.ISubscribeApplyService `autowired:""`
+	serviceService        service.IServiceService          `autowired:""`
+	clusterService        cluster.IClusterService          `autowired:""`
+	transaction           store.ITransaction               `autowired:""`
 }
 
-func (i *imlSubscribeModule) PartitionServices(ctx context.Context, app string) ([]*subscribe_dto.PartitionServiceItem, error) {
-	pInfo, err := i.projectService.Get(ctx, app)
-	if err != nil {
-		return nil, fmt.Errorf("get application error: %w", err)
-	}
-	if !pInfo.AsApp {
-		return nil, fmt.Errorf("project %s is not an application", app)
-	}
-	partitions, err := i.partitionService.List(ctx)
-	if err != nil {
-		return nil, err
-	}
-	subscriptions, err := i.subscribeService.SubscriptionsByApplication(ctx, app)
-	if err != nil {
-		return nil, err
-	}
-	subscriptionCount := make(map[string]int64)
-	for _, s := range subscriptions {
-		if s.ApplyStatus != subscribe.ApplyStatusSubscribe && s.ApplyStatus != subscribe.ApplyStatusReview {
-			continue
-		}
-		if _, ok := subscriptionCount[s.Partition]; !ok {
-			subscriptionCount[s.Partition] = 0
-		}
-		subscriptionCount[s.Partition]++
-	}
-	items := make([]*subscribe_dto.PartitionServiceItem, 0)
-	for _, p := range partitions {
-		items = append(items, &subscribe_dto.PartitionServiceItem{
-			Id:         p.UUID,
-			Name:       p.Name,
-			ServiceNum: subscriptionCount[p.UUID],
-		})
-	}
-	return items, nil
-}
+//func (i *imlSubscribeModule) PartitionServices(ctx context.Context, app string) ([]*subscribe_dto.PartitionServiceItem, error) {
+//	pInfo, err := i.projectService.Get(ctx, app)
+//	if err != nil {
+//		return nil, fmt.Errorf("get application error: %w", err)
+//	}
+//	if !pInfo.AsApp {
+//		return nil, fmt.Errorf("project %s is not an application", app)
+//	}
+//	partitions, err := i.partitionService.List(ctx)
+//	if err != nil {
+//		return nil, err
+//	}
+//	subscriptions, err := i.subscribeService.SubscriptionsByApplication(ctx, app)
+//	if err != nil {
+//		return nil, err
+//	}
+//	subscriptionCount := make(map[string]int64)
+//	for _, s := range subscriptions {
+//		if s.ApplyStatus != subscribe.ApplyStatusSubscribe && s.ApplyStatus != subscribe.ApplyStatusReview {
+//			continue
+//		}
+//		if _, ok := subscriptionCount[s.Partition]; !ok {
+//			subscriptionCount[s.Partition] = 0
+//		}
+//		subscriptionCount[s.Partition]++
+//	}
+//	items := make([]*subscribe_dto.PartitionServiceItem, 0)
+//	for _, p := range partitions {
+//		items = append(items, &subscribe_dto.PartitionServiceItem{
+//			Id:         p.UUID,
+//			Name:       p.Name,
+//			ServiceNum: subscriptionCount[p.UUID],
+//		})
+//	}
+//	return items, nil
+//}
 
-func (i *imlSubscribeModule) getSubscribers(ctx context.Context, partitionId string, projectIds []string) ([]*gateway.SubscribeRelease, error) {
-	subscribers, err := i.subscribeService.SubscribersByProject(ctx, partitionId, projectIds...)
+func (i *imlSubscribeModule) getSubscribers(ctx context.Context, projectIds []string) ([]*gateway.SubscribeRelease, error) {
+	subscribers, err := i.subscribeService.SubscribersByProject(ctx, projectIds...)
 	if err != nil {
 		return nil, err
 	}
@@ -95,15 +95,16 @@ func (i *imlSubscribeModule) getSubscribers(ctx context.Context, partitionId str
 	}), nil
 }
 
-func (i *imlSubscribeModule) initGateway(ctx context.Context, partitionId string, clientDriver gateway.IClientDriver) error {
-	projectPartitions, err := i.projectPartitionService.ListByPartition(ctx, partitionId)
+func (i *imlSubscribeModule) initGateway(ctx context.Context, clientDriver gateway.IClientDriver) error {
+
+	projects, err := i.projectService.List(ctx)
 	if err != nil {
 		return err
 	}
-	projectIds := utils.SliceToSlice(projectPartitions, func(p *project.Partition) string {
-		return p.Project
+	projectIds := utils.SliceToSlice(projects, func(p *project.Project) string {
+		return p.Id
 	})
-	releases, err := i.getSubscribers(ctx, partitionId, projectIds)
+	releases, err := i.getSubscribers(ctx, projectIds)
 	if err != nil {
 		return err
 	}
@@ -140,7 +141,6 @@ func (i *imlSubscribeModule) SearchSubscriptions(ctx context.Context, partitionI
 		return &subscribe_dto.SubscriptionItem{
 			Id:          s.Id,
 			Service:     auto.UUID(s.Service),
-			Partition:   auto.UUID(s.Partition),
 			ApplyStatus: s.ApplyStatus,
 			Project:     auto.UUID(s.Project),
 			Team:        auto.UUID(pInfo.Team),
@@ -172,6 +172,13 @@ func (i *imlSubscribeModule) RevokeSubscription(ctx context.Context, pid string,
 	if subscription.ApplyStatus != subscribe.ApplyStatusSubscribe {
 		return fmt.Errorf("subscription can not be revoked")
 	}
+	partitions, err := i.partitionService.List(ctx)
+	if err != nil {
+		return err
+	}
+	partitionIds := utils.SliceToSlice(partitions, func(i *partition.Partition) string {
+		return i.UUID
+	})
 	applyStatus := subscribe.ApplyStatusUnsubscribe
 	return i.transaction.Transaction(ctx, func(ctx context.Context) error {
 		err = i.subscribeService.Save(ctx, uuid, &subscribe.UpdateSubscribe{
@@ -180,13 +187,14 @@ func (i *imlSubscribeModule) RevokeSubscription(ctx context.Context, pid string,
 		if err != nil {
 			return err
 		}
-
-		err = i.offlineForCluster(ctx, subscription.Partition, &gateway.SubscribeRelease{
-			Service:     subscription.Service,
-			Application: subscription.Application,
-		})
-		if err != nil {
-			log.Warnf("revoke Subscription for partition:%s %s", subscription.Partition, err)
+		for _, p := range partitionIds {
+			err = i.offlineForCluster(ctx, p, &gateway.SubscribeRelease{
+				Service:     subscription.Service,
+				Application: subscription.Application,
+			})
+			if err != nil {
+				return err
+			}
 		}
 
 		return nil
@@ -232,9 +240,11 @@ func (i *imlSubscribeModule) AddSubscriber(ctx context.Context, project string, 
 	if err != nil {
 		return err
 	}
-	if len(input.Partition) == 0 {
-		return fmt.Errorf("partition is empty")
+	partitions, err := i.partitionService.List(ctx)
+	if err != nil {
+		return err
 	}
+
 	if input.Uuid == "" {
 		input.Uuid = uuid.New().String()
 	}
@@ -243,25 +253,24 @@ func (i *imlSubscribeModule) AddSubscriber(ctx context.Context, project string, 
 		Application: input.Project,
 		Expired:     "0",
 	}
-	return i.transaction.Transaction(ctx, func(ctx context.Context) error {
-		for _, partitionId := range input.Partition {
-			err = i.subscribeService.Create(ctx, &subscribe.CreateSubscribe{
-				Uuid:        input.Uuid,
-				Service:     input.Service,
-				Project:     project,
-				Partition:   partitionId,
-				Application: input.Project,
-				ApplyStatus: subscribe.ApplyStatusSubscribe,
-				From:        subscribe.FromUser,
-			})
-			if err != nil {
-				return err
-			}
-			err := i.onlineSubscriber(ctx, partitionId, sub)
-			if err != nil {
-				return fmt.Errorf("add subscriber for partition[%s] %v", partitionId, err)
-			}
 
+	return i.transaction.Transaction(ctx, func(ctx context.Context) error {
+		err = i.subscribeService.Create(ctx, &subscribe.CreateSubscribe{
+			Uuid:        input.Uuid,
+			Service:     input.Service,
+			Project:     project,
+			Application: input.Project,
+			ApplyStatus: subscribe.ApplyStatusSubscribe,
+			From:        subscribe.FromUser,
+		})
+		if err != nil {
+			return err
+		}
+		for _, p := range partitions {
+			err = i.onlineSubscriber(ctx, p.UUID, sub)
+			if err != nil {
+				return fmt.Errorf("add subscriber for partition[%s] %v", p.UUID, err)
+			}
 		}
 
 		return nil
@@ -291,6 +300,19 @@ func (i *imlSubscribeModule) DeleteSubscriber(ctx context.Context, project strin
 	if err != nil {
 		return err
 	}
+	partitions, err := i.partitionService.List(ctx)
+	if err != nil {
+		return err
+	}
+	for _, p := range partitions {
+		err = i.offlineForCluster(ctx, p.UUID, &gateway.SubscribeRelease{
+			Service:     serviceId,
+			Application: applicationId,
+		})
+		if err != nil {
+			return fmt.Errorf("offline subscribe for partition[%s] %s", p.UUID, err)
+		}
+	}
 
 	return i.transaction.Transaction(ctx, func(ctx context.Context) error {
 		list, err := i.subscribeService.ListByApplication(ctx, serviceId, applicationId)
@@ -306,9 +328,11 @@ func (i *imlSubscribeModule) DeleteSubscriber(ctx context.Context, project strin
 			if err != nil {
 				return err
 			}
-			err := i.offlineForCluster(ctx, s.Partition, releaseInfo)
+		}
+		for _, p := range partitions {
+			err := i.offlineForCluster(ctx, p.UUID, releaseInfo)
 			if err != nil {
-				return fmt.Errorf("offline subscribe for partition[%s] %s", s.Partition, err)
+				return fmt.Errorf("offline subscribe for partition[%s] %s", p.UUID, err)
 			}
 		}
 		return nil
@@ -343,30 +367,19 @@ func (i *imlSubscribeModule) SearchSubscribers(ctx context.Context, projectId st
 	if err != nil {
 		return nil, err
 	}
-	subscriberMap := utils.SliceToMapArrayO(list, func(s *subscribe.Subscribe) (string, string) {
-		return fmt.Sprintf("%s-%s", s.Service, s.Application), s.Partition
-	})
 
 	if keyword == "" {
 		items := make([]*subscribe_dto.Subscriber, 0, len(list))
 		for _, subscriber := range list {
-			key := fmt.Sprintf("%s-%s", subscriber.Service, subscriber.Application)
-			partitionIds, ok := subscriberMap[key]
-			if !ok {
-				continue
-			}
-
 			items = append(items, &subscribe_dto.Subscriber{
 				Id:         subscriber.Application,
 				Project:    auto.UUID(subscriber.Project),
 				Service:    auto.UUID(subscriber.Service),
-				Partition:  auto.List(partitionIds),
 				Subscriber: auto.UUID(subscriber.Application),
 				Team:       auto.UUID(pInfo.Team),
 				ApplyTime:  auto.TimeLabel(subscriber.CreateAt),
 				From:       subscriber.From,
 			})
-			delete(subscriberMap, key)
 		}
 		return items, nil
 	}
@@ -381,23 +394,17 @@ func (i *imlSubscribeModule) SearchSubscribers(ctx context.Context, projectId st
 	})
 	items := make([]*subscribe_dto.Subscriber, 0, len(list))
 	for _, subscriber := range list {
-		key := fmt.Sprintf("%s-%s", subscriber.Service, subscriber.Application)
-		partitionIds, ok := subscriberMap[key]
-		if !ok {
-			continue
-		}
+
 		if _, ok := serviceMap[subscriber.Service]; ok {
 			items = append(items, &subscribe_dto.Subscriber{
 				Id:         subscriber.Id,
 				Project:    auto.UUID(subscriber.Project),
 				Service:    auto.UUID(subscriber.Service),
-				Partition:  auto.List(partitionIds),
 				Subscriber: auto.UUID(subscriber.Application),
 				Team:       auto.UUID(pInfo.Team),
 				ApplyTime:  auto.TimeLabel(subscriber.CreateAt),
 				From:       subscriber.From,
 			})
-			delete(subscriberMap, key)
 		}
 	}
 	return items, nil
@@ -406,12 +413,12 @@ func (i *imlSubscribeModule) SearchSubscribers(ctx context.Context, projectId st
 var _ ISubscribeApprovalModule = (*imlSubscribeApprovalModule)(nil)
 
 type imlSubscribeApprovalModule struct {
-	subscribeService        subscribe.ISubscribeService       `autowired:""`
-	subscribeApplyService   subscribe.ISubscribeApplyService  `autowired:""`
-	projectService          project.IProjectService           `autowired:""`
-	projectPartitionService project.IProjectPartitionsService `autowired:""`
-	clusterService          cluster.IClusterService           `autowired:""`
-	transaction             store.ITransaction                `autowired:""`
+	subscribeService      subscribe.ISubscribeService      `autowired:""`
+	subscribeApplyService subscribe.ISubscribeApplyService `autowired:""`
+	projectService        project.IProjectService          `autowired:""`
+	clusterService        cluster.IClusterService          `autowired:""`
+	partitionService      partition.IPartitionService      `autowired:""`
+	transaction           store.ITransaction               `autowired:""`
 }
 
 func (i *imlSubscribeApprovalModule) Pass(ctx context.Context, pid string, id string, approveInfo *subscribe_dto.Approve) error {
@@ -419,27 +426,20 @@ func (i *imlSubscribeApprovalModule) Pass(ctx context.Context, pid string, id st
 	if err != nil {
 		return err
 	}
-	partitions, err := i.projectPartitionService.GetByProject(ctx, pid)
+	partitions, err := i.partitionService.List(ctx)
 	if err != nil {
 		return err
 	}
-	partitionMap := utils.SliceToMapO(partitions, func(s string) (string, struct{}) {
-		return s, struct{}{}
+	partitionIds := utils.SliceToSlice(partitions, func(i *partition.Partition) string {
+		return i.UUID
 	})
-	for _, pt := range approveInfo.Partition {
-		if _, ok := partitionMap[pt]; !ok {
-			return fmt.Errorf("partition %s not exists", pt)
-		}
-	}
-
 	return i.transaction.Transaction(ctx, func(ctx context.Context) error {
 		userID := utils.UserId(ctx)
 		status := subscribe.ApplyStatusSubscribe
 		err = i.subscribeApplyService.Save(ctx, id, &subscribe.EditApply{
-			ApplyPartitions: approveInfo.Partition,
-			Opinion:         &approveInfo.Opinion,
-			Status:          &status,
-			Approver:        &userID,
+			Opinion:  &approveInfo.Opinion,
+			Status:   &status,
+			Approver: &userID,
 		})
 		if err != nil {
 			return err
@@ -448,7 +448,7 @@ func (i *imlSubscribeApprovalModule) Pass(ctx context.Context, pid string, id st
 		if err != nil {
 			return err
 		}
-		cs, err := i.clusterService.List(ctx, approveInfo.Partition...)
+		cs, err := i.clusterService.List(ctx, partitionIds...)
 		if err != nil {
 			return err
 		}
@@ -488,10 +488,9 @@ func (i *imlSubscribeApprovalModule) Reject(ctx context.Context, pid string, id 
 		userID := utils.UserId(ctx)
 		status := subscribe.ApplyStatusRefuse
 		err = i.subscribeApplyService.Save(ctx, id, &subscribe.EditApply{
-			ApplyPartitions: approveInfo.Partition,
-			Opinion:         &approveInfo.Opinion,
-			Status:          &status,
-			Approver:        &userID,
+			Opinion:  &approveInfo.Opinion,
+			Status:   &status,
+			Approver: &userID,
 		})
 		if err != nil {
 			return err
@@ -551,7 +550,6 @@ func (i *imlSubscribeApprovalModule) GetApprovalDetail(ctx context.Context, pid 
 		Applier:      auto.UUID(item.Applier),
 		Approver:     auto.UUID(item.Approver),
 		ApprovalTime: auto.TimeLabel(item.ApproveAt),
-		Partition:    auto.List(item.ApplyPartitions),
 		Reason:       item.Reason,
 		Opinion:      item.Opinion,
 		Status:       item.Status,

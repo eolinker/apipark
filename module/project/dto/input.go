@@ -12,10 +12,9 @@ type CreateProject struct {
 }
 
 type EditProject struct {
-	Name        *string  `json:"name"`
-	Description *string  `json:"description"`
-	Master      *string  `json:"master" aocheck:"user"`
-	Partition   []string `json:"partition" aocheck:"partition"`
+	Name        *string `json:"name"`
+	Description *string `json:"description"`
+	Master      *string `json:"master" aocheck:"user"`
 }
 
 type CreateApp struct {

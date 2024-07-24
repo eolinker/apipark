@@ -70,16 +70,6 @@ func (i *imlProjectService) CountByTeam(ctx context.Context, keyword string) (ma
 	return i.projectStore.CountByGroup(ctx, keyword, map[string]interface{}{"as_server": true}, "team")
 }
 
-//func (i *imlProjectService) ListByProject(ctx context.Context, projectId string) ([]*Project, error) {
-//	list, err := i.projectStore.List(ctx, map[string]interface{}{
-//		"project": projectId,
-//	}, "update_at desc")
-//	if err != nil {
-//		return nil, err
-//	}
-//	return utils.SliceToSlice(list, FromEntity), nil
-//}
-
 func (i *imlProjectService) GetLabels(ctx context.Context, ids ...string) map[string]string {
 	if len(ids) == 0 {
 		return nil
@@ -113,18 +103,17 @@ func uniquestHandler(i *CreateProject) []map[string]interface{} {
 func createEntityHandler(i *CreateProject) *project.Project {
 	now := time.Now()
 	return &project.Project{
-		Id:           0,
-		UUID:         i.Id,
-		Name:         i.Name,
-		CreateAt:     now,
-		UpdateAt:     now,
-		Description:  i.Description,
-		Prefix:       i.Prefix,
-		Team:         i.Team,
-		Organization: i.Organization,
-		Master:       i.Master,
-		AsServer:     i.AsServer,
-		AsApp:        i.AsApp,
+		Id:          0,
+		UUID:        i.Id,
+		Name:        i.Name,
+		CreateAt:    now,
+		UpdateAt:    now,
+		Description: i.Description,
+		Prefix:      i.Prefix,
+		Team:        i.Team,
+		Master:      i.Master,
+		AsServer:    i.AsServer,
+		AsApp:       i.AsApp,
 	}
 }
 func updateHandler(e *project.Project, i *EditProject) {
@@ -137,86 +126,4 @@ func updateHandler(e *project.Project, i *EditProject) {
 	if i.Master != nil {
 		e.Master = *i.Master
 	}
-}
-
-var _ IProjectPartitionsService = (*imlProjectPartitionService)(nil)
-
-type imlProjectPartitionService struct {
-	store project.IProjectPartitionStore `autowired:""`
-}
-
-func (i *imlProjectPartitionService) ListByPartition(ctx context.Context, partitionIds ...string) ([]*Partition, error) {
-	w := make(map[string]interface{})
-	if len(partitionIds) > 0 {
-		w["partition"] = partitionIds
-	}
-	list, err := i.store.List(ctx, w)
-	if err != nil {
-		return nil, err
-	}
-	return utils.SliceToSlice(list, func(t *project.Partition) *Partition {
-		return &Partition{
-			Project:   t.Project,
-			Partition: t.Partition,
-		}
-	}), nil
-}
-
-func (i *imlProjectPartitionService) Delete(ctx context.Context, projectID string) error {
-	_, err := i.store.DeleteWhere(ctx, map[string]interface{}{
-		"project": projectID,
-	})
-	return err
-}
-
-func (i *imlProjectPartitionService) ListByProject(ctx context.Context, projectIDs ...string) ([]*Partition, error) {
-	w := make(map[string]interface{})
-	if len(projectIDs) > 0 {
-		w["project"] = projectIDs
-	}
-	list, err := i.store.List(ctx, w)
-	if err != nil {
-		return nil, err
-	}
-	return utils.SliceToSlice(list, func(t *project.Partition) *Partition {
-		return &Partition{
-			Project:   t.Project,
-			Partition: t.Partition,
-		}
-	}), nil
-}
-
-func (i *imlProjectPartitionService) Save(ctx context.Context, projectID string, partitions []string) error {
-	if len(partitions) == 0 {
-		return fmt.Errorf("partitions is empty")
-	}
-	return i.store.Transaction(ctx, func(ctx context.Context) error {
-		_, err := i.store.DeleteWhere(ctx, map[string]interface{}{
-			"project": projectID,
-		})
-		if err != nil {
-			return err
-		}
-		now := time.Now()
-		return i.store.Insert(ctx, utils.SliceToSlice(partitions, func(t string) *project.Partition {
-			return &project.Partition{
-				Project:    projectID,
-				Partition:  t,
-				CreateTime: now,
-			}
-		})...)
-	})
-
-}
-
-func (i *imlProjectPartitionService) GetByProject(ctx context.Context, projectID string) ([]string, error) {
-	list, err := i.store.List(ctx, map[string]interface{}{
-		"project": projectID,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return utils.SliceToSlice(list, func(t *project.Partition) string {
-		return t.Partition
-	}), nil
 }

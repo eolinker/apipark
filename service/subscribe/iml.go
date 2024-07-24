@@ -73,14 +73,12 @@ func (i *imlSubscribeService) DeleteByApplication(ctx context.Context, service s
 	return err
 }
 
-func (i *imlSubscribeService) SubscribersByProject(ctx context.Context, partitionId string, projectIds ...string) ([]*Subscribe, error) {
+func (i *imlSubscribeService) SubscribersByProject(ctx context.Context, projectIds ...string) ([]*Subscribe, error) {
 	w := make(map[string]interface{})
 	if len(projectIds) > 0 {
 		w["project"] = projectIds
 	}
-	if partitionId != "" {
-		w["partition"] = partitionId
-	}
+
 	w["apply_status"] = ApplyStatusSubscribe
 	list, err := i.store.List(ctx, w, "create_at desc")
 	if err != nil {
@@ -175,13 +173,9 @@ func (i *imlSubscribeService) createEntityHandler(t *CreateSubscribe) *subscribe
 		Project:     t.Project,
 		Application: t.Application,
 		Service:     t.Service,
-		Partition:   t.Partition,
-		//Applier:     t.Applier,
-		//Approver:    t.Approver,
 		From:        t.From,
 		CreateAt:    time.Now(),
 		ApplyStatus: t.ApplyStatus,
-		//ApplyID:     t.ApplyID,
 	}
 }
 
@@ -255,22 +249,19 @@ func (i *imlSubscribeApplyService) uniquestHandler(t *CreateApply) []map[string]
 func (i *imlSubscribeApplyService) createEntityHandler(t *CreateApply) *subscribe.Apply {
 	now := time.Now()
 	return &subscribe.Apply{
-		Uuid:              t.Uuid,
-		Service:           t.Service,
-		Project:           t.Project,
-		Team:              t.Team,
-		Organization:      t.Organization,
-		Application:       t.Application,
-		ApplyTeam:         t.ApplyTeam,
-		ApplyOrganization: t.ApplyOrganization,
-		ApplyPartitions:   t.ApplyPartitions,
-		Applier:           t.Applier,
-		ApplyAt:           now,
-		Approver:          "",
-		ApproveAt:         now,
-		Status:            t.Status,
-		Opinion:           "",
-		Reason:            t.Reason,
+		Uuid:        t.Uuid,
+		Service:     t.Service,
+		Project:     t.Project,
+		Team:        t.Team,
+		Application: t.Application,
+		ApplyTeam:   t.ApplyTeam,
+		Applier:     t.Applier,
+		ApplyAt:     now,
+		Approver:    "",
+		ApproveAt:   now,
+		Status:      t.Status,
+		Opinion:     "",
+		Reason:      t.Reason,
 	}
 }
 
@@ -287,9 +278,6 @@ func (i *imlSubscribeApplyService) updateHandler(e *subscribe.Apply, t *EditAppl
 	if t.Approver != nil {
 		e.Approver = *t.Approver
 		e.ApplyAt = time.Now()
-	}
-	if t.ApplyPartitions != nil {
-		e.ApplyPartitions = t.ApplyPartitions
 	}
 
 }

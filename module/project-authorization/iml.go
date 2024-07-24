@@ -5,8 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/eolinker/eosc/log"
 	"time"
+
+	"github.com/eolinker/apipark/service/partition"
+
+	"github.com/eolinker/eosc/log"
 
 	authDriver "github.com/eolinker/apipark/module/project-authorization/auth-driver"
 
@@ -33,7 +36,7 @@ var _ IProjectAuthorizationModule = (*imlProjectAuthorizationModule)(nil)
 type imlProjectAuthorizationModule struct {
 	projectService              project.IProjectService                           `autowired:""`
 	projectAuthorizationService projectAuthorization.IProjectAuthorizationService `autowired:""`
-	projectPartitionService     project.IProjectPartitionsService                 `autowired:""`
+	partitionService            partition.IPartitionService                       `autowired:""`
 	clusterService              cluster.IClusterService                           `autowired:""`
 	transaction                 store.ITransaction                                `autowired:""`
 }
@@ -80,20 +83,17 @@ func (i *imlProjectAuthorizationModule) getApplications(ctx context.Context, pro
 }
 
 func (i *imlProjectAuthorizationModule) initGateway(ctx context.Context, partitionId string, clientDriver gateway.IClientDriver) error {
-	projectPartitions, err := i.projectPartitionService.ListByPartition(ctx, partitionId)
+	projects, err := i.projectService.List(ctx)
 	if err != nil {
 		return err
 	}
-	projectIds := utils.SliceToSlice(projectPartitions, func(p *project.Partition) string {
-		return p.Project
-	})
-	projects, err := i.projectService.List(ctx, projectIds...)
-	if err != nil {
-		return err
+	projectIds := make([]string, 0, len(projects))
+	projectMap := make(map[string]*project.Project)
+	for _, p := range projects {
+		projectIds = append(projectIds, p.Id)
+		projectMap[p.Id] = p
 	}
-	projectMap := utils.SliceToMap(projects, func(p *project.Project) string {
-		return p.Id
-	})
+
 	applications, err := i.getApplications(ctx, projectIds, projectMap)
 	if err != nil {
 		return err
@@ -102,10 +102,14 @@ func (i *imlProjectAuthorizationModule) initGateway(ctx context.Context, partiti
 }
 
 func (i *imlProjectAuthorizationModule) online(ctx context.Context, projectInfo *project.Project) error {
-	partitionIds, err := i.projectPartitionService.GetByProject(ctx, projectInfo.Id)
+
+	partitions, err := i.partitionService.List(ctx)
 	if err != nil {
 		return err
 	}
+	partitionIds := utils.SliceToSlice(partitions, func(p *partition.Partition) string {
+		return p.UUID
+	})
 	clusters, err := i.clusterService.List(ctx, partitionIds...)
 	if err != nil {
 		return err
@@ -259,12 +263,15 @@ func (i *imlProjectAuthorizationModule) DeleteAuthorization(ctx context.Context,
 	if err != nil {
 		return err
 	}
+	partitions, err := i.partitionService.List(ctx)
+	if err != nil {
+		return err
+	}
+	partitionIds := utils.SliceToSlice(partitions, func(p *partition.Partition) string {
+		return p.UUID
+	})
 	return i.transaction.Transaction(ctx, func(ctx context.Context) error {
 		err = i.projectAuthorizationService.Delete(ctx, aid)
-		if err != nil {
-			return err
-		}
-		partitionIds, err := i.projectPartitionService.GetByProject(ctx, pid)
 		if err != nil {
 			return err
 		}

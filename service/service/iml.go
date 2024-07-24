@@ -110,19 +110,18 @@ func uniquestHandler(i *CreateService) []map[string]interface{} {
 func createEntityHandler(i *CreateService) *service.Service {
 	now := time.Now()
 	return &service.Service{
-		UUID:         i.Uuid,
-		Name:         i.Name,
-		Description:  i.Description,
-		Logo:         i.Logo,
-		ServiceType:  i.ServiceType,
-		Project:      i.Project,
-		Team:         i.Team,
-		Organization: i.Organization,
-		Catalogue:    i.Catalogue,
-		Status:       i.Status,
-		Tag:          i.Tag,
-		CreateAt:     now,
-		UpdateAt:     now,
+		UUID:        i.Uuid,
+		Name:        i.Name,
+		Description: i.Description,
+		Logo:        i.Logo,
+		ServiceType: i.ServiceType,
+		Project:     i.Project,
+		Team:        i.Team,
+		Catalogue:   i.Catalogue,
+		Status:      i.Status,
+		Tag:         i.Tag,
+		CreateAt:    now,
+		UpdateAt:    now,
 	}
 }
 func updateHandler(e *service.Service, i *EditService) {

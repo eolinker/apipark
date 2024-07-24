@@ -6,19 +6,19 @@ import (
 )
 
 type ProjectItem struct {
-	Id           string     `json:"id"`
-	Name         string     `json:"name"`
-	Organization auto.Label `json:"organization" aolabel:"organization"`
-	Team         auto.Label `json:"team" aolabel:"team"`
-	ApiNum       int64      `json:"api_num"`
-	ServiceNum   int64      `json:"service_num"`
+	Id   string `json:"id"`
+	Name string `json:"name"`
+	//Organization auto.Label `json:"organization" aolabel:"organization"`
+	Team       auto.Label `json:"team" aolabel:"team"`
+	ApiNum     int64      `json:"api_num"`
+	ServiceNum int64      `json:"service_num"`
 	//SubscribeNum int64          `json:"subscribe_num"`
-	Description string         `json:"description"`
-	Master      auto.Label     `json:"master" aolabel:"user"`
-	Partition   []auto.Label   `json:"partition,omitempty" aolabel:"partition"`
-	CreateTime  auto.TimeLabel `json:"create_time"`
-	UpdateTime  auto.TimeLabel `json:"update_time"`
-	CanDelete   bool           `json:"can_delete"`
+	Description string     `json:"description"`
+	Master      auto.Label `json:"master" aolabel:"user"`
+	//Partition   []auto.Label   `json:"partition,omitempty" aolabel:"partition"`
+	CreateTime auto.TimeLabel `json:"create_time"`
+	UpdateTime auto.TimeLabel `json:"update_time"`
+	CanDelete  bool           `json:"can_delete"`
 }
 
 type AppItem struct {
@@ -34,12 +34,12 @@ type AppItem struct {
 }
 
 type SimpleProjectItem struct {
-	Id           string       `json:"id"`
-	Name         string       `json:"name"`
-	Organization auto.Label   `json:"organization" aolabel:"organization"`
-	Team         auto.Label   `json:"team" aolabel:"team"`
-	Partition    []auto.Label `json:"partition,omitempty" aolabel:"partition"`
-	Description  string       `json:"description"`
+	Id   string `json:"id"`
+	Name string `json:"name"`
+	//Organization auto.Label   `json:"organization" aolabel:"organization"`
+	Team auto.Label `json:"team" aolabel:"team"`
+	//Partition    []auto.Label `json:"partition,omitempty" aolabel:"partition"`
+	Description string `json:"description"`
 }
 
 type SimpleAppItem struct {
@@ -50,19 +50,19 @@ type SimpleAppItem struct {
 }
 
 type Project struct {
-	Id                 string         `json:"id"`
-	Name               string         `json:"name"`
-	Prefix             string         `json:"prefix,omitempty"`
-	Description        string         `json:"description"`
-	Organization       auto.Label     `json:"organization" aolabel:"organization"`
-	Team               auto.Label     `json:"team" aolabel:"team"`
-	Master             auto.Label     `json:"master" aolabel:"user"`
-	Partition          []auto.Label   `json:"partition,omitempty" aolabel:"partition"`
-	OrganizationPrefix string         `json:"organization_prefix,omitempty"`
-	CreateTime         auto.TimeLabel `json:"create_time"`
-	UpdateTime         auto.TimeLabel `json:"update_time"`
-	AsServer           bool           `json:"as_server"`
-	AsApp              bool           `json:"as_app"`
+	Id          string `json:"id"`
+	Name        string `json:"name"`
+	Prefix      string `json:"prefix,omitempty"`
+	Description string `json:"description"`
+	//Organization       auto.Label     `json:"organization" aolabel:"organization"`
+	Team   auto.Label `json:"team" aolabel:"team"`
+	Master auto.Label `json:"master" aolabel:"user"`
+	//Partition          []auto.Label   `json:"partition,omitempty" aolabel:"partition"`
+	//OrganizationPrefix string         `json:"organization_prefix,omitempty"`
+	CreateTime auto.TimeLabel `json:"create_time"`
+	UpdateTime auto.TimeLabel `json:"update_time"`
+	AsServer   bool           `json:"as_server"`
+	AsApp      bool           `json:"as_app"`
 }
 
 type App struct {
@@ -75,21 +75,18 @@ type App struct {
 	AsApp       bool           `json:"as_app"`
 }
 
-func ToProject(model *project.Project, organization string, organizationPrefix string, partitions []string) *Project {
+func ToProject(model *project.Project) *Project {
 	return &Project{
-		Id:                 model.Id,
-		Name:               model.Name,
-		Prefix:             model.Prefix,
-		Description:        model.Description,
-		Organization:       auto.UUID(organization),
-		Team:               auto.UUID(model.Team),
-		Master:             auto.UUID(model.Master),
-		Partition:          auto.List(partitions),
-		OrganizationPrefix: organizationPrefix,
-		CreateTime:         auto.TimeLabel(model.CreateTime),
-		UpdateTime:         auto.TimeLabel(model.UpdateTime),
-		AsServer:           model.AsServer,
-		AsApp:              model.AsApp,
+		Id:          model.Id,
+		Name:        model.Name,
+		Prefix:      model.Prefix,
+		Description: model.Description,
+		Team:        auto.UUID(model.Team),
+		Master:      auto.UUID(model.Master),
+		CreateTime:  auto.TimeLabel(model.CreateTime),
+		UpdateTime:  auto.TimeLabel(model.UpdateTime),
+		AsServer:    model.AsServer,
+		AsApp:       model.AsApp,
 	}
 }
 

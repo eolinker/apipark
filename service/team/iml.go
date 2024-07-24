@@ -55,14 +55,13 @@ func uniquestHandler(i *CreateTeam) []map[string]interface{} {
 }
 func createEntityHandler(i *CreateTeam) *team.Team {
 	return &team.Team{
-		Id:           0,
-		UUID:         i.Id,
-		Name:         i.Name,
-		Description:  i.Description,
-		Master:       i.Master,
-		Organization: i.Organization,
-		CreateAt:     time.Now(),
-		UpdateAt:     time.Now(),
+		Id:          0,
+		UUID:        i.Id,
+		Name:        i.Name,
+		Description: i.Description,
+		Master:      i.Master,
+		CreateAt:    time.Now(),
+		UpdateAt:    time.Now(),
 	}
 }
 func updateHandler(e *team.Team, i *EditTeam) {
@@ -75,8 +74,6 @@ func updateHandler(e *team.Team, i *EditTeam) {
 	if i.Master != nil {
 		e.Master = *i.Master
 	}
-	if i.Organization != nil {
-		e.Organization = *i.Organization
-	}
+
 	e.UpdateAt = time.Now()
 }

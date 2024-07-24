@@ -3,10 +3,9 @@ package dynamic_module
 import "time"
 
 type DynamicModule struct {
-	Id   int64  `gorm:"column:id;type:BIGINT(20);AUTO_INCREMENT;NOT NULL;comment:id;primary_key;comment:主键ID;"`
-	UUID string `gorm:"type:varchar(36);not null;column:uuid;uniqueIndex:uuid;comment:UUID;"`
-	Name string `gorm:"type:varchar(100);not null;column:name;comment:name"`
-	//Partition   string    `gorm:"column:partition;type:VARCHAR(255);NOT NULL;comment:分区"`
+	Id          int64     `gorm:"column:id;type:BIGINT(20);AUTO_INCREMENT;NOT NULL;comment:id;primary_key;comment:主键ID;"`
+	UUID        string    `gorm:"type:varchar(36);not null;column:uuid;uniqueIndex:uuid;comment:UUID;"`
+	Name        string    `gorm:"type:varchar(100);not null;column:name;comment:name"`
 	Driver      string    `gorm:"column:driver;type:VARCHAR(255);NOT NULL;comment:驱动"`
 	Description string    `gorm:"column:description;type:VARCHAR(255);comment:描述"`
 	Version     string    `gorm:"column:version;type:VARCHAR(32);NOT NULL;comment:版本"`

@@ -4,11 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"gorm.io/gorm"
 
 	"github.com/eolinker/apipark/service/partition"
-
-	"github.com/eolinker/apipark/service/organization"
 
 	"github.com/eolinker/apipark/service/project"
 
@@ -39,7 +38,6 @@ type imlTeamModule struct {
 	userService             user.IUserService                  `autowired:""`
 	departmentMemberService department_member.IMemberService   `autowired:""`
 	projectService          project.IProjectService            `autowired:""`
-	organizationService     organization.IOrganizationService  `autowired:""`
 	partitionService        partition.IPartitionService        `autowired:""`
 	transaction             store.ITransaction                 `autowired:""`
 }
@@ -49,10 +47,10 @@ func (m *imlTeamModule) GetTeam(ctx context.Context, id string) (*team_dto.Team,
 	if err != nil {
 		return nil, err
 	}
-	availablePartitions, err := m.organizationService.Partitions(ctx, tv.Organization)
-	if err != nil {
-		return nil, err
-	}
+	//availablePartitions, err := m.organizationService.Partitions(ctx, tv.Organization)
+	//if err != nil {
+	//	return nil, err
+	//}
 	globalPartitions, err := m.partitionService.List(ctx)
 	if err != nil {
 		return nil, err
@@ -60,20 +58,20 @@ func (m *imlTeamModule) GetTeam(ctx context.Context, id string) (*team_dto.Team,
 	globalPartitionMap := utils.SliceToMapO(globalPartitions, func(p *partition.Partition) (string, struct{}) {
 		return p.UUID, struct{}{}
 	})
-	for _, p := range availablePartitions {
-		delete(globalPartitionMap, p)
-	}
+	//for _, p := range availablePartitions {
+	//	delete(globalPartitionMap, p)
+	//}
 	return &team_dto.Team{
-		Id:                  tv.Id,
-		Name:                tv.Name,
-		Description:         tv.Description,
-		Master:              auto.UUID(tv.Master),
-		CreateTime:          auto.TimeLabel(tv.CreateTime),
-		UpdateTime:          auto.TimeLabel(tv.UpdateTime),
-		Organization:        auto.UUID(tv.Organization),
-		Creator:             auto.UUID(tv.Creator),
-		Updater:             auto.UUID(tv.Updater),
-		AvailablePartitions: auto.List(availablePartitions),
+		Id:           tv.Id,
+		Name:         tv.Name,
+		Description:  tv.Description,
+		Master:       auto.UUID(tv.Master),
+		CreateTime:   auto.TimeLabel(tv.CreateTime),
+		UpdateTime:   auto.TimeLabel(tv.UpdateTime),
+		Organization: auto.UUID(tv.Organization),
+		Creator:      auto.UUID(tv.Creator),
+		Updater:      auto.UUID(tv.Updater),
+		//AvailablePartitions: auto.List(availablePartitions),
 		DisablePartitions: auto.List(utils.MapToSlice(globalPartitionMap, func(k string, v struct{}) string {
 			return k
 		})),
@@ -152,10 +150,10 @@ func (m *imlTeamModule) SimpleTeams(ctx context.Context, keyword string) ([]*tea
 	if err != nil {
 		return nil, err
 	}
-	partitionMap, err := m.organizationService.PartitionsByOrganization(ctx)
-	if err != nil {
-		return nil, err
-	}
+	//partitionMap, err := m.organizationService.PartitionsByOrganization(ctx)
+	//if err != nil {
+	//	return nil, err
+	//}
 	globalPartitions, err := m.partitionService.List(ctx)
 	if err != nil {
 		return nil, err
@@ -177,16 +175,16 @@ func (m *imlTeamModule) SimpleTeams(ctx context.Context, keyword string) ([]*tea
 		globalPartitionMap := utils.SliceToMapO(globalPartitions, func(p *partition.Partition) (string, struct{}) {
 			return p.UUID, struct{}{}
 		})
-		availablePartitions := partitionMap[s.Organization]
-		for _, p := range availablePartitions {
-			delete(globalPartitionMap, p)
-		}
+		//availablePartitions := partitionMap[s.Organization]
+		//for _, p := range availablePartitions {
+		//	delete(globalPartitionMap, p)
+		//}
 		return &team_dto.SimpleTeam{
-			Id:                  s.Id,
-			Name:                s.Name,
-			Description:         s.Description,
-			Organization:        auto.UUID(s.Organization),
-			AvailablePartitions: auto.List(availablePartitions),
+			Id:           s.Id,
+			Name:         s.Name,
+			Description:  s.Description,
+			Organization: auto.UUID(s.Organization),
+			//AvailablePartitions: auto.List(availablePartitions),
 			DisablePartitions: auto.List(utils.MapToSlice(globalPartitionMap, func(k string, v struct{}) string {
 				return k
 			})),

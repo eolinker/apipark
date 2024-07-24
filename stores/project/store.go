@@ -31,14 +31,6 @@ type imlAuthorizationStore struct {
 	store.SearchStore[Authorization]
 }
 
-type IProjectPartitionStore interface {
-	store.IBaseStore[Partition]
-}
-
-type imlProjectPartitionStore struct {
-	store.Store[Partition]
-}
-
 func init() {
 	autowire.Auto[IProjectStore](func() reflect.Value {
 		return reflect.ValueOf(new(imlProjectStore))
@@ -51,8 +43,5 @@ func init() {
 	})
 	autowire.Auto[IAuthorizationStore](func() reflect.Value {
 		return reflect.ValueOf(new(imlAuthorizationStore))
-	})
-	autowire.Auto[IProjectPartitionStore](func() reflect.Value {
-		return reflect.ValueOf(new(imlProjectPartitionStore))
 	})
 }

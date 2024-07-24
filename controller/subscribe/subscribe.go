@@ -1,8 +1,9 @@
 package subscribe
 
 import (
-	"github.com/gin-gonic/gin"
 	"reflect"
+
+	"github.com/gin-gonic/gin"
 
 	subscribe_dto "github.com/eolinker/apipark/module/subscribe/dto"
 
@@ -24,7 +25,7 @@ type ISubscribeController interface {
 	DeleteSubscription(ctx *gin.Context, project string, uuid string) error
 	// RevokeApply 取消申请
 	RevokeApply(ctx *gin.Context, project string, uuid string) error
-	PartitionServices(ctx *gin.Context, app string) ([]*subscribe_dto.PartitionServiceItem, error)
+	//PartitionServices(ctx *gin.Context, app string) ([]*subscribe_dto.PartitionServiceItem, error)
 }
 
 type ISubscribeApprovalController interface {

@@ -23,7 +23,7 @@ type IProjectModule interface {
 	// DeleteProject 删除项目
 	DeleteProject(ctx context.Context, id string) error
 	// SimpleProjects 获取简易项目列表
-	SimpleProjects(ctx context.Context, keyword string, partition string) ([]*project_dto.SimpleProjectItem, error)
+	SimpleProjects(ctx context.Context, keyword string) ([]*project_dto.SimpleProjectItem, error)
 
 	// MySimpleProjects 获取我的简易项目列表
 	MySimpleProjects(ctx context.Context, keyword string) ([]*project_dto.SimpleProjectItem, error)

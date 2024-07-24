@@ -67,11 +67,10 @@ func (m *imlTeamModule) Create(ctx context.Context, input *team_dto.CreateTeam) 
 
 	err := m.transaction.Transaction(ctx, func(ctx context.Context) error {
 		err := m.service.Create(ctx, &team.CreateTeam{
-			Id:           input.Id,
-			Name:         input.Name,
-			Description:  input.Description,
-			Master:       input.Master,
-			Organization: input.OrganizationId,
+			Id:          input.Id,
+			Name:        input.Name,
+			Description: input.Description,
+			Master:      input.Master,
 		})
 		if err != nil {
 			return err

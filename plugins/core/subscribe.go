@@ -17,7 +17,7 @@ func (p *plugin) subscribeApis() []pm3.Api {
 		pm3.CreateApiWidthDoc(http.MethodPost, "/api/v1/application/subscription/cancel", []string{"context", "query:application", "query:subscription"}, nil, p.subscribeController.RevokeSubscription),
 		pm3.CreateApiWidthDoc(http.MethodPost, "/api/v1/application/subscription/cancel_apply", []string{"context", "query:application", "query:subscription"}, nil, p.subscribeController.RevokeApply),
 
-		pm3.CreateApiWidthDoc(http.MethodGet, "/api/v1/simple/application/partitions", []string{"context", "query:application"}, []string{"partitions"}, p.subscribeController.PartitionServices),
+		//pm3.CreateApiWidthDoc(http.MethodGet, "/api/v1/simple/application/partitions", []string{"context", "query:application"}, []string{"partitions"}, p.subscribeController.PartitionServices),
 
 		// 审批相关
 		pm3.CreateApiWidthDoc(http.MethodGet, "/api/v1/project/approval/subscribes", []string{"context", "query:project", "query:status"}, []string{"approvals"}, p.subscribeApprovalController.GetApprovalList),

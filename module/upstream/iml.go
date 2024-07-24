@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/eolinker/apipark/service/partition"
+
 	"github.com/eolinker/go-common/utils"
 
 	"gorm.io/gorm"
@@ -26,10 +28,10 @@ var (
 )
 
 type imlUpstreamModule struct {
-	projectService          project.IProjectService           `autowired:""`
-	projectPartitionService project.IProjectPartitionsService `autowired:""`
-	upstreamService         upstream.IUpstreamService         `autowired:""`
-	transaction             store.ITransaction                `autowired:""`
+	projectService   project.IProjectService     `autowired:""`
+	partitionService partition.IPartitionService `autowired:""`
+	upstreamService  upstream.IUpstreamService   `autowired:""`
+	transaction      store.ITransaction          `autowired:""`
 }
 
 func (i *imlUpstreamModule) Get(ctx context.Context, pid string) (upstream_dto.UpstreamConfig, error) {
@@ -64,18 +66,18 @@ func (i *imlUpstreamModule) Save(ctx context.Context, pid string, upstreamConfig
 	if err != nil {
 		return nil, err
 	}
-	projectPartitions, err := i.projectPartitionService.ListByProject(ctx, pid)
+	partitions, err := i.partitionService.List(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	projectPartitionMap := utils.SliceToMap(projectPartitions, func(p *project.Partition) string {
-		return p.Partition
+	partitionMap := utils.SliceToMapO(partitions, func(p *partition.Partition) (string, struct{}) {
+		return p.UUID, struct{}{}
 	})
 	err = i.transaction.Transaction(ctx, func(ctx context.Context) error {
 		partitionIds := make([]string, 0, len(upstreamConfig))
 		for id, cfg := range upstreamConfig {
-			if _, ok := projectPartitionMap[id]; !ok {
+			if _, ok := partitionMap[id]; !ok {
 				continue
 			}
 			err = i.upstreamService.SaveCommit(ctx, pid, id, upstream_dto.ConvertUpstream(cfg))

@@ -13,7 +13,7 @@ type imlAPIController struct {
 }
 
 func (i *imlAPIController) SimpleList(ctx *gin.Context, partitionId string, input *api_dto.ListInput) ([]*api_dto.ApiSimpleItem, error) {
-	return i.module.SimpleList(ctx, partitionId, input)
+	return i.module.SimpleList(ctx, input)
 }
 
 func (i *imlAPIController) Detail(ctx *gin.Context, pid string, aid string) (*api_dto.ApiDetail, error) {

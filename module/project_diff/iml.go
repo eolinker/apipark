@@ -10,7 +10,6 @@ import (
 	"github.com/eolinker/apipark/service/api"
 	"github.com/eolinker/apipark/service/cluster"
 	"github.com/eolinker/apipark/service/partition"
-	"github.com/eolinker/apipark/service/project"
 	"github.com/eolinker/apipark/service/project_diff"
 	"github.com/eolinker/apipark/service/release"
 	"github.com/eolinker/apipark/service/universally/commit"
@@ -20,19 +19,18 @@ import (
 )
 
 type imlProjectDiff struct {
-	apiService              api.IAPIService                   `autowired:""`
-	upstreamService         upstream.IUpstreamService         `autowired:""`
-	releaseService          release.IReleaseService           `autowired:""`
-	projectPartitionService project.IProjectPartitionsService `autowired:""`
-	partitionService        partition.IPartitionService       `autowired:""`
-	clusterService          cluster.IClusterService           `autowired:""`
+	apiService       api.IAPIService             `autowired:""`
+	upstreamService  upstream.IUpstreamService   `autowired:""`
+	releaseService   release.IReleaseService     `autowired:""`
+	partitionService partition.IPartitionService `autowired:""`
+	clusterService   cluster.IClusterService     `autowired:""`
 }
 
 func (m *imlProjectDiff) Diff(ctx context.Context, projectId string, baseRelease, targetRelease string) (*project_diff.Diff, error) {
 	if targetRelease == "" {
 		return nil, fmt.Errorf("target release is required")
 	}
-	partitions, err := m.projectPartitionService.GetByProject(ctx, projectId)
+	partitions, err := m.partitionService.List(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -58,8 +56,10 @@ func (m *imlProjectDiff) Diff(ctx context.Context, projectId string, baseRelease
 		return nil, err
 	}
 	target.id = projectId
-
-	diff := m.diff(partitions, base, target)
+	partitionIds := utils.SliceToSlice(partitions, func(i *partition.Partition) string {
+		return i.UUID
+	})
+	diff := m.diff(partitionIds, base, target)
 	return diff, nil
 
 }
@@ -120,11 +120,14 @@ func (m *imlProjectDiff) DiffForLatest(ctx context.Context, projectId string, ba
 		apiDocs:         documents,
 		upstreamCommits: upstreamCommits,
 	}
-	partitions, err := m.projectPartitionService.GetByProject(ctx, projectId)
+	partitions, err := m.partitionService.List(ctx)
 	if err != nil {
 		return nil, false, err
 	}
-	return m.diff(partitions, base, target), true, nil
+	partitionIds := utils.SliceToSlice(partitions, func(i *partition.Partition) string {
+		return i.UUID
+	})
+	return m.diff(partitionIds, base, target), true, nil
 }
 func (m *imlProjectDiff) getReleaseInfo(ctx context.Context, releaseId string) (*projectInfo, error) {
 	commits, err := m.releaseService.GetCommits(ctx, releaseId)

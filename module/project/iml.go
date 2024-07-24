@@ -4,10 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/eolinker/apipark/service/subscribe"
-	"gorm.io/gorm"
 	"sort"
 	"strings"
+
+	"github.com/eolinker/apipark/service/partition"
+
+	"github.com/eolinker/apipark/service/subscribe"
+	"gorm.io/gorm"
 
 	"github.com/eolinker/ap-account/service/member"
 
@@ -20,8 +23,6 @@ import (
 	"github.com/eolinker/ap-account/service/user"
 
 	"github.com/eolinker/go-common/auto"
-
-	"github.com/eolinker/apipark/service/organization"
 
 	team_member "github.com/eolinker/apipark/service/team-member"
 
@@ -45,15 +46,14 @@ var (
 )
 
 type imlProjectModule struct {
-	projectService          project.IProjectService           `autowired:""`
-	projectPartitionService project.IProjectPartitionsService `autowired:""`
-	projectMemberService    project_member.IMemberService     `autowired:""`
-	teamService             team.ITeamService                 `autowired:""`
-	teamMemberService       team_member.ITeamMemberService    `autowired:""`
-	organizationService     organization.IOrganizationService `autowired:""`
-	serviceService          service.IServiceService           `autowired:""`
-	apiService              api.IAPIService                   `autowired:""`
-	transaction             store.ITransaction                `autowired:""`
+	partitionService     partition.IPartitionService    `autowired:""`
+	projectService       project.IProjectService        `autowired:""`
+	projectMemberService project_member.IMemberService  `autowired:""`
+	teamService          team.ITeamService              `autowired:""`
+	teamMemberService    team_member.ITeamMemberService `autowired:""`
+	serviceService       service.IServiceService        `autowired:""`
+	apiService           api.IAPIService                `autowired:""`
+	transaction          store.ITransaction             `autowired:""`
 }
 
 func (i *imlProjectModule) searchMyProjects(ctx context.Context, teamId string, keyword string) ([]*project.Project, error) {
@@ -96,13 +96,7 @@ func (i *imlProjectModule) SearchMyProjects(ctx context.Context, teamId string, 
 	if err != nil {
 		return nil, err
 	}
-	partitions, err := i.projectPartitionService.ListByProject(ctx, projectIDs...)
-	if err != nil {
-		return nil, err
-	}
-	partitionMap := utils.SliceToMapArrayO(partitions, func(p *project.Partition) (string, string) {
-		return p.Project, p.Partition
-	})
+
 	items := make([]*project_dto.ProjectItem, 0, len(projects))
 	for _, model := range projects {
 		if teamId != "" && model.Team != teamId {
@@ -111,18 +105,16 @@ func (i *imlProjectModule) SearchMyProjects(ctx context.Context, teamId string, 
 		apiCount := apiCountMap[model.Id]
 		serviceCount := serviceCountMap[model.Id]
 		items = append(items, &project_dto.ProjectItem{
-			Id:           model.Id,
-			Name:         model.Name,
-			Description:  model.Description,
-			Master:       auto.UUID(model.Master),
-			CreateTime:   auto.TimeLabel(model.CreateTime),
-			UpdateTime:   auto.TimeLabel(model.UpdateTime),
-			Organization: auto.UUID(model.Organization),
-			Partition:    auto.List(partitionMap[model.Id]),
-			Team:         auto.UUID(model.Team),
-			ApiNum:       apiCount,
-			ServiceNum:   serviceCount,
-			CanDelete:    apiCount == 0 && serviceCount == 0,
+			Id:          model.Id,
+			Name:        model.Name,
+			Description: model.Description,
+			Master:      auto.UUID(model.Master),
+			CreateTime:  auto.TimeLabel(model.CreateTime),
+			UpdateTime:  auto.TimeLabel(model.UpdateTime),
+			Team:        auto.UUID(model.Team),
+			ApiNum:      apiCount,
+			ServiceNum:  serviceCount,
+			CanDelete:   apiCount == 0 && serviceCount == 0,
 		})
 	}
 	return items, nil
@@ -141,49 +133,36 @@ func (i *imlProjectModule) SimpleAPPS(ctx context.Context, keyword string) ([]*p
 			Name:        p.Name,
 			Description: p.Description,
 
-			Organization: auto.UUID(p.Organization),
-			Team:         auto.UUID(p.Team),
+			Team: auto.UUID(p.Team),
 		}
 	}), nil
 }
 
-func (i *imlProjectModule) SimpleProjects(ctx context.Context, keyword string, partition string) ([]*project_dto.SimpleProjectItem, error) {
+func (i *imlProjectModule) SimpleProjects(ctx context.Context, keyword string) ([]*project_dto.SimpleProjectItem, error) {
 	w := make(map[string]interface{})
 	w["as_server"] = true
-	if partition != "" {
-		pp, err := i.projectPartitionService.ListByPartition(ctx, partition)
-		if err != nil {
-			return nil, err
-		}
-		w["uuid"] = utils.SliceToSlice(pp, func(p *project.Partition) string {
-			return p.Project
-		})
-	}
+	//if partition != "" {
+	//	pp, err := i.projectPartitionService.ListByPartition(ctx, partition)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	w["uuid"] = utils.SliceToSlice(pp, func(p *project.Partition) string {
+	//		return p.Project
+	//	})
+	//}
 	projects, err := i.projectService.Search(ctx, keyword, w)
 	if err != nil {
 		return nil, err
 	}
 
-	projectIDs := utils.SliceToSlice(projects, func(p *project.Project) string {
-		return p.Id
-	})
-	partitions, err := i.projectPartitionService.ListByProject(ctx, projectIDs...)
-	if err != nil {
-		return nil, err
-	}
-	partitionMap := utils.SliceToMapArrayO(partitions, func(p *project.Partition) (string, string) {
-		return p.Project, p.Partition
-	})
 	items := make([]*project_dto.SimpleProjectItem, 0, len(projects))
 	for _, p := range projects {
 
 		items = append(items, &project_dto.SimpleProjectItem{
-			Id:           p.Id,
-			Name:         p.Name,
-			Description:  p.Description,
-			Organization: auto.UUID(p.Organization),
-			Team:         auto.UUID(p.Team),
-			Partition:    auto.List(partitionMap[p.Id]),
+			Id:          p.Id,
+			Name:        p.Name,
+			Description: p.Description,
+			Team:        auto.UUID(p.Team),
 		})
 	}
 	return items, nil
@@ -195,27 +174,15 @@ func (i *imlProjectModule) MySimpleProjects(ctx context.Context, keyword string)
 	if err != nil {
 		return nil, err
 	}
-	projectIDs := utils.SliceToSlice(projects, func(p *project.Project) string {
-		return p.Id
-	})
-	partitions, err := i.projectPartitionService.ListByProject(ctx, projectIDs...)
-	if err != nil {
-		return nil, err
-	}
-	partitionMap := utils.SliceToMapArrayO(partitions, func(p *project.Partition) (string, string) {
-		return p.Project, p.Partition
-	})
 
 	items := make([]*project_dto.SimpleProjectItem, 0, len(projects))
 	for _, p := range projects {
 
 		items = append(items, &project_dto.SimpleProjectItem{
-			Id:           p.Id,
-			Name:         p.Name,
-			Description:  p.Description,
-			Organization: auto.UUID(p.Organization),
-			Team:         auto.UUID(p.Team),
-			Partition:    auto.List(partitionMap[p.Id]),
+			Id:          p.Id,
+			Name:        p.Name,
+			Description: p.Description,
+			Team:        auto.UUID(p.Team),
 		})
 	}
 	return items, nil
@@ -226,19 +193,8 @@ func (i *imlProjectModule) GetProject(ctx context.Context, id string) (*project_
 	if err != nil {
 		return nil, err
 	}
-	teamInfo, err := i.teamService.Get(ctx, projectInfo.Team)
-	if err != nil {
-		return nil, err
-	}
-	organizationInfo, err := i.organizationService.Get(ctx, teamInfo.Organization)
-	if err != nil {
-		return nil, err
-	}
-	partitions, err := i.projectPartitionService.GetByProject(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	return project_dto.ToProject(projectInfo, teamInfo.Organization, organizationInfo.Prefix, partitions), nil
+
+	return project_dto.ToProject(projectInfo), nil
 }
 
 func (i *imlProjectModule) Search(ctx context.Context, teamID string, keyword string) ([]*project_dto.ProjectItem, error) {
@@ -269,51 +225,39 @@ func (i *imlProjectModule) Search(ctx context.Context, teamID string, keyword st
 	if err != nil {
 		return nil, err
 	}
-	partitions, err := i.projectPartitionService.ListByProject(ctx, projectIds...)
-	if err != nil {
-		return nil, err
-	}
-	partitionMap := utils.SliceToMapArrayO(partitions, func(p *project.Partition) (string, string) {
-		return p.Project, p.Partition
-	})
+
 	items := make([]*project_dto.ProjectItem, 0, len(list))
 	for _, model := range list {
 		apiCount := apiCountMap[model.Id]
 		serviceCount := serviceCountMap[model.Id]
 		items = append(items, &project_dto.ProjectItem{
-			Id:           model.Id,
-			Name:         model.Name,
-			Description:  model.Description,
-			Master:       auto.UUID(model.Master),
-			CreateTime:   auto.TimeLabel(model.CreateTime),
-			UpdateTime:   auto.TimeLabel(model.UpdateTime),
-			Organization: auto.UUID(model.Organization),
-			Partition:    auto.List(partitionMap[model.Id]),
-			Team:         auto.UUID(model.Team),
-			ApiNum:       apiCount,
-			ServiceNum:   serviceCount,
-			CanDelete:    apiCount == 0 && serviceCount == 0,
+			Id:          model.Id,
+			Name:        model.Name,
+			Description: model.Description,
+			Master:      auto.UUID(model.Master),
+			CreateTime:  auto.TimeLabel(model.CreateTime),
+			UpdateTime:  auto.TimeLabel(model.UpdateTime),
+			Team:        auto.UUID(model.Team),
+			ApiNum:      apiCount,
+			ServiceNum:  serviceCount,
+			CanDelete:   apiCount == 0 && serviceCount == 0,
 		})
 	}
 	return items, nil
 }
 
 func (i *imlProjectModule) CreateProject(ctx context.Context, teamID string, input *project_dto.CreateProject) (*project_dto.Project, error) {
-	teamInfo, err := i.teamService.Get(ctx, teamID)
-	if err != nil {
-		return nil, err
-	}
+
 	if input.Id == "" {
 		input.Id = uuid.New().String()
 	}
 	mo := &project.CreateProject{
-		Id:           input.Id,
-		Name:         input.Name,
-		Description:  input.Description,
-		Master:       input.Master,
-		Team:         teamID,
-		Prefix:       input.Prefix,
-		Organization: teamInfo.Organization,
+		Id:          input.Id,
+		Name:        input.Name,
+		Description: input.Description,
+		Master:      input.Master,
+		Team:        teamID,
+		Prefix:      input.Prefix,
 	}
 	if input.AsApp == nil {
 		// 默认值为false
@@ -328,18 +272,8 @@ func (i *imlProjectModule) CreateProject(ctx context.Context, teamID string, inp
 		mo.AsServer = *input.AsServer
 	}
 	input.Prefix = strings.Trim(strings.Trim(input.Prefix, " "), "/")
-	err = i.transaction.Transaction(ctx, func(ctx context.Context) error {
-		if mo.AsServer {
-			// 判断是否有不可用的分区
-			err = i.validPartitions(ctx, teamInfo.Organization, input.Partition)
-			if err != nil {
-				return err
-			}
-			err = i.projectPartitionService.Save(ctx, input.Id, input.Partition)
-			if err != nil {
-				return err
-			}
-		}
+	err := i.transaction.Transaction(ctx, func(ctx context.Context) error {
+
 		// 判断用户是否在团队内
 		members, err := i.teamMemberService.Members(ctx, []string{teamID}, []string{input.Master})
 		if err != nil {
@@ -362,40 +296,13 @@ func (i *imlProjectModule) CreateProject(ctx context.Context, teamID string, inp
 	return i.GetProject(ctx, input.Id)
 }
 
-func (i *imlProjectModule) validPartitions(ctx context.Context, orgID string, partitions []string) error {
-	orgPartitions, err := i.organizationService.Partitions(ctx, orgID)
-	if err != nil {
-		return err
-	}
-	partitionMap := utils.SliceToMapO(orgPartitions, func(s string) (string, struct{}) {
-		return s, struct{}{}
-	})
-	for _, partition := range partitions {
-		if _, ok := partitionMap[partition]; !ok {
-			return fmt.Errorf("partition not found: %s", partition)
-		}
-	}
-	return nil
-}
-
 func (i *imlProjectModule) EditProject(ctx context.Context, id string, input *project_dto.EditProject) (*project_dto.Project, error) {
+	_, err := i.projectService.Get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	err = i.transaction.Transaction(ctx, func(ctx context.Context) error {
 
-	err := i.transaction.Transaction(ctx, func(ctx context.Context) error {
-		pInfo, err := i.projectService.Get(ctx, id)
-		if err != nil {
-			return err
-		}
-		if len(input.Partition) > 0 {
-			// 判断是否有不可用的分区
-			err = i.validPartitions(ctx, pInfo.Organization, input.Partition)
-			if err != nil {
-				return err
-			}
-			err = i.projectPartitionService.Save(ctx, pInfo.Id, input.Partition)
-			if err != nil {
-				return err
-			}
-		}
 		if input.Master != nil {
 			projectInfo, err := i.projectService.Get(ctx, id)
 			if err != nil {
@@ -447,10 +354,6 @@ func (i *imlProjectModule) DeleteProject(ctx context.Context, id string) error {
 		}
 		// 删除项目成员
 		err = i.projectMemberService.Delete(ctx, id)
-		if err != nil {
-			return err
-		}
-		err = i.projectPartitionService.Delete(ctx, id)
 		if err != nil {
 			return err
 		}
@@ -643,22 +546,21 @@ type imlAppModule struct {
 }
 
 func (i *imlAppModule) CreateApp(ctx context.Context, teamID string, input *project_dto.CreateApp) (*project_dto.App, error) {
-	teamInfo, err := i.teamService.Get(ctx, teamID)
-	if err != nil {
-		return nil, err
-	}
+	//teamInfo, err := i.teamService.Get(ctx, teamID)
+	//if err != nil {
+	//	return nil, err
+	//}
 	if input.Id == "" {
 		input.Id = uuid.New().String()
 	}
 	userId := utils.UserId(ctx)
 	mo := &project.CreateProject{
-		Id:           input.Id,
-		Name:         input.Name,
-		Description:  input.Description,
-		Master:       userId,
-		Team:         teamID,
-		Organization: teamInfo.Organization,
-		AsApp:        true,
+		Id:          input.Id,
+		Name:        input.Name,
+		Description: input.Description,
+		Master:      userId,
+		Team:        teamID,
+		AsApp:       true,
 	}
 	// 判断用户是否在团队内
 	members, err := i.teamMemberService.Members(ctx, []string{teamID}, []string{userId})

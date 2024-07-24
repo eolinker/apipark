@@ -4,10 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/eolinker/apipark/service/partition"
 	"github.com/eolinker/apipark/service/subscribe"
 	"github.com/eolinker/eosc/log"
-	"strings"
 
 	"github.com/eolinker/apipark/gateway"
 
@@ -39,18 +40,17 @@ var (
 )
 
 type imlServiceModule struct {
-	projectService          project.IProjectService           `autowired:""`
-	projectPartitionService project.IProjectPartitionsService `autowired:""`
-	serviceService          service.IServiceService           `autowired:""`
-	serviceTagService       service.ITagService               `autowired:""`
-	servicePartitionService service.IPartitionsService        `autowired:""`
-	serviceDocService       service.IDocService               `autowired:""`
-	tagService              tag.ITagService                   `autowired:""`
-	serviceApiService       service.IApiService               `autowired:""`
-	apiService              api.IAPIService                   `autowired:""`
-	subscribeService        subscribe.ISubscribeService       `autowired:""`
-	partitionService        partition.IPartitionService       `autowired:""`
-	clusterService          cluster.IClusterService           `autowired:""`
+	projectService          project.IProjectService     `autowired:""`
+	serviceService          service.IServiceService     `autowired:""`
+	serviceTagService       service.ITagService         `autowired:""`
+	servicePartitionService service.IPartitionsService  `autowired:""`
+	serviceDocService       service.IDocService         `autowired:""`
+	tagService              tag.ITagService             `autowired:""`
+	serviceApiService       service.IApiService         `autowired:""`
+	apiService              api.IAPIService             `autowired:""`
+	subscribeService        subscribe.ISubscribeService `autowired:""`
+	partitionService        partition.IPartitionService `autowired:""`
+	clusterService          cluster.IClusterService     `autowired:""`
 
 	transaction store.ITransaction `autowired:""`
 }
@@ -82,12 +82,9 @@ func (i *imlServiceModule) getServiceApis(ctx context.Context, projectIds []stri
 }
 
 func (i *imlServiceModule) initGateway(ctx context.Context, partitionId string, clientDriver gateway.IClientDriver) error {
-	projectPartitions, err := i.projectPartitionService.ListByPartition(ctx, partitionId)
-	if err != nil {
-		return err
-	}
-	projectIds := utils.SliceToSlice(projectPartitions, func(p *project.Partition) string {
-		return p.Project
+	projects, err := i.projectService.List(ctx)
+	projectIds := utils.SliceToSlice(projects, func(p *project.Project) string {
+		return p.Id
 	})
 	releases, err := i.getServiceApis(ctx, projectIds)
 	if err != nil {
@@ -413,17 +410,16 @@ func (i *imlServiceModule) Create(ctx context.Context, pid string, input *servic
 	err = i.transaction.Transaction(ctx, func(ctx context.Context) error {
 		t := strings.Join(input.Tags, ",")
 		err = i.serviceService.Create(ctx, &service.CreateService{
-			Uuid:         input.ID,
-			Name:         input.Name,
-			Description:  input.Description,
-			Logo:         input.Logo,
-			ServiceType:  input.ServiceType,
-			Project:      pid,
-			Team:         pInfo.Team,
-			Organization: pInfo.Organization,
-			Catalogue:    catalogue,
-			Status:       service.StatusOff,
-			Tag:          t,
+			Uuid:        input.ID,
+			Name:        input.Name,
+			Description: input.Description,
+			Logo:        input.Logo,
+			ServiceType: input.ServiceType,
+			Project:     pid,
+			Team:        pInfo.Team,
+			Catalogue:   catalogue,
+			Status:      service.StatusOff,
+			Tag:         t,
 		})
 		if err != nil {
 			return err
