@@ -111,9 +111,9 @@ func createEntityHandler(i *CreateProject) *project.Project {
 		Description: i.Description,
 		Prefix:      i.Prefix,
 		Team:        i.Team,
-		Master:      i.Master,
-		AsServer:    i.AsServer,
-		AsApp:       i.AsApp,
+		//Master:      i.Master,
+		AsServer: i.AsServer,
+		AsApp:    i.AsApp,
 	}
 }
 func updateHandler(e *project.Project, i *EditProject) {
@@ -123,7 +123,7 @@ func updateHandler(e *project.Project, i *EditProject) {
 	if i.Description != nil {
 		e.Description = *i.Description
 	}
-	if i.Master != nil {
-		e.Master = *i.Master
-	}
+	//if i.Master != nil {
+	//	e.Master = *i.Master
+	//}
 }

@@ -16,12 +16,12 @@ type imlProjectStore struct {
 
 type IMemberStore member.IMemberStore
 
-type IMemberRoleStore interface {
-	store.IBaseStore[MemberRole]
-}
-type imlMemberRoleStore struct {
-	store.Store[MemberRole]
-}
+//type IMemberRoleStore interface {
+//	store.IBaseStore[MemberRole]
+//}
+//type imlMemberRoleStore struct {
+//	store.Store[MemberRole]
+//}
 
 type IAuthorizationStore interface {
 	store.ISearchStore[Authorization]
@@ -38,9 +38,9 @@ func init() {
 	autowire.Auto[IMemberStore](func() reflect.Value {
 		return reflect.ValueOf(member.NewMemberStore("project"))
 	})
-	autowire.Auto[IMemberRoleStore](func() reflect.Value {
-		return reflect.ValueOf(new(imlMemberRoleStore))
-	})
+	//autowire.Auto[IMemberRoleStore](func() reflect.Value {
+	//	return reflect.ValueOf(new(imlMemberRoleStore))
+	//})
 	autowire.Auto[IAuthorizationStore](func() reflect.Value {
 		return reflect.ValueOf(new(imlAuthorizationStore))
 	})

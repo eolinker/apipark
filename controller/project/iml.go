@@ -7,9 +7,9 @@ import (
 )
 
 var (
-	_ IProjectController       = (*imlProjectController)(nil)
-	_ IProjectMemberController = (*imlProjectMemberController)(nil)
-	_ IAppController           = (*imlAppController)(nil)
+	_ IProjectController = (*imlProjectController)(nil)
+	//_ IProjectMemberController = (*imlProjectMemberController)(nil)
+	_ IAppController = (*imlAppController)(nil)
 )
 
 type imlProjectController struct {
@@ -48,33 +48,33 @@ func (i *imlProjectController) DeleteProject(ctx *gin.Context, id string) error 
 	return i.module.DeleteProject(ctx, id)
 }
 
-type imlProjectMemberController struct {
-	module project.IProjectMemberModule `autowired:""`
-}
-
-func (i *imlProjectMemberController) SimpleMembersToAdd(ctx *gin.Context, pid string, keyword string) ([]*project_dto.TeamMemberToAdd, error) {
-	return i.module.SimpleMembersToAdd(ctx, pid, keyword)
-}
-
-func (i *imlProjectMemberController) SimpleMembers(ctx *gin.Context, pid string) ([]*project_dto.SimpleMemberItem, error) {
-	return i.module.SimpleMembers(ctx, pid)
-}
-
-func (i *imlProjectMemberController) Members(ctx *gin.Context, id string, keyword string) ([]*project_dto.MemberItem, error) {
-	return i.module.Members(ctx, id, keyword)
-}
-
-func (i *imlProjectMemberController) AddMember(ctx *gin.Context, pid string, users *project_dto.Users) error {
-	return i.module.AddMember(ctx, pid, users.Users)
-}
-
-func (i *imlProjectMemberController) RemoveMember(ctx *gin.Context, pid string, uid string) error {
-	return i.module.RemoveMember(ctx, pid, []string{uid})
-}
-
-func (i *imlProjectMemberController) EditProjectMember(ctx *gin.Context, pid string, uid string, edit *project_dto.EditProjectMember) error {
-	return i.module.EditProjectMember(ctx, pid, uid, edit.Roles)
-}
+//type imlProjectMemberController struct {
+//	module project.IProjectMemberModule `autowired:""`
+//}
+//
+//func (i *imlProjectMemberController) SimpleMembersToAdd(ctx *gin.Context, pid string, keyword string) ([]*project_dto.TeamMemberToAdd, error) {
+//	return i.module.SimpleMembersToAdd(ctx, pid, keyword)
+//}
+//
+//func (i *imlProjectMemberController) SimpleMembers(ctx *gin.Context, pid string) ([]*project_dto.SimpleMemberItem, error) {
+//	return i.module.SimpleMembers(ctx, pid)
+//}
+//
+//func (i *imlProjectMemberController) Members(ctx *gin.Context, id string, keyword string) ([]*project_dto.MemberItem, error) {
+//	return i.module.Members(ctx, id, keyword)
+//}
+//
+//func (i *imlProjectMemberController) AddMember(ctx *gin.Context, pid string, users *project_dto.Users) error {
+//	return i.module.AddMember(ctx, pid, users.Users)
+//}
+//
+//func (i *imlProjectMemberController) RemoveMember(ctx *gin.Context, pid string, uid string) error {
+//	return i.module.RemoveMember(ctx, pid, []string{uid})
+//}
+//
+//func (i *imlProjectMemberController) EditProjectMember(ctx *gin.Context, pid string, uid string, edit *project_dto.EditProjectMember) error {
+//	return i.module.EditProjectMember(ctx, pid, uid, edit.Roles)
+//}
 
 type imlAppController struct {
 	module project.IAppModule `autowired:""`

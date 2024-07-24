@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/eolinker/ap-account/service/member"
 	"github.com/eolinker/ap-account/service/role"
 	"github.com/eolinker/ap-account/service/user"
@@ -13,7 +14,6 @@ import (
 	permit_type "github.com/eolinker/apipark/service/permit-type"
 	"github.com/eolinker/apipark/service/project"
 	project_member "github.com/eolinker/apipark/service/project-member"
-	project_role "github.com/eolinker/apipark/service/project-role"
 	"github.com/eolinker/apipark/service/team"
 	team_member "github.com/eolinker/apipark/service/team-member"
 	"github.com/eolinker/eosc/log"
@@ -56,7 +56,7 @@ type imlProjectPermitModule struct {
 	userGroupService       user_group.IUserGroupService        `autowired:""`
 	userService            user.IUserService                   `autowired:""`
 	roleService            role.IRoleService                   `autowired:""`
-	projectRoleService     project_role.IProjectRoleService    `autowired:""`
+	//projectRoleService     project_role.IProjectRoleService    `autowired:""`
 }
 
 func (m *imlProjectPermitModule) Permissions(ctx *gin.Context, projectId string) ([]string, error) {
@@ -149,10 +149,10 @@ func (m *imlProjectPermitModule) getIdentity(ctx context.Context, p *project.Pro
 
 	targets := make([]string, 0)
 	targets = append(targets, permit_type.AnyOne.Key)
-	if p.Master == uid {
-		targets = append(targets, permit_type.ProjectMaster.Key)
-		targets = append(targets, permit_type.ProjectMember.Key)
-	}
+	//if p.Master == uid {
+	//	targets = append(targets, permit_type.ProjectMaster.Key)
+	//	targets = append(targets, permit_type.ProjectMember.Key)
+	//}
 	if len(members) != 0 {
 		// 用户属于该项目的成员,则是用户的全局用户组身份生效
 		targets = append(targets, permit_type.ProjectMember.Key)
@@ -165,12 +165,12 @@ func (m *imlProjectPermitModule) getIdentity(ctx context.Context, p *project.Pro
 			targets = append(targets, permit_type.UserGroup.KeyOf(mb.Come))
 		}
 	}
-	roles, err := m.projectRoleService.Roles(ctx, p.Id, uid)
-	if err == nil && roles != nil {
-		targets = append(targets, utils.SliceToSlice(roles, func(s *project_role.ProjectRole) string {
-			return permit_type.Role.KeyOf(s.Rid)
-		})...)
-	}
+	//roles, err := m.projectRoleService.Roles(ctx, p.Id, uid)
+	//if err == nil && roles != nil {
+	//	targets = append(targets, utils.SliceToSlice(roles, func(s *project_role.ProjectRole) string {
+	//		return permit_type.Role.KeyOf(s.Rid)
+	//	})...)
+	//}
 
 	teamIdentity, err := m.identityTeamService.IdentifyTeam(ctx, p.Team, uid)
 	if err != nil {

@@ -2,10 +2,10 @@ package project
 
 import (
 	"reflect"
-	
+
 	project_dto "github.com/eolinker/apipark/module/project/dto"
 	"github.com/gin-gonic/gin"
-	
+
 	"github.com/eolinker/go-common/autowire"
 )
 
@@ -27,24 +27,24 @@ type IProjectController interface {
 	MySimpleProjects(ctx *gin.Context, keyword string) ([]*project_dto.SimpleProjectItem, error)
 }
 
-type IProjectMemberController interface {
-	// Members 获取项目成员列表
-	Members(ctx *gin.Context, pid string, keyword string) ([]*project_dto.MemberItem, error)
-	// AddMember 添加项目成员
-	AddMember(ctx *gin.Context, pid string, users *project_dto.Users) error
-	// RemoveMember 移除项目成员
-	RemoveMember(ctx *gin.Context, pid string, uid string) error
-	// EditProjectMember 修改成员信息
-	EditProjectMember(ctx *gin.Context, pid string, uid string, edit *project_dto.EditProjectMember) error
-	// SimpleMembers 简易系统成员列表
-	SimpleMembers(ctx *gin.Context, pid string) ([]*project_dto.SimpleMemberItem, error)
-	SimpleMembersToAdd(ctx *gin.Context, pid string, keyword string) ([]*project_dto.TeamMemberToAdd, error)
-}
+//type IProjectMemberController interface {
+//	// Members 获取项目成员列表
+//	Members(ctx *gin.Context, pid string, keyword string) ([]*project_dto.MemberItem, error)
+//	// AddMember 添加项目成员
+//	AddMember(ctx *gin.Context, pid string, users *project_dto.Users) error
+//	// RemoveMember 移除项目成员
+//	RemoveMember(ctx *gin.Context, pid string, uid string) error
+//	// EditProjectMember 修改成员信息
+//	EditProjectMember(ctx *gin.Context, pid string, uid string, edit *project_dto.EditProjectMember) error
+//	// SimpleMembers 简易系统成员列表
+//	SimpleMembers(ctx *gin.Context, pid string) ([]*project_dto.SimpleMemberItem, error)
+//	SimpleMembersToAdd(ctx *gin.Context, pid string, keyword string) ([]*project_dto.TeamMemberToAdd, error)
+//}
 
 type IAppController interface {
 	// CreateApp 创建应用
 	CreateApp(ctx *gin.Context, teamID string, project *project_dto.CreateApp) (*project_dto.App, error)
-	
+
 	UpdateApp(ctx *gin.Context, appId string, project *project_dto.UpdateApp) (*project_dto.App, error)
 	SearchMyApps(ctx *gin.Context, teamId string, keyword string) ([]*project_dto.AppItem, error)
 	// SimpleApps 获取简易项目列表
@@ -58,10 +58,10 @@ func init() {
 	autowire.Auto[IProjectController](func() reflect.Value {
 		return reflect.ValueOf(new(imlProjectController))
 	})
-	autowire.Auto[IProjectMemberController](func() reflect.Value {
-		return reflect.ValueOf(new(imlProjectMemberController))
-	})
-	
+	//autowire.Auto[IProjectMemberController](func() reflect.Value {
+	//	return reflect.ValueOf(new(imlProjectMemberController))
+	//})
+
 	autowire.Auto[IAppController](func() reflect.Value {
 		return reflect.ValueOf(new(imlAppController))
 	})

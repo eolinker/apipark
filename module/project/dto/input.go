@@ -1,10 +1,10 @@
 package project_dto
 
 type CreateProject struct {
-	Id          string   `json:"id"`
-	Name        string   `json:"name"`
-	Prefix      string   `json:"prefix"`
-	Master      string   `json:"master"`
+	Id     string `json:"id"`
+	Name   string `json:"name"`
+	Prefix string `json:"prefix"`
+	//Master      string   `json:"master"`
 	Partition   []string `json:"partition" aocheck:"partition"`
 	Description string   `json:"description"`
 	AsApp       *bool    `json:"as_app"`
@@ -14,7 +14,7 @@ type CreateProject struct {
 type EditProject struct {
 	Name        *string `json:"name"`
 	Description *string `json:"description"`
-	Master      *string `json:"master" aocheck:"user"`
+	//Master      *string `json:"master" aocheck:"user"`
 }
 
 type CreateApp struct {

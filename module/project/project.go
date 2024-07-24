@@ -40,28 +40,28 @@ type IAppModule interface {
 	DeleteApp(ctx context.Context, appId string) error
 }
 
-type IProjectMemberModule interface {
-	// Members 获取项目成员列表
-	Members(ctx context.Context, id string, keyword string) ([]*project_dto.MemberItem, error)
-	// AddMember 添加项目成员
-	AddMember(ctx context.Context, id string, userIDs []string) error
-	// RemoveMember 移除项目成员
-	RemoveMember(ctx context.Context, id string, userIDs []string) error
-	// EditProjectMember 修改成员信息
-	EditProjectMember(ctx context.Context, pid string, uid string, roles []string) error
-	// SimpleMembers 简易成员列表
-	SimpleMembers(ctx context.Context, pid string) ([]*project_dto.SimpleMemberItem, error)
-	SimpleMembersToAdd(ctx context.Context, pid string, keyword string) ([]*project_dto.TeamMemberToAdd, error)
-}
+//type IProjectMemberModule interface {
+//	// Members 获取项目成员列表
+//	Members(ctx context.Context, id string, keyword string) ([]*project_dto.MemberItem, error)
+//	// AddMember 添加项目成员
+//	AddMember(ctx context.Context, id string, userIDs []string) error
+//	// RemoveMember 移除项目成员
+//	RemoveMember(ctx context.Context, id string, userIDs []string) error
+//	// EditProjectMember 修改成员信息
+//	EditProjectMember(ctx context.Context, pid string, uid string, roles []string) error
+//	// SimpleMembers 简易成员列表
+//	SimpleMembers(ctx context.Context, pid string) ([]*project_dto.SimpleMemberItem, error)
+//	SimpleMembersToAdd(ctx context.Context, pid string, keyword string) ([]*project_dto.TeamMemberToAdd, error)
+//}
 
 func init() {
 	autowire.Auto[IProjectModule](func() reflect.Value {
 		m := new(imlProjectModule)
 		return reflect.ValueOf(m)
 	})
-	autowire.Auto[IProjectMemberModule](func() reflect.Value {
-		return reflect.ValueOf(new(imlProjectMemberModule))
-	})
+	//autowire.Auto[IProjectMemberModule](func() reflect.Value {
+	//	return reflect.ValueOf(new(imlProjectMemberModule))
+	//})
 
 	autowire.Auto[IAppModule](func() reflect.Value {
 		return reflect.ValueOf(new(imlAppModule))

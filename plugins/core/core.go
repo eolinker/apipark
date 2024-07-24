@@ -54,13 +54,13 @@ func (d *Driver) Create() (pm3.IPlugin, error) {
 }
 
 type plugin struct {
-	partitionController            partition.IPartitionController                        `autowired:""`
-	certificateController          certificate.ICertificateController                    `autowired:""`
-	teamManagerController          team_manager.ITeamManagerController                   `autowired:""`
-	myTeamController               my_team.ITeamController                               `autowired:""`
-	appController                  project.IAppController                                `autowired:""`
-	projectController              project.IProjectController                            `autowired:""`
-	projectMemberController        project.IProjectMemberController                      `autowired:""`
+	partitionController   partition.IPartitionController      `autowired:""`
+	certificateController certificate.ICertificateController  `autowired:""`
+	teamManagerController team_manager.ITeamManagerController `autowired:""`
+	myTeamController      my_team.ITeamController             `autowired:""`
+	appController         project.IAppController              `autowired:""`
+	projectController     project.IProjectController          `autowired:""`
+	//projectMemberController        project.IProjectMemberController                      `autowired:""`
 	serviceController              service.IServiceController                            `autowired:""`
 	catalogueController            catalogue.ICatalogueController                        `autowired:""`
 	upstreamController             upstream.IUpstreamController                          `autowired:""`

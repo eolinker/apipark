@@ -13,8 +13,8 @@ type ProjectItem struct {
 	ApiNum     int64      `json:"api_num"`
 	ServiceNum int64      `json:"service_num"`
 	//SubscribeNum int64          `json:"subscribe_num"`
-	Description string     `json:"description"`
-	Master      auto.Label `json:"master" aolabel:"user"`
+	Description string `json:"description"`
+	//Master      auto.Label `json:"master" aolabel:"user"`
 	//Partition   []auto.Label   `json:"partition,omitempty" aolabel:"partition"`
 	CreateTime auto.TimeLabel `json:"create_time"`
 	UpdateTime auto.TimeLabel `json:"update_time"`
@@ -55,8 +55,8 @@ type Project struct {
 	Prefix      string `json:"prefix,omitempty"`
 	Description string `json:"description"`
 	//Organization       auto.Label     `json:"organization" aolabel:"organization"`
-	Team   auto.Label `json:"team" aolabel:"team"`
-	Master auto.Label `json:"master" aolabel:"user"`
+	Team auto.Label `json:"team" aolabel:"team"`
+	//Master auto.Label `json:"master" aolabel:"user"`
 	//Partition          []auto.Label   `json:"partition,omitempty" aolabel:"partition"`
 	//OrganizationPrefix string         `json:"organization_prefix,omitempty"`
 	CreateTime auto.TimeLabel `json:"create_time"`
@@ -82,11 +82,11 @@ func ToProject(model *project.Project) *Project {
 		Prefix:      model.Prefix,
 		Description: model.Description,
 		Team:        auto.UUID(model.Team),
-		Master:      auto.UUID(model.Master),
-		CreateTime:  auto.TimeLabel(model.CreateTime),
-		UpdateTime:  auto.TimeLabel(model.UpdateTime),
-		AsServer:    model.AsServer,
-		AsApp:       model.AsApp,
+		//Master:      auto.UUID(model.Master),
+		CreateTime: auto.TimeLabel(model.CreateTime),
+		UpdateTime: auto.TimeLabel(model.UpdateTime),
+		AsServer:   model.AsServer,
+		AsApp:      model.AsApp,
 	}
 }
 
