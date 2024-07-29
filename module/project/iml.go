@@ -20,8 +20,6 @@ import (
 
 	team_member "github.com/eolinker/apipark/service/team-member"
 
-	project_member "github.com/eolinker/apipark/service/project-member"
-
 	"github.com/eolinker/go-common/store"
 
 	"github.com/google/uuid"
@@ -40,14 +38,14 @@ var (
 )
 
 type imlProjectModule struct {
-	partitionService     partition.IPartitionService    `autowired:""`
-	projectService       project.IProjectService        `autowired:""`
-	projectMemberService project_member.IMemberService  `autowired:""`
-	teamService          team.ITeamService              `autowired:""`
-	teamMemberService    team_member.ITeamMemberService `autowired:""`
-	serviceService       service.IServiceService        `autowired:""`
-	apiService           api.IAPIService                `autowired:""`
-	transaction          store.ITransaction             `autowired:""`
+	partitionService partition.IPartitionService `autowired:""`
+	projectService   project.IProjectService     `autowired:""`
+	//projectMemberService project_member.IMemberService  `autowired:""`
+	teamService       team.ITeamService              `autowired:""`
+	teamMemberService team_member.ITeamMemberService `autowired:""`
+	serviceService    service.IServiceService        `autowired:""`
+	apiService        api.IAPIService                `autowired:""`
+	transaction       store.ITransaction             `autowired:""`
 }
 
 func (i *imlProjectModule) searchMyProjects(ctx context.Context, teamId string, keyword string) ([]*project.Project, error) {
@@ -343,11 +341,11 @@ func (i *imlProjectModule) DeleteProject(ctx context.Context, id string) error {
 		if count > 0 {
 			return fmt.Errorf("project has apis, can not delete")
 		}
-		// 删除项目成员
-		err = i.projectMemberService.Delete(ctx, id)
-		if err != nil {
-			return err
-		}
+		//// 删除项目成员
+		//err = i.projectMemberService.Delete(ctx, id)
+		//if err != nil {
+		//	return err
+		//}
 
 		return i.projectService.Delete(ctx, id)
 	})
@@ -529,12 +527,12 @@ func (i *imlProjectModule) DeleteProject(ctx context.Context, id string) error {
 var _ IAppModule = &imlAppModule{}
 
 type imlAppModule struct {
-	teamService          team.ITeamService              `autowired:""`
-	projectService       project.IProjectService        `autowired:""`
-	projectMemberService project_member.IMemberService  `autowired:""`
-	teamMemberService    team_member.ITeamMemberService `autowired:""`
-	subscribeService     subscribe.ISubscribeService    `autowired:""`
-	transaction          store.ITransaction             `autowired:""`
+	teamService    team.ITeamService       `autowired:""`
+	projectService project.IProjectService `autowired:""`
+	//projectMemberService project_member.IMemberService  `autowired:""`
+	teamMemberService team_member.ITeamMemberService `autowired:""`
+	subscribeService  subscribe.ISubscribeService    `autowired:""`
+	transaction       store.ITransaction             `autowired:""`
 }
 
 func (i *imlAppModule) CreateApp(ctx context.Context, teamID string, input *project_dto.CreateApp) (*project_dto.App, error) {
@@ -565,12 +563,12 @@ func (i *imlAppModule) CreateApp(ctx context.Context, teamID string, input *proj
 
 	err = i.transaction.Transaction(ctx, func(ctx context.Context) error {
 
-		err = i.projectService.Create(ctx, mo)
-		if err != nil {
-			return err
-		}
-
-		return i.projectMemberService.AddMemberTo(ctx, input.Id, userId)
+		return i.projectService.Create(ctx, mo)
+		//if err != nil {
+		//	return err
+		//}
+		//
+		//return i.projectMemberService.AddMemberTo(ctx, input.Id, userId)
 	})
 	if err != nil {
 		return nil, err

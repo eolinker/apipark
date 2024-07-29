@@ -3,6 +3,8 @@ package core
 import (
 	"net/http"
 
+	"github.com/eolinker/ap-account/controller/role"
+
 	"github.com/eolinker/apipark/controller/common"
 	plugin_partition "github.com/eolinker/apipark/controller/plugin-partition"
 
@@ -68,6 +70,7 @@ type plugin struct {
 	subscribeController            subscribe.ISubscribeController                        `autowired:""`
 	projectAuthorizationController project_authorization.IProjectAuthorizationController `autowired:""`
 	releaseController              release.IReleaseController                            `autowired:""`
+	roleController                 role.IRoleController                                  `autowired:""`
 	subscribeApprovalController    subscribe.ISubscribeApprovalController                `autowired:""`
 	dynamicModuleController        dynamic_module.IDynamicModuleController               `autowired:""`
 	topologyController             topology.ITopologyController                          `autowired:""`

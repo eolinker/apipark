@@ -58,9 +58,6 @@ func init() {
 	autowire.Auto[IProjectController](func() reflect.Value {
 		return reflect.ValueOf(new(imlProjectController))
 	})
-	//autowire.Auto[IProjectMemberController](func() reflect.Value {
-	//	return reflect.ValueOf(new(imlProjectMemberController))
-	//})
 
 	autowire.Auto[IAppController](func() reflect.Value {
 		return reflect.ValueOf(new(imlAppController))

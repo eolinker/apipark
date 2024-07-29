@@ -309,10 +309,10 @@ func (m *imlProjectPermitModule) ProjectAccess(ctx *gin.Context, projectId strin
 
 	result := utils.SliceToSlice(accesses, func(s access.Access) *permit_dto.Permission {
 		r := &permit_dto.Permission{
-			Access:      s.Name,
-			Name:        s.CName,
-			Description: s.Desc,
-			Grant:       nil,
+			Access: s.Name,
+			Name:   s.CName,
+			//Description: s.Desc,
+			Grant: nil,
 		}
 		if gs, has := grants[r.Access]; has {
 			r.Grant = permit_type.TargetsOf(gs...)

@@ -2,6 +2,7 @@ package access
 
 import (
 	_ "embed"
+
 	"github.com/eolinker/go-common/access"
 	"gopkg.in/yaml.v3"
 )
