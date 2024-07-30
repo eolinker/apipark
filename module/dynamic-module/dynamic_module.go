@@ -17,14 +17,14 @@ type IDynamicModuleModule interface {
 	Delete(ctx context.Context, module string, ids []string) error
 	Get(ctx context.Context, module string, id string) (*dynamic_module_dto.DynamicModule, error)
 	List(ctx context.Context, module string, keyword string, page int, pageSize int) ([]map[string]interface{}, int64, error)
-	PluginInfo(ctx context.Context, module string, partitionIds ...string) (*dynamic_module_dto.PluginInfo, error)
+	PluginInfo(ctx context.Context, module string, clusterIds ...string) (*dynamic_module_dto.PluginInfo, error)
 	Render(ctx context.Context, module string) (map[string]interface{}, error)
 	ModuleDrivers(ctx context.Context, group string) ([]*dynamic_module_dto.ModuleDriver, error)
 
-	Online(ctx context.Context, module string, id string, partitionInput *dynamic_module_dto.PartitionInput) error
-	Offline(ctx context.Context, module string, id string, partitionInput *dynamic_module_dto.PartitionInput) error
-	PartitionStatuses(ctx context.Context, module string, keyword string, page int, pageSize int) (map[string]map[string]string, error)
-	PartitionStatus(ctx context.Context, module string, id string) (*dynamic_module_dto.OnlineInfo, error)
+	Online(ctx context.Context, module string, id string, clusterInput *dynamic_module_dto.ClusterInput) error
+	Offline(ctx context.Context, module string, id string, clusterInput *dynamic_module_dto.ClusterInput) error
+	//PartitionStatuses(ctx context.Context, module string, keyword string, page int, pageSize int) (map[string]map[string]string, error)
+	//PartitionStatus(ctx context.Context, module string, id string) (*dynamic_module_dto.OnlineInfo, error)
 }
 
 func init() {

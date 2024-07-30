@@ -105,7 +105,7 @@ export const GlobalProvider: FC<{children:ReactNode}> = ({ children }) => {
         userData: null,
         version: '1.0.0',
         updateDate: '2024-07-01',
-        powered:'Powered by https://eolink.com',
+        powered:'Powered by https://apipark.com',
         mainPage:'/system/list'
     });
     const [accessData,setAccessData] = useState<Map<string,string[]>>(new Map())

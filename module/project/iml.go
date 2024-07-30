@@ -7,14 +7,14 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/eolinker/apipark/service/partition"
+	"github.com/eolinker/apipark/service/tag"
+
+	"github.com/eolinker/apipark/service/service"
 
 	"github.com/eolinker/apipark/service/subscribe"
 	"gorm.io/gorm"
 
 	"github.com/eolinker/apipark/service/api"
-
-	"github.com/eolinker/apipark/service/service"
 
 	"github.com/eolinker/go-common/auto"
 
@@ -38,11 +38,10 @@ var (
 )
 
 type imlProjectModule struct {
-	partitionService partition.IPartitionService `autowired:""`
-	projectService   project.IProjectService     `autowired:""`
-	//projectMemberService project_member.IMemberService  `autowired:""`
+	projectService    project.IProjectService        `autowired:""`
 	teamService       team.ITeamService              `autowired:""`
 	teamMemberService team_member.ITeamMemberService `autowired:""`
+	tagService        tag.ITagService                `autowired:""`
 	serviceService    service.IServiceService        `autowired:""`
 	apiService        api.IAPIService                `autowired:""`
 	transaction       store.ITransaction             `autowired:""`
@@ -84,10 +83,6 @@ func (i *imlProjectModule) SearchMyProjects(ctx context.Context, teamId string, 
 	if err != nil {
 		return nil, err
 	}
-	serviceCountMap, err := i.serviceService.CountByGroup(ctx, "", map[string]interface{}{"project": projectIDs}, "project")
-	if err != nil {
-		return nil, err
-	}
 
 	items := make([]*project_dto.ProjectItem, 0, len(projects))
 	for _, model := range projects {
@@ -95,18 +90,15 @@ func (i *imlProjectModule) SearchMyProjects(ctx context.Context, teamId string, 
 			continue
 		}
 		apiCount := apiCountMap[model.Id]
-		serviceCount := serviceCountMap[model.Id]
 		items = append(items, &project_dto.ProjectItem{
 			Id:          model.Id,
 			Name:        model.Name,
 			Description: model.Description,
-			//Master:      auto.UUID(model.Master),
-			CreateTime: auto.TimeLabel(model.CreateTime),
-			UpdateTime: auto.TimeLabel(model.UpdateTime),
-			Team:       auto.UUID(model.Team),
-			ApiNum:     apiCount,
-			ServiceNum: serviceCount,
-			CanDelete:  apiCount == 0 && serviceCount == 0,
+			CreateTime:  auto.TimeLabel(model.CreateTime),
+			UpdateTime:  auto.TimeLabel(model.UpdateTime),
+			Team:        auto.UUID(model.Team),
+			ApiNum:      apiCount,
+			CanDelete:   apiCount == 0,
 		})
 	}
 	return items, nil
@@ -138,7 +130,7 @@ func (i *imlProjectModule) SimpleProjects(ctx context.Context, keyword string) (
 	//	if err != nil {
 	//		return nil, err
 	//	}
-	//	w["uuid"] = utils.SliceToSlice(pp, func(p *project.Partition) string {
+	//	w["uuid"] = utils.SliceToSlice(pp, func(p *project.Cluster) string {
 	//		return p.Project
 	//	})
 	//}
@@ -226,13 +218,11 @@ func (i *imlProjectModule) Search(ctx context.Context, teamID string, keyword st
 			Id:          model.Id,
 			Name:        model.Name,
 			Description: model.Description,
-			//Master:      auto.UUID(model.Master),
-			CreateTime: auto.TimeLabel(model.CreateTime),
-			UpdateTime: auto.TimeLabel(model.UpdateTime),
-			Team:       auto.UUID(model.Team),
-			ApiNum:     apiCount,
-			ServiceNum: serviceCount,
-			CanDelete:  apiCount == 0 && serviceCount == 0,
+			CreateTime:  auto.TimeLabel(model.CreateTime),
+			UpdateTime:  auto.TimeLabel(model.UpdateTime),
+			Team:        auto.UUID(model.Team),
+			ApiNum:      apiCount,
+			CanDelete:   apiCount == 0 && serviceCount == 0,
 		})
 	}
 	return items, nil
@@ -247,9 +237,8 @@ func (i *imlProjectModule) CreateProject(ctx context.Context, teamID string, inp
 		Id:          input.Id,
 		Name:        input.Name,
 		Description: input.Description,
-		//Master:      input.Master,
-		Team:   teamID,
-		Prefix: input.Prefix,
+		Team:        teamID,
+		Prefix:      input.Prefix,
 	}
 	if input.AsApp == nil {
 		// 默认值为false
@@ -265,19 +254,7 @@ func (i *imlProjectModule) CreateProject(ctx context.Context, teamID string, inp
 	}
 	input.Prefix = strings.Trim(strings.Trim(input.Prefix, " "), "/")
 	err := i.transaction.Transaction(ctx, func(ctx context.Context) error {
-
-		//// 判断用户是否在团队内
-		//members, err := i.teamMemberService.Members(ctx, []string{teamID}, []string{input.Master})
-		//if err != nil {
-		//	return err
-		//}
-		//if len(members) == 0 {
-		//	return fmt.Errorf("master is not in team")
-		//}
-
 		return i.projectService.Create(ctx, mo)
-
-		//return i.projectMemberService.AddMemberTo(ctx, input.Id, input.Master)
 	})
 	if err != nil {
 		return nil, err
@@ -292,36 +269,9 @@ func (i *imlProjectModule) EditProject(ctx context.Context, id string, input *pr
 	}
 	err = i.transaction.Transaction(ctx, func(ctx context.Context) error {
 
-		//if input.Master != nil {
-		//projectInfo, err := i.projectService.Get(ctx, id)
-		//if err != nil {
-		//	return err
-		//}
-
-		//// 判断用户是否在团队内
-		//members, err := i.teamMemberService.Members(ctx, []string{projectInfo.Team}, []string{*input.Master})
-		//if err != nil {
-		//	return err
-		//}
-		//if len(members) == 0 {
-		//	return fmt.Errorf("master is not in team")
-		//}
-		//// 负责人是否在项目内，若不在，则新增
-		//projectMembers, err := i.projectMemberService.Members(ctx, []string{id}, []string{*input.Master})
-		//if err != nil {
-		//	return err
-		//}
-		//if len(projectMembers) == 0 {
-		//	err = i.projectMemberService.AddMemberTo(ctx, id, *input.Master)
-		//	if err != nil {
-		//		return err
-		//	}
-		//}
-		//}
 		return i.projectService.Save(ctx, id, &project.EditProject{
 			Name:        input.Name,
 			Description: input.Description,
-			//Master:      input.Master,
 		})
 	})
 
@@ -341,205 +291,59 @@ func (i *imlProjectModule) DeleteProject(ctx context.Context, id string) error {
 		if count > 0 {
 			return fmt.Errorf("project has apis, can not delete")
 		}
-		//// 删除项目成员
-		//err = i.projectMemberService.Delete(ctx, id)
-		//if err != nil {
-		//	return err
-		//}
 
 		return i.projectService.Delete(ctx, id)
 	})
 	return err
 }
 
-//var _ IProjectMemberModule = (*imlProjectMemberModule)(nil)
-//
-//type imlProjectMemberModule struct {
-//	projectService       project.IProjectService       `autowired:""`
-//	projectMemberService project_member.IMemberService `autowired:""`
-//	//projectRoleService   project_role.IProjectRoleService `autowired:""`
-//	userService       user.IUserService              `autowired:""`
-//	transaction       store.ITransaction             `autowired:""`
-//	teamMemberService team_member.ITeamMemberService `autowired:""`
-//}
-//
-//func (i *imlProjectMemberModule) SimpleMembersToAdd(ctx context.Context, pid string, keyword string) ([]*project_dto.TeamMemberToAdd, error) {
-//
-//	pro, err := i.projectService.Get(ctx, pid)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	users, err := i.userService.Search(ctx, keyword, -1)
-//	if err != nil {
-//		return nil, err
-//	}
-//	userIds := utils.SliceToSlice(users, func(s *user.User) string {
-//		return s.UID
-//	})
-//
-//	members, err := i.teamMemberService.Members(ctx, []string{pro.Team}, userIds)
-//	if err != nil {
-//		return nil, err
-//	}
-//	userMaps := utils.SliceToMap(users, func(s *user.User) string {
-//		return s.UID
-//	})
-//
-//	return utils.SliceToSlice(members, func(s *member.Member) *project_dto.TeamMemberToAdd {
-//		uf := userMaps[s.UID]
-//		return &project_dto.TeamMemberToAdd{
-//			Id:    uf.UID,
-//			Name:  uf.Username,
-//			Email: uf.Email,
-//			//Department: uf.,
-//		}
-//	}, func(m *member.Member) bool {
-//		_, has := userMaps[m.UID]
-//		return has
-//	}), nil
-//
-//}
-//
-//func (i *imlProjectMemberModule) SimpleMembers(ctx context.Context, pid string) ([]*project_dto.SimpleMemberItem, error) {
-//	members, err := i.projectMemberService.Members(ctx, []string{pid}, nil)
-//	if err != nil {
-//		return nil, err
-//	}
-//	userIds := utils.SliceToSlice(members, func(s *member.Member) string {
-//		return s.UID
-//	})
-//	users, err := i.userService.Get(ctx, userIds...)
-//	if err != nil {
-//		return nil, err
-//	}
-//	out := utils.SliceToSlice(users, func(s *user.User) *project_dto.SimpleMemberItem {
-//		return &project_dto.SimpleMemberItem{
-//			Id:   s.UID,
-//			Name: s.Username,
-//		}
-//	})
-//	return out, nil
-//}
-
-//
-//func (i *imlProjectMemberModule) Members(ctx context.Context, id string, keyword string) ([]*project_dto.MemberItem, error) {
-//	pInfo, err := i.projectService.Get(ctx, id)
-//	if err != nil {
-//		return nil, err
-//	}
-//	users, err := i.userService.Search(ctx, keyword, -1)
-//	if err != nil {
-//		return nil, err
-//	}
-//	userMap := make(map[string]*user.User)
-//	userIds := make([]string, 0, len(users))
-//	for _, u := range users {
-//		userIds = append(userIds, u.UID)
-//		userMap[u.UID] = u
-//	}
-//	members, err := i.projectMemberService.Members(ctx, []string{id}, userIds)
-//	if err != nil {
-//		return nil, err
-//	}
-//	roleMap, err := i.projectRoleService.RoleMap(ctx, id)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	out := utils.SliceToSlice(members, func(info *project_member.Member) *project_dto.MemberItem {
-//		roleIDs := make([]string, 0, len(roleMap[info.UID]))
-//		for _, r := range roleMap[info.UID] {
-//			roleIDs = append(roleIDs, r.Rid)
-//		}
-//		item := &project_dto.MemberItem{
-//			User:  auto.UUID(info.UID),
-//			Email: "",
-//			Roles: auto.List(roleIDs),
-//		}
-//
-//		u, ok := userMap[info.UID]
-//		if ok {
-//			item.Email = u.Email
-//		}
-//		if pInfo.Master == info.UID {
-//			item.CanDelete = false
-//		} else {
-//			item.CanDelete = true
-//		}
-//		return item
-//
-//	})
-//	return out, nil
-//}
-//
-//func (i *imlProjectMemberModule) AddMember(ctx context.Context, pid string, userIDs []string) error {
-//	_, err := i.projectService.Get(ctx, pid)
-//	if err != nil {
-//		return err
-//	}
-//	return i.projectMemberService.AddMemberTo(ctx, pid, userIDs...)
-//}
-//
-//func (i *imlProjectMemberModule) RemoveMember(ctx context.Context, pid string, userIDs []string) error {
-//	// 删除的成员是否有项目负责人
-//	info, err := i.projectService.Get(ctx, pid)
-//	if err != nil {
-//		return err
-//	}
-//	uids := make([]string, 0, len(userIDs))
-//	for _, id := range userIDs {
-//		if id != info.Master {
-//			uids = append(uids, id)
-//		}
-//	}
-//	if len(uids) == 0 {
-//		return nil
-//	}
-//	return i.projectMemberService.RemoveMemberFrom(ctx, pid, userIDs...)
-//}
-//
-//func (i *imlProjectMemberModule) EditProjectMember(ctx context.Context, pid string, uid string, roles []string) error {
-//	return i.transaction.Transaction(ctx, func(ctx context.Context) error {
-//		_, err := i.projectService.Get(ctx, pid)
-//		if err != nil {
-//			return err
-//		}
-//		_, err = i.userService.Get(ctx, uid)
-//		if err != nil {
-//			return err
-//		}
-//
-//		err = i.projectRoleService.DeleteRole(ctx, pid, uid)
-//		if err != nil {
-//			return err
-//		}
-//		for _, rid := range roles {
-//			err = i.projectRoleService.AddRole(ctx, pid, uid, rid)
-//			if err != nil {
-//				return err
-//			}
-//		}
-//		return nil
-//	})
-//}
+func (i *imlProjectModule) getTagUuids(ctx context.Context, tags []string) ([]string, error) {
+	list, err := i.tagService.Search(ctx, "", map[string]interface{}{"name": tags})
+	if err != nil {
+		return nil, err
+	}
+	tagMap := make(map[string]string)
+	for _, t := range list {
+		tagMap[t.Name] = t.Id
+	}
+	tagList := make([]string, 0, len(tags))
+	repeatTag := make(map[string]struct{})
+	for _, t := range tags {
+		if _, ok := repeatTag[t]; ok {
+			continue
+		}
+		repeatTag[t] = struct{}{}
+		v := &tag.CreateTag{
+			Name: t,
+		}
+		id, ok := tagMap[t]
+		if !ok {
+			v.Id = uuid.New().String()
+			err = i.tagService.Create(ctx, v)
+			if err != nil {
+				return nil, err
+			}
+			tagMap[t] = v.Id
+		} else {
+			v.Id = id
+		}
+		tagList = append(tagList, v.Id)
+	}
+	return tagList, nil
+}
 
 var _ IAppModule = &imlAppModule{}
 
 type imlAppModule struct {
-	teamService    team.ITeamService       `autowired:""`
-	projectService project.IProjectService `autowired:""`
-	//projectMemberService project_member.IMemberService  `autowired:""`
+	teamService       team.ITeamService              `autowired:""`
+	projectService    project.IProjectService        `autowired:""`
 	teamMemberService team_member.ITeamMemberService `autowired:""`
 	subscribeService  subscribe.ISubscribeService    `autowired:""`
 	transaction       store.ITransaction             `autowired:""`
 }
 
 func (i *imlAppModule) CreateApp(ctx context.Context, teamID string, input *project_dto.CreateApp) (*project_dto.App, error) {
-	//teamInfo, err := i.teamService.Get(ctx, teamID)
-	//if err != nil {
-	//	return nil, err
-	//}
+
 	if input.Id == "" {
 		input.Id = uuid.New().String()
 	}
@@ -548,9 +352,8 @@ func (i *imlAppModule) CreateApp(ctx context.Context, teamID string, input *proj
 		Id:          input.Id,
 		Name:        input.Name,
 		Description: input.Description,
-		//Master:      userId,
-		Team:  teamID,
-		AsApp: true,
+		Team:        teamID,
+		AsApp:       true,
 	}
 	// 判断用户是否在团队内
 	members, err := i.teamMemberService.Members(ctx, []string{teamID}, []string{userId})
@@ -564,11 +367,7 @@ func (i *imlAppModule) CreateApp(ctx context.Context, teamID string, input *proj
 	err = i.transaction.Transaction(ctx, func(ctx context.Context) error {
 
 		return i.projectService.Create(ctx, mo)
-		//if err != nil {
-		//	return err
-		//}
-		//
-		//return i.projectMemberService.AddMemberTo(ctx, input.Id, userId)
+
 	})
 	if err != nil {
 		return nil, err
@@ -603,7 +402,6 @@ func (i *imlAppModule) searchMyApps(ctx context.Context, teamId string, keyword 
 	userID := utils.UserId(ctx)
 	condition := make(map[string]interface{})
 	condition["as_app"] = true
-	condition["master"] = userID
 	if teamId != "" {
 		_, err := i.teamService.Get(ctx, teamId)
 		if err != nil {
@@ -751,8 +549,6 @@ func (i *imlAppModule) DeleteApp(ctx context.Context, appId string) error {
 	if !info.AsApp {
 		return errors.New("not app, can not delete")
 	}
-	//if info.Master != utils.UserId(ctx) {
-	//	return errors.New("not master, can not delete")
-	//}
+
 	return i.projectService.Delete(ctx, appId)
 }

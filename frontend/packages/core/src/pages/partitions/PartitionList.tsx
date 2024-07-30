@@ -1,7 +1,7 @@
 /*
  * @Date: 2024-01-31 15:00:11
  * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-06 17:54:34
+ * @LastEditTime: 2024-07-12 09:57:09
  * @FilePath: \frontend\packages\core\src\pages\partitions\PartitionList.tsx
  */
 import PageList from "@common/components/aoplatform/PageList.tsx"
@@ -14,7 +14,7 @@ import {useFetch} from "@common/hooks/http.ts";
 import {App, Button, Modal} from "antd";
 import { PARTITION_LIST_COLUMNS } from "../../const/partitions/const.tsx";
 import { PartitionTableListItem } from "../../const/partitions/types.ts";
-import { SimpleMemberItem } from "../../const/system/type.ts";
+import { SimpleMemberItem } from "@common/const/type.ts";
 import TableBtnWithPermission from "@common/components/aoplatform/TableBtnWithPermission.tsx";
 import PartitionConfig, { PartitionConfigHandle } from "./PartitionConfig.tsx";
 import WithPermission from "@common/components/aoplatform/WithPermission.tsx";
@@ -77,7 +77,7 @@ const PartitionList:FC = ()=>{
         setModalVisible(true)
         setAddClusterStep('config')
         // modal.confirm({
-        //     title:'添加分区',
+        //     title:'添加环境',
         //     content:<PartitionConfig ref={addPartitionRef} />,
         //     onOk:()=> {
         //         return addPartitionRef.current?.save().then((res)=>{if(res === true) manualReloadTable()})
@@ -119,9 +119,9 @@ const PartitionList:FC = ()=>{
             ref={pageListRef}
             columns = {[...columns,...operation]}
             request={()=>getPartitionList()}
-            addNewBtnTitle="添加分区"
+            addNewBtnTitle="添加环境"
             showPagination={false}
-            searchPlaceholder="输入名称、ID 查找分区"
+            searchPlaceholder="输入名称、ID 查找环境"
             onAddNewBtnClick={()=>{openModal()}}
             addNewBtnAccess="system.partition.self.add"
             onSearchWordChange={(e)=>{setSearchWord(e.target.value)}}
@@ -129,7 +129,7 @@ const PartitionList:FC = ()=>{
             tableClickAccess="system.partition.self.view"
             />
             <Modal
-                title="添加分区"
+                title="添加环境"
                 open={modalVisible}
                 width={900}
                 destroyOnClose={true}

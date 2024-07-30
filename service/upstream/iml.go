@@ -75,7 +75,6 @@ func (i *imlUpstreamService) Get(ctx context.Context, id string) (*Upstream, err
 			Updater:    t.Updater,
 			CreateTime: t.CreateAt,
 			UpdateTime: t.UpdateAt,
-			Partitions: t.Partitions,
 		},
 	}, nil
 }
@@ -84,16 +83,15 @@ func (i *imlUpstreamService) Save(ctx context.Context, u *SaveUpstream) error {
 	now := time.Now()
 	userId := utils.UserId(ctx)
 	return i.store.Save(ctx, &upstream.Upstream{
-		UUID:       u.UUID,
-		Name:       u.Name,
-		Project:    u.Project,
-		Team:       u.Team,
-		Remark:     u.Remark,
-		Creator:    userId,
-		Updater:    userId,
-		CreateAt:   now,
-		UpdateAt:   now,
-		Partitions: u.Partitions,
+		UUID:     u.UUID,
+		Name:     u.Name,
+		Project:  u.Project,
+		Team:     u.Team,
+		Remark:   u.Remark,
+		Creator:  userId,
+		Updater:  userId,
+		CreateAt: now,
+		UpdateAt: now,
 	})
 }
 

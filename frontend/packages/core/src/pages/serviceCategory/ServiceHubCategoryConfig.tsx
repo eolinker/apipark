@@ -49,7 +49,6 @@ export const ServiceHubCategoryConfig = forwardRef<ServiceHubCategoryConfigHandl
     )
 
     useEffect(() => {
-        //console.log(type,entity)
 
         switch(type){
             case 'addCate':

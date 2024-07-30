@@ -6,7 +6,7 @@ type Certificate struct {
 	ID         string    `json:"id"`
 	Name       string    `json:"name"`
 	Domains    []string  `json:"domains"`
-	Partition  string    `json:"partition_id"`
+	Cluster    string    `json:"cluster"`
 	NotBefore  time.Time `gorm:"type:timestamp;NOT NULL;DEFAULT:CURRENT_TIMESTAMP;column:not_before;comment:生效时间"`
 	NotAfter   time.Time `gorm:"type:timestamp;NOT NULL;DEFAULT:CURRENT_TIMESTAMP;column:not_after;comment:失效时间"`
 	Updater    string    `json:"updater"`

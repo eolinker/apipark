@@ -1,7 +1,7 @@
 /*
  * @Date: 2024-01-31 15:00:11
  * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 19:10:58
+ * @LastEditTime: 2024-07-12 20:58:39
  * @FilePath: \frontend\packages\core\src\pages\system\SystemInsidePage.tsx
  */
 import  {FC, useEffect, useMemo, useState} from "react";
@@ -63,9 +63,9 @@ const SystemInsidePage:FC = ()=> {
             return newMenu!.filter((m:MenuItemGroupType )=>{
                 if(m.children && m.children.length > 0){
                      m.children = m.children.filter(
-                        (c)=>(c as MenuItemType&{access:string} ).access ? 
+                        (c)=>(c&&(c as MenuItemType&{access:string} ).access ? 
                             checkPermission((c as MenuItemType&{access:string} ).access as keyof typeof PERMISSION_DEFINITION[0]): 
-                            true)
+                            true))
                 }
                 return m.children && m.children.length > 0
             })
@@ -122,7 +122,7 @@ const SystemInsidePage:FC = ()=> {
                     <Menu
                         onClick={onMenuClick}
                         className="h-full overflow-y-auto"
-                        style={{ width: 176 }}
+                        style={{ width: 182 }}
                         selectedKeys={[activeMenu!]}
                         mode="inline"
                         items={menuData as unknown as ItemType<MenuItemType>[] } 

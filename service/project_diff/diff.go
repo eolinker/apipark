@@ -39,7 +39,7 @@ type UpstreamDiff struct {
 }
 
 type Diff struct {
-	Partitions []string        `json:"partitions,omitempty"`
-	Apis       []*ApiDiff      `json:"apis"`
-	Upstreams  []*UpstreamDiff `json:"upstreams"`
+	Clusters  []string        `json:"clusters,omitempty"`
+	Apis      []*ApiDiff      `json:"apis"`
+	Upstreams []*UpstreamDiff `json:"upstreams"`
 }

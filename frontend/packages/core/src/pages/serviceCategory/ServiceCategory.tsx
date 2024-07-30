@@ -119,6 +119,7 @@ export default function ServiceCategory(){
                     setExpandedKeys(prev=>[...prev,item.id])
                     return {
                         title: <TreeWithMore
+                            stopClick={false}
                             dropdownMenu={dropdownMenu(item as CategorizesType)}>{item.name}</TreeWithMore> ,
                         key: item.id, children: loop(item.children)
                     };
@@ -126,6 +127,7 @@ export default function ServiceCategory(){
 
                 return {
                     title: <TreeWithMore
+                        stopClick={false}
                         dropdownMenu={dropdownMenu(item as CategorizesType)}>{item.name}</TreeWithMore>,
                     key: item.id,
                 };

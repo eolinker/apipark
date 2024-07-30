@@ -26,12 +26,11 @@ type imlPublishService struct {
 
 func (s *imlPublishService) SetPublishStatus(ctx context.Context, status *Status) error {
 	return s.statusStore.Save(ctx, &publish.Status{
-		Publish:   status.Publish,
-		Cluster:   status.Cluster,
-		Partition: status.Partition,
-		Status:    int(status.Status),
-		Error:     status.Error,
-		UpdateAt:  time.Now(),
+		Publish:  status.Publish,
+		Cluster:  status.Cluster,
+		Status:   int(status.Status),
+		Error:    status.Error,
+		UpdateAt: time.Now(),
 	})
 }
 
@@ -43,12 +42,11 @@ func (s *imlPublishService) GetPublishStatus(ctx context.Context, id string) ([]
 
 	return utils.SliceToSlice(list, func(s *publish.Status) *Status {
 		return &Status{
-			Publish:   s.Publish,
-			Cluster:   s.Cluster,
-			Partition: s.Partition,
-			Status:    StatusType(s.Status),
-			Error:     s.Error,
-			UpdateAt:  s.UpdateAt,
+			Publish:  s.Publish,
+			Cluster:  s.Cluster,
+			Status:   StatusType(s.Status),
+			Error:    s.Error,
+			UpdateAt: s.UpdateAt,
 		}
 	}), nil
 }

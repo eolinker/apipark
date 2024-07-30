@@ -39,10 +39,10 @@ func FromEntity(e *publish.Publish) *Publish {
 }
 
 type Status struct {
-	Publish   string
-	Cluster   string
-	Partition string
-	Status    StatusType
-	Error     string
-	UpdateAt  time.Time
+	Publish string
+	Cluster string
+	//Partition string
+	Status   StatusType
+	Error    string
+	UpdateAt time.Time
 }

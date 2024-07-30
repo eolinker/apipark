@@ -58,7 +58,7 @@ const PartitionInsidePage = ()=> {
             <InsidePage 
                 pageTitle={partitionInfo?.name || '-'} 
                 tagList={[{label:
-                    <Paragraph className="mb-0" copyable={partitionId ? { text: partitionId } : false}>分区 ID：{partitionId || '-'}</Paragraph>
+                    <Paragraph className="mb-0" copyable={partitionId ? { text: partitionId } : false}>环境 ID：{partitionId || '-'}</Paragraph>
                 }]}
                 backUrl="/partition/list">
                 <div className="flex h-full">
@@ -66,7 +66,7 @@ const PartitionInsidePage = ()=> {
                         className="h-full overflow-y-auto"
                         selectedKeys={[activeMenu || '']}
                         onClick={onMenuClick}
-                        style={{ width: 176 }}
+                        style={{ width: 182 }}
                         mode="inline"
                         items={PARTITIONS_INNER_MENU}
                     />

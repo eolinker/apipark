@@ -257,11 +257,11 @@ const SystemConfig = forwardRef<SystemConfigHandle>((_,ref) => {
                         </Form.Item>
 
                         <Form.Item<SystemConfigFieldType>
-                            label="分区权限"
+                            label="环境权限"
                             name="partition"
                             rules={[{ required: true, message: '必填项' }]}
                         >
-                            <Checkbox.Group className="flex flex-col gap-[8px] mt-[5px]" options={partitionOption} />{partitionOption.length === 0 && <span className="text-status_fail block h-[27px]">暂无可选分区，请检查所属团队可用分区</span>}
+                            <Checkbox.Group className="flex flex-col gap-[8px] mt-[5px]" options={partitionOption} />{partitionOption.length === 0 && <span className="text-status_fail block h-[27px]">暂无可选环境，请检查所属团队可用环境</span>}
                         </Form.Item>
                         {onEdit && <>
                         <Row className="mb-[10px]"

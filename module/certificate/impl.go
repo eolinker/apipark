@@ -5,13 +5,12 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/eolinker/eosc/log"
-	"gorm.io/gorm"
 	"time"
 
-	"github.com/eolinker/apipark/gateway"
+	"github.com/eolinker/eosc/log"
+	"gorm.io/gorm"
 
-	"github.com/eolinker/apipark/service/partition"
+	"github.com/eolinker/apipark/gateway"
 
 	"github.com/google/uuid"
 
@@ -29,15 +28,14 @@ var (
 )
 
 type imlCertificate struct {
-	service          certificate.ICertificateService `autowired:""`
-	userInfoService  account.IAccountService         `autowired:""`
-	partitionService partition.IPartitionService     `autowired:""`
-	clusterService   cluster.IClusterService         `autowired:""`
-	transaction      store.ITransaction              `autowired:""`
+	service         certificate.ICertificateService `autowired:""`
+	userInfoService account.IAccountService         `autowired:""`
+	clusterService  cluster.IClusterService         `autowired:""`
+	transaction     store.ITransaction              `autowired:""`
 }
 
-func (m *imlCertificate) getCertificates(ctx context.Context, partitionId string) ([]*gateway.DynamicRelease, error) {
-	certs, err := m.service.List(ctx, partitionId)
+func (m *imlCertificate) getCertificates(ctx context.Context, clusterId string) ([]*gateway.DynamicRelease, error) {
+	certs, err := m.service.List(ctx, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -65,12 +63,12 @@ func (m *imlCertificate) getCertificates(ctx context.Context, partitionId string
 	return publishCerts, nil
 }
 
-func (m *imlCertificate) initGateway(ctx context.Context, partitionId string, clientDriver gateway.IClientDriver) error {
+func (m *imlCertificate) initGateway(ctx context.Context, clusterId string, clientDriver gateway.IClientDriver) error {
 	certificateClient, err := clientDriver.Dynamic("certificate")
 	if err != nil {
 		return err
 	}
-	certs, err := m.getCertificates(ctx, partitionId)
+	certs, err := m.getCertificates(ctx, clusterId)
 	if err != nil {
 		return err
 	}
@@ -117,38 +115,29 @@ func (m *imlCertificate) syncGateway(ctx context.Context, clusterId string, rele
 	return dynamicClient.Offline(ctx, releaseInfo)
 }
 
-func (m *imlCertificate) Create(ctx context.Context, partitionId string, create *certificatedto.FileInput) error {
-	_, err := m.partitionService.Get(ctx, partitionId)
-	if err != nil {
-		return err
-	}
-	clusters, err := m.clusterService.ListByClusters(ctx, partitionId)
-	if err != nil {
-		return err
-	}
+func (m *imlCertificate) Create(ctx context.Context, clusterId string, create *certificatedto.FileInput) error {
+
 	return m.transaction.Transaction(ctx, func(ctx context.Context) error {
 		id := uuid.New().String()
 		version := time.Now().Format("20060102150405")
-		for _, c := range clusters {
-			err = m.syncGateway(ctx, c.Uuid, &gateway.DynamicRelease{
-				BasicItem: &gateway.BasicItem{
-					ID:          id,
-					Description: "",
-					Version:     version,
-					MatchLabels: map[string]string{
-						"module": "certificate",
-					},
+		err := m.syncGateway(ctx, clusterId, &gateway.DynamicRelease{
+			BasicItem: &gateway.BasicItem{
+				ID:          id,
+				Description: "",
+				Version:     version,
+				MatchLabels: map[string]string{
+					"module": "certificate",
 				},
-				Attr: map[string]interface{}{
-					"key": create.Key,
-					"pem": create.Cert,
-				},
-			}, true)
-			if err != nil {
-				return err
-			}
+			},
+			Attr: map[string]interface{}{
+				"key": create.Key,
+				"pem": create.Cert,
+			},
+		}, true)
+		if err != nil {
+			return err
 		}
-		_, err = m.save(ctx, id, partitionId, create)
+		_, err = m.save(ctx, id, clusterId, create)
 		if err != nil {
 			return err
 		}
@@ -162,7 +151,7 @@ func (m *imlCertificate) Update(ctx context.Context, id string, edit *certificat
 	if err != nil {
 		return err
 	}
-	clusters, err := m.clusterService.ListByClusters(ctx, old.Partition)
+	clusters, err := m.clusterService.ListByClusters(ctx, old.Cluster)
 	if err != nil {
 		return err
 	}
@@ -187,15 +176,15 @@ func (m *imlCertificate) Update(ctx context.Context, id string, edit *certificat
 				return err
 			}
 		}
-		_, err = m.save(ctx, id, old.Partition, edit)
+		_, err = m.save(ctx, id, old.Cluster, edit)
 		if err != nil {
 			return err
 		}
 		return nil
 	})
 }
-func (m *imlCertificate) ListForPartition(ctx context.Context, partitionId string) ([]*certificatedto.Certificate, error) {
-	certs, err := m.service.List(ctx, partitionId)
+func (m *imlCertificate) List(ctx context.Context, clusterId string) ([]*certificatedto.Certificate, error) {
+	certs, err := m.service.List(ctx, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -223,7 +212,7 @@ func (m *imlCertificate) Delete(ctx context.Context, id string) error {
 		}
 		return err
 	}
-	clusters, err := m.clusterService.ListByClusters(ctx, cert.Partition)
+	clusters, err := m.clusterService.ListByClusters(ctx, cert.Cluster)
 	if err != nil {
 		return err
 	}

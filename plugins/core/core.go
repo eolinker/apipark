@@ -3,10 +3,13 @@ package core
 import (
 	"net/http"
 
+	plugin_cluster "github.com/eolinker/apipark/controller/plugin-cluster"
+
+	"github.com/eolinker/apipark/controller/cluster"
+
 	"github.com/eolinker/ap-account/controller/role"
 
 	"github.com/eolinker/apipark/controller/common"
-	plugin_partition "github.com/eolinker/apipark/controller/plugin-partition"
 
 	"github.com/eolinker/apipark/controller/topology"
 
@@ -31,7 +34,6 @@ import (
 	"github.com/eolinker/apipark/controller/my_team"
 
 	"github.com/eolinker/apipark/controller/certificate"
-	"github.com/eolinker/apipark/controller/partition"
 	"github.com/eolinker/apipark/controller/team_manager"
 	"github.com/eolinker/go-common/autowire"
 	"github.com/eolinker/go-common/pm3"
@@ -56,13 +58,12 @@ func (d *Driver) Create() (pm3.IPlugin, error) {
 }
 
 type plugin struct {
-	partitionController   partition.IPartitionController      `autowired:""`
-	certificateController certificate.ICertificateController  `autowired:""`
-	teamManagerController team_manager.ITeamManagerController `autowired:""`
-	myTeamController      my_team.ITeamController             `autowired:""`
-	appController         project.IAppController              `autowired:""`
-	projectController     project.IProjectController          `autowired:""`
-	//projectMemberController        project.IProjectMemberController                      `autowired:""`
+	clusterController              cluster.IClusterController                            `autowired:""`
+	certificateController          certificate.ICertificateController                    `autowired:""`
+	teamManagerController          team_manager.ITeamManagerController                   `autowired:""`
+	myTeamController               my_team.ITeamController                               `autowired:""`
+	appController                  project.IAppController                                `autowired:""`
+	projectController              project.IProjectController                            `autowired:""`
 	serviceController              service.IServiceController                            `autowired:""`
 	catalogueController            catalogue.ICatalogueController                        `autowired:""`
 	upstreamController             upstream.IUpstreamController                          `autowired:""`
@@ -74,7 +75,7 @@ type plugin struct {
 	subscribeApprovalController    subscribe.ISubscribeApprovalController                `autowired:""`
 	dynamicModuleController        dynamic_module.IDynamicModuleController               `autowired:""`
 	topologyController             topology.ITopologyController                          `autowired:""`
-	pluginPartitionController      plugin_partition.IPluginPartitionController           `autowired:""`
+	pluginClusterController        plugin_cluster.IPluginClusterController               `autowired:""`
 	commonController               common.ICommonController                              `autowired:""`
 	apis                           []pm3.Api
 }

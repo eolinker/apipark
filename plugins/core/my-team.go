@@ -17,6 +17,8 @@ func (p *plugin) MyTeamApi() []pm3.Api {
 		pm3.CreateApiWidthDoc(http.MethodDelete, "/api/v1/team/member", []string{"context", "query:team", "query:user"}, nil, p.myTeamController.RemoveMember),
 		pm3.CreateApiWidthDoc(http.MethodGet, "/api/v1/team/members", []string{"context", "query:team", "query:keyword"}, []string{"members"}, p.myTeamController.Members),
 
+		pm3.CreateApiWidthDoc(http.MethodPut, "/api/v1/team/member/role", []string{"context", "query:team", "body"}, nil, p.myTeamController.UpdateMemberRole),
+
 		// 团队项目操作
 		pm3.CreateApiWidthDoc(http.MethodGet, "/api/v1/team/projects", []string{"context", "query:team", "query:keyword"}, []string{"projects"}, p.projectController.Search),
 		pm3.CreateApiWidthDoc(http.MethodPost, "/api/v1/team/project", []string{"context", "query:team", "body"}, []string{"project"}, p.projectController.CreateProject),

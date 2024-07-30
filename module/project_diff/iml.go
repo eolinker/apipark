@@ -5,11 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"gorm.io/gorm"
-
 	"github.com/eolinker/apipark/service/api"
 	"github.com/eolinker/apipark/service/cluster"
-	"github.com/eolinker/apipark/service/partition"
 	"github.com/eolinker/apipark/service/project_diff"
 	"github.com/eolinker/apipark/service/release"
 	"github.com/eolinker/apipark/service/universally/commit"
@@ -19,24 +16,17 @@ import (
 )
 
 type imlProjectDiff struct {
-	apiService       api.IAPIService             `autowired:""`
-	upstreamService  upstream.IUpstreamService   `autowired:""`
-	releaseService   release.IReleaseService     `autowired:""`
-	partitionService partition.IPartitionService `autowired:""`
-	clusterService   cluster.IClusterService     `autowired:""`
+	apiService      api.IAPIService           `autowired:""`
+	upstreamService upstream.IUpstreamService `autowired:""`
+	releaseService  release.IReleaseService   `autowired:""`
+	clusterService  cluster.IClusterService   `autowired:""`
 }
 
 func (m *imlProjectDiff) Diff(ctx context.Context, projectId string, baseRelease, targetRelease string) (*project_diff.Diff, error) {
 	if targetRelease == "" {
 		return nil, fmt.Errorf("target release is required")
 	}
-	partitions, err := m.partitionService.List(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if len(partitions) == 0 {
-		return nil, fmt.Errorf("no partition for project %s", projectId)
-	}
+
 	var target *projectInfo
 
 	targetReleaseValue, err := m.releaseService.GetRelease(ctx, targetRelease)
@@ -56,10 +46,14 @@ func (m *imlProjectDiff) Diff(ctx context.Context, projectId string, baseRelease
 		return nil, err
 	}
 	target.id = projectId
-	partitionIds := utils.SliceToSlice(partitions, func(i *partition.Partition) string {
-		return i.UUID
+	clusters, err := m.clusterService.List(ctx)
+	if err != nil {
+		return nil, err
+	}
+	clusterIds := utils.SliceToSlice(clusters, func(i *cluster.Cluster) string {
+		return i.Uuid
 	})
-	diff := m.diff(partitionIds, base, target)
+	diff := m.diff(clusterIds, base, target)
 	return diff, nil
 
 }
@@ -120,14 +114,14 @@ func (m *imlProjectDiff) DiffForLatest(ctx context.Context, projectId string, ba
 		apiDocs:         documents,
 		upstreamCommits: upstreamCommits,
 	}
-	partitions, err := m.partitionService.List(ctx)
+	clusters, err := m.clusterService.List(ctx)
 	if err != nil {
 		return nil, false, err
 	}
-	partitionIds := utils.SliceToSlice(partitions, func(i *partition.Partition) string {
-		return i.UUID
+	clusterIds := utils.SliceToSlice(clusters, func(i *cluster.Cluster) string {
+		return i.Uuid
 	})
-	return m.diff(partitionIds, base, target), true, nil
+	return m.diff(clusterIds, base, target), true, nil
 }
 func (m *imlProjectDiff) getReleaseInfo(ctx context.Context, releaseId string) (*projectInfo, error) {
 	commits, err := m.releaseService.GetCommits(ctx, releaseId)
@@ -182,7 +176,7 @@ func (m *imlProjectDiff) diff(partitions []string, base, target *projectInfo) *p
 	out := &project_diff.Diff{
 		Apis:      nil,
 		Upstreams: nil,
-		//Partitions: partitions,
+		//Clusters: partitions,
 	}
 	baseApis := utils.NewSet(utils.SliceToSlice(base.apis, func(i *api.APIInfo) string {
 		return i.UUID
@@ -297,32 +291,34 @@ func (m *imlProjectDiff) diff(partitions []string, base, target *projectInfo) *p
 
 func (m *imlProjectDiff) Out(ctx context.Context, diff *project_diff.Diff) (*DiffOut, error) {
 
-	partitions, err := m.partitionService.List(ctx, diff.Partitions...)
+	clusters, err := m.clusterService.List(ctx, diff.Clusters...)
 	if err != nil {
 		return nil, err
 	}
-
-	// 检查分区是否配置集群，若没有配置，则报错
-	requirePartition := make([]*partition.Partition, 0, len(partitions))
-	for _, p := range partitions {
-		if p.Cluster == "" {
-			requirePartition = append(requirePartition, p)
-			continue
-		}
-		_, err = m.clusterService.Get(ctx, p.Cluster)
-		if err != nil {
-			if !errors.Is(err, gorm.ErrRecordNotFound) {
-				requirePartition = append(requirePartition, p)
-				continue
-			}
-			return nil, err
-		}
-
+	if len(clusters) == 0 {
+		return nil, fmt.Errorf("unset gateway for clusters %v", diff.Clusters)
 	}
-
-	if len(requirePartition) > 0 {
-		return nil, fmt.Errorf("unset gateway for partitions %v", requirePartition)
-	}
+	//// 检查分区是否配置集群，若没有配置，则报错
+	//requirePartition := make([]*partition.Partition, 0, len(partitions))
+	//for _, p := range partitions {
+	//	if p.Cluster == "" {
+	//		requirePartition = append(requirePartition, p)
+	//		continue
+	//	}
+	//	_, err = m.clusterService.Get(ctx, p.Cluster)
+	//	if err != nil {
+	//		if !errors.Is(err, gorm.ErrRecordNotFound) {
+	//			requirePartition = append(requirePartition, p)
+	//			continue
+	//		}
+	//		return nil, err
+	//	}
+	//
+	//}
+	//
+	//if len(requirePartition) > 0 {
+	//	return nil, fmt.Errorf("unset gateway for partitions %v", requirePartition)
+	//}
 
 	out := &DiffOut{}
 	out.Apis = utils.SliceToSlice(diff.Apis, func(i *project_diff.ApiDiff) *ApiDiffOut {

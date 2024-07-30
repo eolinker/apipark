@@ -142,7 +142,7 @@ export const ServiceHubGroup = ({children,filterOption,dispatch}:ServiceHubGroup
                         </div>
                         <Divider className="my-[20px]" />
                         <div className="ml-[20px] pr-[10px]">
-                        <p className="text-[18px] h-[25px] leading-[25px] font-bold mb-[15px]">分区</p>
+                        <p className="text-[18px] h-[25px] leading-[25px] font-bold mb-[15px]">环境</p>
                             <Tree
                                 className="no-first-switch-tree no-selected-tree"
                                 checkable

@@ -6,7 +6,7 @@ type Subscriber struct {
 	Id      string     `json:"id"`
 	Project auto.Label `json:"project" aolabel:"project"`
 	Service auto.Label `json:"service" aolabel:"service"`
-	//Partition []auto.Label `json:"partition" aolabel:"partition"`
+	//Cluster []auto.Label `json:"partition" aolabel:"partition"`
 
 	Subscriber auto.Label     `json:"subscriber"  aolabel:"project"`
 	Team       auto.Label     `json:"team" aolabel:"team"`
@@ -19,7 +19,7 @@ type Subscriber struct {
 type SubscriptionItem struct {
 	Id      string     `json:"id"`
 	Service auto.Label `json:"service" aolabel:"service"`
-	//Partition   auto.Label `json:"partition" aolabel:"partition"`
+	//Cluster   auto.Label `json:"partition" aolabel:"partition"`
 	ApplyStatus int        `json:"apply_status"`
 	Project     auto.Label `json:"project" aolabel:"project"`
 	Team        auto.Label `json:"team" aolabel:"team"`

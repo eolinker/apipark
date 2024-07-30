@@ -1,8 +1,9 @@
 package release
 
 import (
-	"github.com/eolinker/apipark/stores/release"
 	"time"
+
+	"github.com/eolinker/apipark/stores/release"
 )
 
 type Release struct {
@@ -63,7 +64,7 @@ type ProjectCommits struct {
 //
 //type UpstreamDiff struct {
 //	UpstreamCommit  string                  `json:"upstream,omitempty"`
-//	Partition string                  `json:"partition,omitempty"`
+//	Cluster string                  `json:"partition,omitempty"`
 //	Commit    string                  `json:"commit,omitempty"`
 //	Change    project_diff.ChangeType `json:"change,omitempty"`
 //}

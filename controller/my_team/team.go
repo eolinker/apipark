@@ -18,6 +18,7 @@ type ITeamController interface {
 	RemoveMember(ctx *gin.Context, id string, uuid string) error
 	Members(ctx *gin.Context, id string, keyword string) ([]*team_dto.Member, error)
 	SimpleMembers(ctx *gin.Context, id string, keyword string) ([]*team_dto.SimpleMember, error)
+	UpdateMemberRole(ctx *gin.Context, id string, input *team_dto.UpdateMemberRole) error
 }
 
 func init() {

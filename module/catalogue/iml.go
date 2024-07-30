@@ -8,8 +8,6 @@ import (
 	"math"
 	"sort"
 
-	"github.com/eolinker/apipark/service/partition"
-
 	"github.com/eolinker/apipark/service/project"
 
 	"github.com/eolinker/apipark/service/subscribe"
@@ -54,7 +52,6 @@ type imlCatalogueModule struct {
 	releaseService          release.IReleaseService          `autowired:""`
 	subscribeService        subscribe.ISubscribeService      `autowired:""`
 	subscribeApplyService   subscribe.ISubscribeApplyService `autowired:""`
-	partitionService        partition.IPartitionService      `autowired:""`
 	transaction             store.ITransaction               `autowired:""`
 
 	root *Root
@@ -175,18 +172,6 @@ func (i *imlCatalogueModule) ServiceDetail(ctx context.Context, sid string) (*ca
 		docStr = doc.Doc
 	}
 
-	globalPartitions, err := i.partitionService.List(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	partitions := utils.SliceToSlice(globalPartitions, func(t *partition.Partition) *catalogue_dto.Partition {
-		return &catalogue_dto.Partition{
-			Id:     t.UUID,
-			Name:   t.Name,
-			Prefix: t.Prefix,
-		}
-	})
 	r, err := i.releaseService.GetRunning(ctx, s.Project)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -199,7 +184,6 @@ func (i *imlCatalogueModule) ServiceDetail(ctx context.Context, sid string) (*ca
 					Team:    auto.UUID(s.Team),
 					ApiNum:  0,
 				},
-				Partition: partitions,
 			}, nil
 		}
 
@@ -282,8 +266,7 @@ func (i *imlCatalogueModule) ServiceDetail(ctx context.Context, sid string) (*ca
 			ApiNum:        len(apis),
 			SubscriberNum: subscribeCount[s.Id],
 		},
-		Apis:      apis,
-		Partition: partitions,
+		Apis: apis,
 	}, nil
 }
 
@@ -336,7 +319,7 @@ func (i *imlCatalogueModule) Services(ctx context.Context, keyword string) ([]*c
 			Name:      v.Name,
 			Tags:      auto.List(serviceTagMap[v.Id]),
 			Catalogue: auto.UUID(v.Catalogue),
-			//Partition:     auto.List(ps),
+			//Cluster:     auto.List(ps),
 			ApiNum:        apiNum,
 			SubscriberNum: subscribeCount[v.Id],
 			Description:   v.Description,

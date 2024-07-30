@@ -21,7 +21,7 @@ func FromModel(c *certificate.Certificate) *Certificate {
 		Id:         c.ID,
 		Name:       c.Name,
 		Domains:    c.Domains,
-		Partition:  c.Partition,
+		Partition:  c.Cluster,
 		NotBefore:  auto.TimeLabel(c.NotBefore),
 		NotAfter:   auto.TimeLabel(c.NotAfter),
 		Updater:    auto.UUID(c.Updater),

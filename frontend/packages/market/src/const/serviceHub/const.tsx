@@ -61,7 +61,7 @@ export const SERVICE_HUB_TABLE_COLUMNS: ProColumns<ServiceHubTableListItem>[] = 
         ellipsis:true
     },
     {
-        title: '可用分区',
+        title: '可用环境',
         dataIndex: 'partition',
         ellipsis:true,
         renderText:(_,entity:ServiceHubTableListItem)=>entity.partition?.map((x)=>x.name).join(',')

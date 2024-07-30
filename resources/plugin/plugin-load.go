@@ -6,12 +6,13 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"log"
 	"strings"
 
+	"gopkg.in/yaml.v3"
+
 	"github.com/eolinker/apipark/model/plugin_model"
-	pluginModule "github.com/eolinker/apipark/module/plugin-partition"
+	pluginModule "github.com/eolinker/apipark/module/plugin-cluster"
 	"github.com/eolinker/apipark/service/setting"
 	"github.com/eolinker/go-common/autowire"
 	"github.com/eolinker/go-common/store"
@@ -30,9 +31,9 @@ var (
 )
 
 type pluginLoad struct {
-	transaction    store.ITransaction                  `autowired:""`
-	module         pluginModule.IPluginPartitionModule `autowired:""`
-	settingService setting.ISettingService             `autowired:""`
+	transaction    store.ITransaction                `autowired:""`
+	module         pluginModule.IPluginClusterModule `autowired:""`
+	settingService setting.ISettingService           `autowired:""`
 	version        string
 	defines        []*plugin_model.Define
 }

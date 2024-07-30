@@ -59,7 +59,6 @@ func createEntityHandler(i *CreateTeam) *team.Team {
 		UUID:        i.Id,
 		Name:        i.Name,
 		Description: i.Description,
-		Master:      i.Master,
 		CreateAt:    time.Now(),
 		UpdateAt:    time.Now(),
 	}
@@ -70,9 +69,6 @@ func updateHandler(e *team.Team, i *EditTeam) {
 	}
 	if i.Description != nil {
 		e.Description = *i.Description
-	}
-	if i.Master != nil {
-		e.Master = *i.Master
 	}
 
 	e.UpdateAt = time.Now()

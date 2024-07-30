@@ -92,7 +92,7 @@ const LogSettings = ()=>{
                         className="h-full overflow-y-auto"
                         selectedKeys={[activeMenu || '']}
                         onClick={onMenuClick}
-                        style={{ width: 176 }}
+                        style={{ width: 182 }}
                         mode="inline"
                         items={menuItems}
                     />

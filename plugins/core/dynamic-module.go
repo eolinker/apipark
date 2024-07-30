@@ -17,7 +17,7 @@ func (p *plugin) DynamicModuleApis() []pm3.Api {
 		pm3.CreateApiWidthDoc(http.MethodGet, "/api/v1/simple/dynamics/:group", []string{"context", "rest:group"}, []string{"dynamics"}, p.dynamicModuleController.ModuleDrivers),
 		pm3.CreateApiWidthDoc(http.MethodPut, "/api/v1/dynamic/:name/online", []string{"context", "rest:name", "query:id", "body"}, nil, p.dynamicModuleController.Online),
 		pm3.CreateApiWidthDoc(http.MethodPut, "/api/v1/dynamic/:name/offline", []string{"context", "rest:name", "query:id", "body"}, nil, p.dynamicModuleController.Offline),
-		pm3.CreateApiWidthDoc(http.MethodGet, "/api/v1/dynamic/:name/status", []string{"context", "rest:name", "query:keyword", "query:page", "query:page_size"}, []string{"list"}, p.dynamicModuleController.PartitionStatuses),
-		pm3.CreateApiWidthDoc(http.MethodGet, "/api/v1/dynamic/:name", []string{"context", "rest:name", "query:id"}, []string{"info"}, p.dynamicModuleController.PartitionStatus),
+		//pm3.CreateApiWidthDoc(http.MethodGet, "/api/v1/dynamic/:name/status", []string{"context", "rest:name", "query:keyword", "query:page", "query:page_size"}, []string{"list"}, p.dynamicModuleController.PartitionStatuses),
+		//pm3.CreateApiWidthDoc(http.MethodGet, "/api/v1/dynamic/:name", []string{"context", "rest:name", "query:id"}, []string{"info"}, p.dynamicModuleController.PartitionStatus),
 	}
 }

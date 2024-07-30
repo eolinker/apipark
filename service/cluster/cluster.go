@@ -17,19 +17,20 @@ import (
 )
 
 var (
-	_ IClusterService      = (*imlClusterService)(nil)
-	_ auto.CompleteService = (*imlClusterService)(nil)
+	_                IClusterService      = (*imlClusterService)(nil)
+	_                auto.CompleteService = (*imlClusterService)(nil)
+	DefaultClusterID                      = "default"
 )
 
 type IClusterService interface {
 	CountByPartition(ctx context.Context) (map[string]int, error)
-	List(ctx context.Context, partitionId ...string) ([]*Cluster, error)
+	List(ctx context.Context, clusterIds ...string) ([]*Cluster, error)
 	ListByClusters(ctx context.Context, partitionId string, ids ...string) ([]*Cluster, error)
 	Search(ctx context.Context, keyword string, partitionId ...string) ([]*Cluster, error)
-	Create(ctx context.Context, partitionId string, name string, resume string, address string) (*Cluster, error)
+	Create(ctx context.Context, name string, resume string, address string) (*Cluster, error)
 	UpdateInfo(ctx context.Context, id string, name *string, resume *string) (*Cluster, error)
 	UpdateAddress(ctx context.Context, id string, address string) ([]*Node, error)
-	Nodes(ctx context.Context, id string) ([]*Node, error)
+	Nodes(ctx context.Context, clusterIds ...string) ([]*Node, error)
 	GatewayClient(ctx context.Context, id string) (gateway.IClientDriver, error)
 	Get(ctx context.Context, id string) (*Cluster, error)
 	Delete(ctx context.Context, id string) error
@@ -125,7 +126,7 @@ func (s *imlClusterService) Get(ctx context.Context, id string) (*Cluster, error
 	return FromEntity(v), nil
 }
 
-func (s *imlClusterService) Create(ctx context.Context, partitionId string, name string, resume string, address string) (*Cluster, error) {
+func (s *imlClusterService) Create(ctx context.Context, name string, resume string, address string) (*Cluster, error) {
 	apintoInfo, err := admin.Admin(address).Info(ctx)
 	if err != nil {
 		return nil, err
@@ -157,15 +158,14 @@ func (s *imlClusterService) Create(ctx context.Context, partitionId string, name
 	}
 
 	en := &cluster.Cluster{
-		Id:        0,
-		UUID:      apintoInfo.Cluster,
-		Name:      name,
-		Partition: partitionId,
-		Resume:    resume,
-		Creator:   operator,
-		Updater:   operator,
-		CreateAt:  time.Now(),
-		UpdateAt:  time.Now(),
+		Id:       0,
+		UUID:     apintoInfo.Cluster,
+		Name:     name,
+		Resume:   resume,
+		Creator:  operator,
+		Updater:  operator,
+		CreateAt: time.Now(),
+		UpdateAt: time.Now(),
 	}
 	nodeEn, addrEn := s.genNodeEntity(apintoInfo.Cluster, apintoInfo.Nodes)
 	err = s.store.Transaction(ctx, func(ctx context.Context) error {
@@ -189,21 +189,21 @@ func (s *imlClusterService) Create(ctx context.Context, partitionId string, name
 	}
 	return FromEntity(en), nil
 }
-func (s *imlClusterService) genNodeEntity(id string, nodes []*admin.Node) ([]*cluster.ClusterNode, []*cluster.ClusterNodeAddr) {
-	nodeEn := make([]*cluster.ClusterNode, 0, len(nodes))
-	addrAllTemp := make([][]*cluster.ClusterNodeAddr, 0, len(nodes))
+func (s *imlClusterService) genNodeEntity(id string, nodes []*admin.Node) ([]*cluster.Node, []*cluster.NodeAddr) {
+	nodeEn := make([]*cluster.Node, 0, len(nodes))
+	addrAllTemp := make([][]*cluster.NodeAddr, 0, len(nodes))
 	now := time.Now()
 	for _, node := range nodes {
-		nodeEn = append(nodeEn, &cluster.ClusterNode{
+		nodeEn = append(nodeEn, &cluster.Node{
 			Id:         0,
 			UUID:       node.Id,
 			Name:       node.Name,
 			Cluster:    id,
 			UpdateTime: now,
 		})
-		aden := make([]*cluster.ClusterNodeAddr, 0, len(node.Peer)+len(node.Admin)+len(node.Server))
+		aden := make([]*cluster.NodeAddr, 0, len(node.Peer)+len(node.Admin)+len(node.Server))
 		for _, addr := range node.Peer {
-			aden = append(aden, &cluster.ClusterNodeAddr{
+			aden = append(aden, &cluster.NodeAddr{
 				Id:         0,
 				Cluster:    id,
 				Node:       node.Id,
@@ -213,7 +213,7 @@ func (s *imlClusterService) genNodeEntity(id string, nodes []*admin.Node) ([]*cl
 			})
 		}
 		for _, addr := range node.Admin {
-			aden = append(aden, &cluster.ClusterNodeAddr{
+			aden = append(aden, &cluster.NodeAddr{
 				Id:         0,
 				Cluster:    id,
 				Node:       node.Id,
@@ -223,7 +223,7 @@ func (s *imlClusterService) genNodeEntity(id string, nodes []*admin.Node) ([]*cl
 			})
 		}
 		for _, addr := range node.Server {
-			aden = append(aden, &cluster.ClusterNodeAddr{
+			aden = append(aden, &cluster.NodeAddr{
 				Id:         0,
 				Cluster:    id,
 				Node:       node.Id,
@@ -341,22 +341,26 @@ func (s *imlClusterService) UpdateAddress(ctx context.Context, id string, addres
 
 }
 
-func (s *imlClusterService) Nodes(ctx context.Context, id string) ([]*Node, error) {
-	nodeAddrs, err := s.nodeAddressStore.ListQuery(ctx, "`cluster` = ?", []interface{}{id}, "id desc")
+func (s *imlClusterService) Nodes(ctx context.Context, clusterIds ...string) ([]*Node, error) {
+	w := make(map[string]interface{})
+	if len(clusterIds) > 0 {
+		w["cluster"] = clusterIds
+	}
+	nodeAddrs, err := s.nodeAddressStore.List(ctx, w, "id desc")
 	if err != nil {
 		return nil, err
 	}
-	nodes, err := s.nodeStore.ListQuery(ctx, "`cluster` = ?", []interface{}{id}, "id desc")
+	nodes, err := s.nodeStore.List(ctx, w, "id desc")
 	if err != nil {
 		return nil, err
 	}
 
-	addrOfNode := utils.SliceToMapArray(nodeAddrs, func(i *cluster.ClusterNodeAddr) string {
+	addrOfNode := utils.SliceToMapArray(nodeAddrs, func(i *cluster.NodeAddr) string {
 		return i.Node
 	})
 
-	return utils.SliceToSlice(nodes, func(i *cluster.ClusterNode) *Node {
-		addrs := utils.SliceToMapArrayO(addrOfNode[i.UUID], func(i *cluster.ClusterNodeAddr) (string, string) {
+	return utils.SliceToSlice(nodes, func(i *cluster.Node) *Node {
+		addrs := utils.SliceToMapArrayO(addrOfNode[i.UUID], func(i *cluster.NodeAddr) (string, string) {
 			return i.Type, i.Addr
 		})
 
@@ -404,15 +408,15 @@ func (s *imlClusterService) Search(ctx context.Context, keyword string, partitio
 	}
 	return utils.SliceToSlice(list, FromEntity), nil
 }
-func (s *imlClusterService) List(ctx context.Context, partitionId ...string) ([]*Cluster, error) {
-	if len(partitionId) == 0 {
+func (s *imlClusterService) List(ctx context.Context, clusterIds ...string) ([]*Cluster, error) {
+	if len(clusterIds) == 0 {
 		list, err := s.store.List(ctx, make(map[string]interface{}))
 		if err != nil {
 			return nil, err
 		}
 		return utils.SliceToSlice(list, FromEntity), nil
 	}
-	list, err := s.store.ListQuery(ctx, "`partition` in (?)", []interface{}{partitionId}, "update_at desc")
+	list, err := s.store.ListQuery(ctx, "`cluster` in (?)", []interface{}{clusterIds}, "update_at desc")
 	if err != nil {
 		return nil, err
 	}

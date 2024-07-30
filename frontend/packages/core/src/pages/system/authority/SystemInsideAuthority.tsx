@@ -5,6 +5,7 @@ import {Link, useParams} from "react-router-dom";
 import {useBreadcrumb} from "@common/contexts/BreadcrumbContext.tsx";
 import { App, Divider } from "antd";
 import {BasicResponse, STATUS_CODE} from "@common/const/const.ts";
+import { SimpleMemberItem } from "@common/const/type.ts";
 import {useFetch} from "@common/hooks/http.ts";
 import {RouterParams} from "@core/components/aoplatform/RenderRoutes.tsx";
 import {SystemAuthorityView} from "./SystemAuthorityView.tsx";
@@ -12,7 +13,7 @@ import {
     SystemAuthorityConfig,
 } from "./SystemAuthorityConfig.tsx";
 import { SYSTEM_AUTHORITY_TABLE_COLUMNS } from "../../../const/system/const.tsx";
-import { SystemAuthorityTableListItem, SystemAuthorityConfigHandle, EditAuthFieldType, SimpleMemberItem } from "../../../const/system/type.ts";
+import { SystemAuthorityTableListItem, SystemAuthorityConfigHandle, EditAuthFieldType} from "../../../const/system/type.ts";
 import TableBtnWithPermission from "@common/components/aoplatform/TableBtnWithPermission.tsx";
 import { checkAccess } from "@common/utils/permission.ts";
 import { useGlobalContext } from "@common/contexts/GlobalStateContext.tsx";

@@ -1,7 +1,7 @@
 /*
  * @Date: 2024-02-04 16:37:27
  * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 11:18:44
+ * @LastEditTime: 2024-07-12 10:15:37
  * @FilePath: \frontend\packages\core\src\const\system\type.ts
  */
 import { FormInstance, UploadFile } from "antd";
@@ -45,13 +45,6 @@ export type SystemSubServiceTableListItem = {
 };
 
 
-export type SimpleMemberItem = {
-    id:string
-    name:string
-    email:string
-    department:string
-    avatar:string
-}
 
 export type SystemSubscriberTableListItem = {
     id:string
@@ -154,6 +147,19 @@ export type SystemApiProxyFieldType = {
     service?:string;
     proxy:SystemApiProxyType
 };
+
+export type SystemApiSimpleFieldType = {
+        id: string
+        name: string
+        description: string
+        method: string
+        path: string
+        match: MatchItem[]
+        creator: string
+        updater: string
+        create_time: string
+        update_time: string
+}
 
 export type SystemInsideApiCreateProps = {
     type?:'copy'

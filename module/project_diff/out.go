@@ -50,8 +50,8 @@ type UpstreamDiffOut struct {
 //		Upstreams: utils.SliceToSlice(d.Upstreams, func(s *project_diff.UpstreamDiff) *UpstreamDiffOut {
 //			return &UpstreamDiffOut{
 //				Upstream:  s.Name,
-//				Partition: auto.UUID(s.Partition),
-//				Partition:   auto.UUID(s.Partition),
+//				Cluster: auto.UUID(s.Cluster),
+//				Cluster:   auto.UUID(s.Cluster),
 //				Change:    s.Change,
 //				Type:      s.Type,
 //				Addr:      s.Addr,

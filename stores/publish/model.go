@@ -52,13 +52,12 @@ func (t *Latest) TableName() string {
 }
 
 type Status struct {
-	Id        int64     `gorm:"column:id;type:BIGINT(20);NOT NULL;comment:id;primary_key;comment:主键ID;"`
-	Publish   string    `gorm:"type:varchar(36);not null;column:publish;comment:publish id;uniqueIndex:unique"`
-	Cluster   string    `gorm:"type:varchar(36);not null;column:cluster;comment:cluster;uniqueIndex:unique"`
-	Partition string    `gorm:"type:varchar(36);not null;column:partition;comment:partition;uniqueIndex:unique"`
-	Status    int       `gorm:"type:int(11);not null;column:status;index:status; comment:状态, 0: 申请中, 1: 审批中, 2: 审批通过, 3: 审批拒绝, 4: 已发布 5: 已中止 6: 已关闭 7: 发布中 8：发布失败"`
-	Error     string    `gorm:"type:text;not null;column:error;comment:错误信息"`
-	UpdateAt  time.Time `gorm:"type:timestamp;NOT NULL;DEFAULT:CURRENT_TIMESTAMP;column:update_at;comment:更新时间"`
+	Id       int64     `gorm:"column:id;type:BIGINT(20);NOT NULL;comment:id;primary_key;comment:主键ID;"`
+	Publish  string    `gorm:"type:varchar(36);not null;column:publish;comment:publish id;uniqueIndex:unique"`
+	Cluster  string    `gorm:"type:varchar(36);not null;column:cluster;comment:cluster;uniqueIndex:unique"`
+	Status   int       `gorm:"type:int(11);not null;column:status;index:status; comment:状态, 0: 申请中, 1: 审批中, 2: 审批通过, 3: 审批拒绝, 4: 已发布 5: 已中止 6: 已关闭 7: 发布中 8：发布失败"`
+	Error    string    `gorm:"type:text;not null;column:error;comment:错误信息"`
+	UpdateAt time.Time `gorm:"type:timestamp;NOT NULL;DEFAULT:CURRENT_TIMESTAMP;column:update_at;comment:更新时间"`
 }
 
 func (t *Status) IdValue() int64 {

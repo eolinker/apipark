@@ -101,7 +101,7 @@ const TeamInsidePage:FC = ()=> {
                 backUrl="/team/list">
                 <div className="flex h-full">
                     <Menu
-                        style={{ width: 176 }}
+                        style={{ width: 182 }}
                         mode="inline"
                         items={menuData}
                         onClick={onMenuClick}

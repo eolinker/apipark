@@ -9,15 +9,14 @@ type Item struct {
 }
 
 type ServiceItem struct {
-	Id        string       `json:"id"`
-	Name      string       `json:"name"`
-	Tags      []auto.Label `json:"tags" aolabel:"tag"`
-	Catalogue auto.Label   `json:"catalogue" aolabel:"catalogue"`
-	//Partition     []auto.Label `json:"partition" aolabel:"partition"`
-	Description   string `json:"description"`
-	Logo          string `json:"logo"`
-	ApiNum        int64  `json:"api_num"`
-	SubscriberNum int64  `json:"subscriber_num"`
+	Id            string       `json:"id"`
+	Name          string       `json:"name"`
+	Tags          []auto.Label `json:"tags" aolabel:"tag"`
+	Catalogue     auto.Label   `json:"catalogue" aolabel:"catalogue"`
+	Description   string       `json:"description"`
+	Logo          string       `json:"logo"`
+	ApiNum        int64        `json:"api_num"`
+	SubscriberNum int64        `json:"subscriber_num"`
 }
 
 type ServiceDetail struct {
@@ -27,11 +26,9 @@ type ServiceDetail struct {
 	Basic       *ServiceBasic      `json:"basic"`
 	Apis        []*ServiceApi      `json:"apis"`
 	DisableApis []*ServiceApiBasic `json:"disable_apis"`
-	Partition   []*Partition       `json:"partition"`
 }
 
 type ServiceBasic struct {
-	//Organization  auto.Label `json:"organization" aolabel:"organization"`
 	Project       auto.Label `json:"project" aolabel:"project"`
 	Team          auto.Label `json:"team" aolabel:"team"`
 	ApiNum        int        `json:"api_num"`

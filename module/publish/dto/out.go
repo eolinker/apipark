@@ -53,8 +53,8 @@ type PublishDetail struct {
 }
 
 type PublishStatus struct {
-	Partition auto.Label `json:"partition" aolabel:"partition"`
-	Cluster   auto.Label `json:"cluster" aolabel:"cluster"`
-	Status    string     `json:"status"`
-	Error     string     `json:"error"`
+	//Partition auto.Label `json:"partition" aolabel:"partition"`
+	Cluster auto.Label `json:"cluster" aolabel:"cluster"`
+	Status  string     `json:"status"`
+	Error   string     `json:"error"`
 }

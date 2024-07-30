@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/eolinker/apipark/service/partition"
+	"github.com/eolinker/apipark/service/cluster"
 
 	projectDiff "github.com/eolinker/apipark/module/project_diff"
 	"github.com/eolinker/apipark/module/release/dto"
@@ -37,7 +37,7 @@ type imlReleaseModule struct {
 	publishService    publish.IPublishService        `autowired:""`
 	transaction       store.ITransaction             `autowired:""`
 	projectService    project.IProjectService        `autowired:""`
-	partitionService  partition.IPartitionService    `autowired:""`
+	clusterService    cluster.IClusterService        `autowired:""`
 }
 
 func (m *imlReleaseModule) Create(ctx context.Context, projectId string, input *dto.CreateInput) (string, error) {
@@ -49,9 +49,9 @@ func (m *imlReleaseModule) Create(ctx context.Context, projectId string, input *
 		}
 		return "", err
 	}
-	partitions, err := m.partitionService.List(ctx)
-	if err != nil {
-		return "", fmt.Errorf("partitions not set:%w", err)
+	clusters, err := m.clusterService.List(ctx)
+	if err != nil || len(clusters) == 0 {
+		return "", fmt.Errorf("cluster not set:%w", err)
 	}
 
 	apis, err := m.apiService.ListForProject(ctx, proInfo.Id)
@@ -109,8 +109,8 @@ func (m *imlReleaseModule) Create(ctx context.Context, projectId string, input *
 			return c.Key, c.UUID
 		})
 	})
-	if !m.releaseService.Completeness(utils.SliceToSlice(partitions, func(s *partition.Partition) string {
-		return s.UUID
+	if !m.releaseService.Completeness(utils.SliceToSlice(clusters, func(s *cluster.Cluster) string {
+		return s.Uuid
 	}), apiUUIDS, apiProxy, apiDocs, upstreams) {
 		return "", errors.New("completeness check failed")
 	}

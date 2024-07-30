@@ -5,9 +5,8 @@ import { ColumnsType } from "antd/es/table";
 import { getItem } from "@common/utils/navigation";
 import { MatchItem, MemberItem } from "@common/const/type";
 import { ConfigField } from "@common/components/aoplatform/EditableTableWithModal";
-import { frontendTimeSorter } from "../../pages/openApi/OpenApiList";
+import { frontendTimeSorter } from "@common/utils/dataTransfer";
 import moment from "moment";
-import { CheckboxOptionType } from "antd/lib/checkbox";
 import { STATUS_COLOR } from "@common/const/const";
 import { LoadingOutlined } from "@ant-design/icons";
 import { SystemInsidePublishOnlineItems } from "../../pages/system/publish/SystemInsidePublishOnline";
@@ -154,7 +153,7 @@ export const SYSTEM_TABLE_COLUMNS: ProColumns<SystemTableListItem>[] = [
     {
         title: '创建时间',
         dataIndex: 'createTime',
-        width:176,
+        width:182,
         ellipsis:true,
         sorter: (a,b)=>frontendTimeSorter(a,b,'createTime')
     }
@@ -180,7 +179,7 @@ export const SYSTEM_SUBSERVICE_TABLE_COLUMNS: ProColumns<SystemSubServiceTableLi
         ellipsis:true
     },
     {
-        title: '可用分区',
+        title: '可用环境',
         dataIndex: 'partition',
         ellipsis:true,
         renderText:(_,entity)=>(entity.partition?.map((x)=>x.name).join(',')||'-')
@@ -241,7 +240,7 @@ export const SYSTEM_SUBSERVICE_TABLE_COLUMNS: ProColumns<SystemSubServiceTableLi
         title: '添加时间',
         dataIndex: 'createTime',
         ellipsis:true,
-        width:176,
+        width:182,
         sorter: (a,b)=> {
             return a.createTime.localeCompare(b.createTime)
         },
@@ -269,7 +268,7 @@ export const SYSTEM_SUBSCRIBER_TABLE_COLUMNS: ProColumns<SystemSubscriberTableLi
         ellipsis:true
     },
     {
-        title: '可用分区',
+        title: '可用环境',
         dataIndex: 'partition',
         ellipsis:true,
         renderText:(_,entity)=>(entity.partition?.map((x)=>x.name).join(',')||'-')
@@ -322,7 +321,7 @@ export const SYSTEM_SUBSCRIBER_TABLE_COLUMNS: ProColumns<SystemSubscriberTableLi
         title: '订阅时间',
         dataIndex: 'applyTime',
         ellipsis:true,
-        width:176,
+        width:182,
         sorter: (a,b)=> {
             return a.applyTime.localeCompare(b.applyTime)
         },
@@ -460,7 +459,7 @@ export const SYSTEM_API_TABLE_COLUMNS: ProColumns<SystemApiTableListItem>[] = [
         dataIndex: 'updateTime',
         ellipsis:true,
         hideInSearch: true,
-        width:176,
+        width:182,
         sorter: (a,b)=>frontendTimeSorter(a,b,'updateTime')
     },
 ];
@@ -509,7 +508,7 @@ export const SYSTEM_UPSTREAM_TABLE_COLUMNS: ProColumns<SystemUpstreamTableListIt
     {
         title: '创建时间',
         dataIndex: 'createTime',
-        width:176,
+        width:182,
         ellipsis:true,
         sorter: (a,b)=> {
             return a.createTime.localeCompare(b.createTime)
@@ -518,7 +517,7 @@ export const SYSTEM_UPSTREAM_TABLE_COLUMNS: ProColumns<SystemUpstreamTableListIt
     {
         title: '更新时间',
         dataIndex: 'updateTime',
-        width:176,
+        width:182,
         ellipsis:true,
         sorter: (a,b)=> {
             return a.updateTime.localeCompare(b.updateTime)
@@ -709,7 +708,7 @@ export const SYSTEM_AUTHORITY_TABLE_COLUMNS: ProColumns<SystemAuthorityTableList
         title: '过期时间',
         dataIndex: 'expireTime',
         ellipsis:true,
-        width:176,
+        width:182,
         render:(_: React.ReactNode, entity: SystemAuthorityTableListItem) => (
             <span className={entity.expireTime !== 0 && moment.now() - (entity.expireTime * 1000) > 0 ? 'text-status_fail' : ''}>{entity.expireTime === 0 ? '永不过期'  :moment(entity.expireTime * 1000).format('YYYY-MM-DD hh:mm:ss')}</span>
         ),
@@ -731,7 +730,7 @@ export const SYSTEM_AUTHORITY_TABLE_COLUMNS: ProColumns<SystemAuthorityTableList
         title: '创建时间',
         key: 'createTime',
         dataIndex: 'createTime',
-        width:176,
+        width:182,
         ellipsis:true,
         sorter: (a,b)=> {
             return a.createTime.localeCompare(b.createTime)
@@ -811,7 +810,7 @@ export const SYSTEM_MYSERVICE_TABLE_COLUMNS: ProColumns<MyServiceTableListItem>[
         key: 'updateTime',
         dataIndex: 'updateTime',
         ellipsis:true,
-        width:176,
+        width:182,
         sorter: (a,b)=> {
             return a.updateTime.localeCompare(b.updateTime)
         },
@@ -820,7 +819,7 @@ export const SYSTEM_MYSERVICE_TABLE_COLUMNS: ProColumns<MyServiceTableListItem>[
         title: '创建时间',
         key: 'createTime',
         dataIndex: 'createTime',
-        width:176,
+        width:182,
         ellipsis:true,
         sorter: (a,b)=> {
             return a.createTime.localeCompare(b.createTime)
@@ -907,7 +906,7 @@ export const SYSTEM_SUBSCRIBE_APPROVAL_DETAIL_LIST = [
         title:'申请状态',key:'status',renderText:()=>{}
     },
     {
-        title:'可用分区',key:'partition',dataType:'checkbox'
+        title:'可用环境',key:'partition',dataType:'checkbox'
     },
     {
         title:'申请人',key:'applier',nested:'name'
@@ -959,7 +958,7 @@ export const SYSTEM_TOPOLOGY_NODE_TYPE_COLOR_MAP = {
 
   export const SYSTEM_PUBLISH_ONLINE_COLUMNS = [
     {
-        title: '分区',
+        title: '环境',
         dataIndex: ['partition','name'],
         copyable: true,
         ellipsis:true,
@@ -990,6 +989,9 @@ export const SYSTEM_TOPOLOGY_NODE_TYPE_COLOR_MAP = {
     },
   ]
 
+const APP_MODE = import.meta.env.VITE_APP_MODE;
+
+
   export const SYSTEM_PAGE_MENU_ITEMS: MenuProps['items'] = [
     getItem('内部数据服务', 'assets', null,
         [
@@ -1013,7 +1015,7 @@ export const SYSTEM_TOPOLOGY_NODE_TYPE_COLOR_MAP = {
     //     'group'),
     getItem('管理', 'mng', null,
         [
-            getItem(<Link to="./topology">调用拓扑图</Link>, 'topology',undefined,undefined,undefined,'project.mySystem.topology.view'),
+            APP_MODE === 'pro' ? getItem(<Link to="./topology">调用拓扑图</Link>, 'topology',undefined,undefined,undefined,'project.mySystem.topology.view'):null,
             getItem(<Link to="./member">成员</Link>, 'member',undefined,undefined,undefined,'project.mySystem.member.view'),
             getItem(<Link to="./access">权限</Link>, 'access',undefined,undefined,undefined,'project.mySystem.access.view'),
             getItem(<Link to="./setting">设置</Link>, 'setting',undefined,undefined,undefined,'team.mySystem.self.edit')],

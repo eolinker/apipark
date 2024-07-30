@@ -1,7 +1,7 @@
 /*
  * @Date: 2024-01-31 15:00:11
  * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 19:07:51
+ * @LastEditTime: 2024-07-09 11:01:30
  * @FilePath: \frontend\packages\core\src\pages\member\MemberPage.tsx
  */
 import Tree, {DataNode} from "antd/es/tree";
@@ -152,7 +152,7 @@ const MemberPage = ()=>{
                     </Button></WithPermission>
                 ),
             },
-            {
+            entity.id !== '-1' && {
                 key: 'rename',
                 label: (
                     <WithPermission access="system.member.department.edit"  key="renamePermission"><Button type="text" key="rename" className=" border-none p-0 flex items-center bg-transparent " onClick={()=>openModal('rename',entity)}>
@@ -198,14 +198,14 @@ const MemberPage = ()=>{
                     item.departmentIds = departmentIds
                     if (item.children) {
                         return {
-                            title:<TreeWithMore dropdownMenu={dropdownMenu(item)}>{title}</TreeWithMore>, 
+                            title:<TreeWithMore  dropdownMenu={dropdownMenu(item)}>{title}</TreeWithMore>, 
                             key: item.id,
                             departmentIds:departmentIds,
                             children: loop(item.children,departmentIds) };
                     }
 
                     return {
-                        title: ['unknown','disable'].indexOf(item.id) === -1 ? <TreeWithMore dropdownMenu={dropdownMenu(item)}>{title}</TreeWithMore> : title,
+                        title: ['unknown','disable'].indexOf(item.id) === -1 ? <TreeWithMore  dropdownMenu={dropdownMenu(item)}>{title}</TreeWithMore> : title,
                         key: item.id,
                         departmentIds:departmentIds,
                         isLeaf:true

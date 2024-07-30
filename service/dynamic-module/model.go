@@ -27,7 +27,7 @@ type CreateDynamicModule struct {
 	Id     string
 	Name   string
 	Driver string
-	//Partition   string
+	//Cluster   string
 	Description string
 	Config      string
 	Module      string
@@ -65,7 +65,6 @@ type DynamicModulePublish struct {
 	ID            string
 	DynamicModule string
 	Module        string
-	Partition     string
 	Cluster       string
 	Creator       string
 	Version       string
@@ -77,7 +76,6 @@ func FromPublishEntity(ov *dynamic_module.DynamicModulePublish) *DynamicModulePu
 		ID:            ov.UUID,
 		DynamicModule: ov.DynamicModule,
 		Module:        ov.Module,
-		Partition:     ov.Partition,
 		Cluster:       ov.Cluster,
 		Version:       ov.Version,
 		Creator:       ov.Creator,
@@ -89,7 +87,6 @@ type CreateDynamicModulePublish struct {
 	ID            string
 	DynamicModule string
 	Module        string
-	Partition     string
 	Cluster       string
 	Version       string
 }

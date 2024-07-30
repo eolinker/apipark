@@ -210,22 +210,22 @@ func (s *imlReleaseService) GetRunningApiProxyCommit(ctx context.Context, projec
 //func (s *imlReleaseService) DiffUpstreams(ctx context.Context, baseUpstreams []*UpstreamCommit, targetUpstreams []*UpstreamCommit) []*UpstreamDiff {
 //	Upstreams := make([]*UpstreamDiff, 0, len(targetUpstreams)+len(baseUpstreams))
 //	baseUpstreamMap := utils.SliceToMap(baseUpstreams, func(v *UpstreamCommit) string {
-//		return fmt.Sprintf("%s-%s", v.UpstreamCommit, v.Partition)
+//		return fmt.Sprintf("%s-%s", v.UpstreamCommit, v.Cluster)
 //	})
 //	for _, targetUpstream := range targetUpstreams {
-//		key := fmt.Sprintf("%s-%s", targetUpstream.UpstreamCommit, targetUpstream.Partition)
+//		key := fmt.Sprintf("%s-%s", targetUpstream.UpstreamCommit, targetUpstream.Cluster)
 //		if baseUpstream, ok := baseUpstreamMap[key]; ok {
 //			if baseUpstream.Commit != targetUpstream.Commit {
 //				Upstreams = append(Upstreams, &UpstreamDiff{
 //					UpstreamCommit:  targetUpstream.UpstreamCommit,
-//					Partition: targetUpstream.Partition,
+//					Cluster: targetUpstream.Cluster,
 //					Commit:    targetUpstream.Commit,
 //					Change:    project_diff.ChangeTypeUpdate,
 //				})
 //			} else {
 //				Upstreams = append(Upstreams, &UpstreamDiff{
 //					UpstreamCommit:  targetUpstream.UpstreamCommit,
-//					Partition: targetUpstream.Partition,
+//					Cluster: targetUpstream.Cluster,
 //					Commit:    targetUpstream.Commit,
 //					Change:    project_diff.ChangeTypeNone,
 //				})
@@ -234,7 +234,7 @@ func (s *imlReleaseService) GetRunningApiProxyCommit(ctx context.Context, projec
 //		} else {
 //			Upstreams = append(Upstreams, &UpstreamDiff{
 //				UpstreamCommit:  targetUpstream.UpstreamCommit,
-//				Partition: targetUpstream.Partition,
+//				Cluster: targetUpstream.Cluster,
 //				Commit:    targetUpstream.Commit,
 //				Change:    project_diff.ChangeTypeNew,
 //			})
@@ -243,7 +243,7 @@ func (s *imlReleaseService) GetRunningApiProxyCommit(ctx context.Context, projec
 //	for _, baseUpstream := range baseUpstreamMap {
 //		Upstreams = append(Upstreams, &UpstreamDiff{
 //			UpstreamCommit:  baseUpstream.UpstreamCommit,
-//			Partition: baseUpstream.Partition,
+//			Cluster: baseUpstream.Cluster,
 //			Commit:    baseUpstream.Commit,
 //			Change:    project_diff.ChangeTypeDelete,
 //		})

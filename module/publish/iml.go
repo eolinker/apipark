@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/eolinker/apipark/service/partition"
-
 	"github.com/eolinker/apipark/service/universally/commit"
 
 	"github.com/eolinker/apipark/service/api"
@@ -45,7 +43,6 @@ type imlPublishModule struct {
 	upstreamService   upstream.IUpstreamService      `autowired:""`
 	releaseService    release.IReleaseService        `autowired:""`
 	clusterService    cluster.IClusterService        `autowired:""`
-	partitionService  partition.IPartitionService    `autowired:""`
 	projectService    project.IProjectService        `autowired:""`
 }
 
@@ -176,7 +173,7 @@ func (m *imlPublishModule) getProjectRelease(ctx context.Context, projectID stri
 	}, nil
 }
 
-func (m *imlPublishModule) getReleaseInfo(ctx context.Context, projectID, releaseId string, version string, partitionIds []string) (map[string]*gateway.ProjectRelease, error) {
+func (m *imlPublishModule) getReleaseInfo(ctx context.Context, projectID, releaseId, version string, clusterIds []string) (map[string]*gateway.ProjectRelease, error) {
 	commits, err := m.releaseService.GetCommits(ctx, releaseId)
 	if err != nil {
 		return nil, err
@@ -248,7 +245,7 @@ func (m *imlPublishModule) getReleaseInfo(ctx context.Context, projectID, releas
 	upstreamReleaseMap := make(map[string]*gateway.UpstreamRelease)
 
 	for _, c := range upstreamCommits {
-		for _, partitionId := range partitionIds {
+		for _, partitionId := range clusterIds {
 			upstreamRelease := &gateway.UpstreamRelease{
 				BasicItem: &gateway.BasicItem{
 					ID:      c.Target,
@@ -270,7 +267,7 @@ func (m *imlPublishModule) getReleaseInfo(ctx context.Context, projectID, releas
 		}
 	}
 
-	for _, clusterId := range partitionIds {
+	for _, clusterId := range clusterIds {
 		projectReleaseMap[clusterId] = &gateway.ProjectRelease{
 			Id:       projectID,
 			Version:  version,
@@ -305,10 +302,9 @@ func (m *imlPublishModule) PublishStatuses(ctx context.Context, project string, 
 			errMsg = "发布超时"
 		}
 		return &dto.PublishStatus{
-			Partition: auto.UUID(s.Partition),
-			Cluster:   auto.UUID(s.Cluster),
-			Status:    status.String(),
-			Error:     errMsg,
+			Cluster: auto.UUID(s.Cluster),
+			Status:  status.String(),
+			Error:   errMsg,
 		}
 
 	}), nil
@@ -467,18 +463,14 @@ func (m *imlPublishModule) Accept(ctx context.Context, project string, id string
 	return m.publishService.Accept(ctx, project, id, commits)
 }
 
-func (m *imlPublishModule) publish(ctx context.Context, id string, partitionId string, projectRelease *gateway.ProjectRelease) error {
-	pInfo, err := m.partitionService.Get(ctx, partitionId)
-	if err != nil {
-		return err
-	}
+func (m *imlPublishModule) publish(ctx context.Context, id string, clusterId string, projectRelease *gateway.ProjectRelease) error {
+
 	publishStatus := &publish.Status{
-		Publish:   id,
-		Partition: partitionId,
-		Status:    publish.StatusPublishing,
-		UpdateAt:  time.Now(),
+		Publish:  id,
+		Status:   publish.StatusPublishing,
+		UpdateAt: time.Now(),
 	}
-	err = m.publishService.SetPublishStatus(ctx, publishStatus)
+	err := m.publishService.SetPublishStatus(ctx, publishStatus)
 	if err != nil {
 		return fmt.Errorf("set publishing publishStatus error: %v", err)
 	}
@@ -489,7 +481,7 @@ func (m *imlPublishModule) publish(ctx context.Context, id string, partitionId s
 		}
 	}()
 
-	client, err := m.clusterService.GatewayClient(ctx, pInfo.Cluster)
+	client, err := m.clusterService.GatewayClient(ctx, clusterId)
 	if err != nil {
 		publishStatus.Status = publish.StatusPublishError
 		publishStatus.Error = err.Error()
@@ -529,20 +521,22 @@ func (m *imlPublishModule) Publish(ctx context.Context, project string, id strin
 	if flow.Status != publish.StatusAccept {
 		return errors.New("只有通过状态才能发布")
 	}
-	partitions, err := m.partitionService.List(ctx)
+	clusters, err := m.clusterService.List(ctx)
 	if err != nil {
 		return err
 	}
-	partitionIds := utils.SliceToSlice(partitions, func(p *partition.Partition) string {
-		return p.UUID
+	clusterIds := utils.SliceToSlice(clusters, func(i *cluster.Cluster) string {
+		return i.Uuid
 	})
-	projectReleaseMap, err := m.getReleaseInfo(ctx, project, flow.Release, flow.Release, partitionIds)
+
+	projectReleaseMap, err := m.getReleaseInfo(ctx, project, flow.Release, flow.Release, clusterIds)
 	if err != nil {
 		return err
 	}
 	hasError := false
-	for _, partitionId := range partitionIds {
-		err = m.publish(ctx, flow.Id, partitionId, projectReleaseMap[partitionId])
+
+	for _, c := range clusters {
+		err = m.publish(ctx, flow.Id, c.Uuid, projectReleaseMap[c.Uuid])
 		if err != nil {
 			hasError = true
 			log.Error(err)

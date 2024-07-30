@@ -9,7 +9,7 @@ import {useFetch} from "@common/hooks/http.ts";
 import {SortOrder} from "antd/es/table/interface";
 import {DefaultOptionType} from "antd/es/cascader";
 import moment from "moment";
-import { SimpleMemberItem } from "../../const/system/type.ts";
+import { SimpleMemberItem } from "@common/const/type.ts";
 
 type AuditLogTableListItem = {
     operator:string;
@@ -30,7 +30,7 @@ const AUDIT_LOG_COLUMNS_CONFIG: ProColumns<AuditLogTableListItem, 'multipleSelec
         copyable: true,
         ellipsis:true,
         fixed:'left',
-        width:176
+        width:182
     },
     {
         title: '操作人',
@@ -125,7 +125,6 @@ export default function AuditLog(){
         setOperatorTypeList([])
         const {code,data,msg} = await fetchData<BasicResponse<{operateTypes:Array<{id:string,name:string}>}>>('audit/operate_types',{method:'GET',eoTransformKeys:['operate_types']})
             if(code === STATUS_CODE.SUCCESS){
-                //console.log(data)
                 setOperatorTypeList(data.operateTypes?.map((x:{id:string,name:string})=>({label:x.name, value:x.id})))
             }else{
                 message.error(msg || '操作失败')
@@ -145,7 +144,6 @@ export default function AuditLog(){
     }
 
     const handleOperatorList = ()=>{
-        //console.log(operatorList)
         setColumns((prevData)=>
             prevData?.map((x)=>{
                 if(x.dataIndex === 'operator'){

@@ -86,11 +86,11 @@ export default function PartitionInsideDashboardSetting(){
                         autoComplete="off"
                     >
                         {/* <Form.Item<PartitionDashboardConfigFieldType>
-                            label="分区名称"
+                            label="环境名称"
                             name="name"
                             rules={[{ required: true, message: '必填项' }]}
                         >
-                            <Input className="w-INPUT_NORMAL"  placeholder="请输入分区名称"/>
+                            <Input className="w-INPUT_NORMAL"  placeholder="请输入环境名称"/>
                         </Form.Item> */}
                         <div>
                             <Form.Item<PartitionDashboardConfigFieldType>

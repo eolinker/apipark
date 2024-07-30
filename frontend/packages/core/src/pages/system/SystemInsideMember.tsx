@@ -68,7 +68,6 @@ export default function SystemInsideMember(){
                 if(!searchWord) setAllMemberIds(data.members?.map((x:SystemMemberTableListItem)=>x.user.id) || [])
                 setTableListDataSource(data.members)
                 setInit((prev) => prev ? false : prev)
-                // tableHttpReload && data.apps.sort((a:SystemMemberTableListItem,b:SystemMemberTableListItem)=>frontendTimeSorter(a,b,'updateTime'))
                 setTableHttpReload(false)
                 return {data: data.members, success: true}
             } else {

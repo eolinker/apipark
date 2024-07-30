@@ -23,7 +23,7 @@ func (c *imlCertificate) Update(ctx *gin.Context, id string, edit *certificate_d
 }
 
 func (c *imlCertificate) ListForPartition(ctx *gin.Context, partitionId string) ([]*certificate_dto.Certificate, error) {
-	return c.module.ListForPartition(ctx, partitionId)
+	return c.module.List(ctx, partitionId)
 }
 
 func (c *imlCertificate) Detail(ctx *gin.Context, id string) (*certificate_dto.Certificate, *certificate_dto.File, error) {

@@ -8,8 +8,7 @@ import {DynamicKeyValueInput, transferToList, transferToMap} from "@common/compo
 import {BasicResponse, STATUS_CODE} from "@common/const/const.ts";
 import {useFetch} from "@common/hooks/http.ts";
 import WithPermission from "@common/components/aoplatform/WithPermission.tsx";
-import { EntityItem } from "@common/const/type.ts";
-import { SimpleMemberItem } from "../../const/system/type.ts";
+import { EntityItem,SimpleMemberItem } from "@common/const/type.ts";
 import TableBtnWithPermission from "@common/components/aoplatform/TableBtnWithPermission.tsx";
 import { checkAccess } from "@common/utils/permission.ts";
 import { useGlobalContext } from "@common/contexts/GlobalStateContext.tsx";
@@ -61,7 +60,7 @@ const WEBHOOK_TABLE_COLUMNS: ProColumns<WebhookTableListItem>[] = [
         title: '更新时间',
         dataIndex: 'updateTime',
         ellipsis:true,
-        width:176,
+        width:182,
     },
 ];
 

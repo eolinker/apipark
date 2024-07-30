@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/eolinker/apipark/service/partition"
-
 	"github.com/eolinker/eosc/log"
 
 	authDriver "github.com/eolinker/apipark/module/project-authorization/auth-driver"
@@ -36,7 +34,6 @@ var _ IProjectAuthorizationModule = (*imlProjectAuthorizationModule)(nil)
 type imlProjectAuthorizationModule struct {
 	projectService              project.IProjectService                           `autowired:""`
 	projectAuthorizationService projectAuthorization.IProjectAuthorizationService `autowired:""`
-	partitionService            partition.IPartitionService                       `autowired:""`
 	clusterService              cluster.IClusterService                           `autowired:""`
 	transaction                 store.ITransaction                                `autowired:""`
 }
@@ -103,14 +100,7 @@ func (i *imlProjectAuthorizationModule) initGateway(ctx context.Context, partiti
 
 func (i *imlProjectAuthorizationModule) online(ctx context.Context, projectInfo *project.Project) error {
 
-	partitions, err := i.partitionService.List(ctx)
-	if err != nil {
-		return err
-	}
-	partitionIds := utils.SliceToSlice(partitions, func(p *partition.Partition) string {
-		return p.UUID
-	})
-	clusters, err := i.clusterService.List(ctx, partitionIds...)
+	clusters, err := i.clusterService.List(ctx)
 	if err != nil {
 		return err
 	}
@@ -144,7 +134,7 @@ func (i *imlProjectAuthorizationModule) online(ctx context.Context, projectInfo 
 	for _, c := range clusters {
 		err := i.doOnline(ctx, c.Uuid, app)
 		if err != nil {
-			log.Warnf("project authorization online for partition[%s] %v", c.Partition, err)
+			log.Warnf("project authorization online for cluster[%s] %v", c.Name, err)
 		}
 	}
 	return nil
@@ -263,19 +253,13 @@ func (i *imlProjectAuthorizationModule) DeleteAuthorization(ctx context.Context,
 	if err != nil {
 		return err
 	}
-	partitions, err := i.partitionService.List(ctx)
-	if err != nil {
-		return err
-	}
-	partitionIds := utils.SliceToSlice(partitions, func(p *partition.Partition) string {
-		return p.UUID
-	})
+
 	return i.transaction.Transaction(ctx, func(ctx context.Context) error {
 		err = i.projectAuthorizationService.Delete(ctx, aid)
 		if err != nil {
 			return err
 		}
-		clusters, err := i.clusterService.List(ctx, partitionIds...)
+		clusters, err := i.clusterService.List(ctx)
 		if err != nil {
 			return err
 		}
@@ -287,7 +271,7 @@ func (i *imlProjectAuthorizationModule) DeleteAuthorization(ctx context.Context,
 		for _, c := range clusters {
 			err := i.doOffline(ctx, c.Uuid, app)
 			if err != nil {
-				log.Warnf("project authorization offline for partition[%s] %v", c.Partition, err)
+				log.Warnf("project authorization offline for cluster[%s] %v", c.Name, err)
 			}
 		}
 		return nil

@@ -7,11 +7,12 @@ import { PublishApprovalModalHandle, PublishApprovalModalContent } from "@common
 import { RouterParams } from "@core/components/aoplatform/RenderRoutes";
 import { PUBLISH_APPROVAL_RECORD_INNER_TABLE_COLUMN, PUBLISH_APPROVAL_VERSION_INNER_TABLE_COLUMN } from "@common/const/approval/const";
 import { BasicResponse, STATUS_CODE } from "@common/const/const";
+import { SimpleMemberItem } from "@common/const/type.ts";
 import { MemberTableListItem } from "../../../const/member/type";
 import { useBreadcrumb } from "@common/contexts/BreadcrumbContext";
 import { useFetch } from "@common/hooks/http";
 import WithPermission from "@common/components/aoplatform/WithPermission";
-import { SimpleMemberItem, SystemPublishReleaseItem } from "../../../const/system/type";
+import { SystemPublishReleaseItem } from "../../../const/system/type";
 import TableBtnWithPermission from "@common/components/aoplatform/TableBtnWithPermission";
 import { useGlobalContext } from "@common/contexts/GlobalStateContext";
 import { PERMISSION_DEFINITION } from "@common/const/permissions";
@@ -192,7 +193,7 @@ const SystemInsidePublicList:FC = ()=>{
                     message.loading('正在加载数据');
                     const { code, data, msg } = await fetchData<BasicResponse<{ diffs: PublishApprovalInfoType }>>(
                         'project/publish/check',
-                        { method: 'GET', eoParams:{project:systemId}}
+                        { method: 'GET', eoParams:{project:systemId, ...(type === 'publish' ?{ release:entity?.id }:{})},eoTransformKeys:['version_remark'] }
                     );
                     message.destroy();
                     if (code === STATUS_CODE.SUCCESS) {

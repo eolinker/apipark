@@ -13,7 +13,6 @@ import (
 	permit_dto "github.com/eolinker/apipark/module/permit/dto"
 	permit_type "github.com/eolinker/apipark/service/permit-type"
 	"github.com/eolinker/apipark/service/project"
-	project_member "github.com/eolinker/apipark/service/project-member"
 	"github.com/eolinker/apipark/service/team"
 	team_member "github.com/eolinker/apipark/service/team-member"
 	"github.com/eolinker/eosc/log"
@@ -46,16 +45,16 @@ var (
 )
 
 type imlProjectPermitModule struct {
-	projectService         project.IProjectService             `autowired:""`
-	teamProject            team.ITeamService                   `autowired:""`
-	permitService          permit.IPermit                      `autowired:""`
-	projectMemberService   project_member.IMemberService       `autowired:""`
-	teamMemberService      team_member.ITeamMemberService      `autowired:""`
-	identityTeamService    permit_identity.IdentityTeamService `autowired:""`
-	userGroupMemberService user_group.IUserGroupMemberService  `autowired:""`
-	userGroupService       user_group.IUserGroupService        `autowired:""`
-	userService            user.IUserService                   `autowired:""`
-	roleService            role.IRoleService                   `autowired:""`
+	projectService project.IProjectService `autowired:""`
+	teamProject    team.ITeamService       `autowired:""`
+	permitService  permit.IPermit          `autowired:""`
+	//projectMemberService   project_member.IMemberService       `autowired:""`
+	teamMemberService   team_member.ITeamMemberService      `autowired:""`
+	identityTeamService permit_identity.IdentityTeamService `autowired:""`
+	//userGroupMemberService user_group.IUserGroupMemberService  `autowired:""`
+	userGroupService user_group.IUserGroupService `autowired:""`
+	userService      user.IUserService            `autowired:""`
+	roleService      role.IRoleService            `autowired:""`
 	//projectRoleService     project_role.IProjectRoleService    `autowired:""`
 }
 

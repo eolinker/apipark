@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 
-	"gorm.io/gorm"
+	"github.com/eolinker/ap-account/service/role"
 
-	"github.com/eolinker/apipark/service/partition"
+	"gorm.io/gorm"
 
 	"github.com/eolinker/apipark/service/project"
 
@@ -17,8 +17,6 @@ import (
 	"github.com/eolinker/ap-account/service/user"
 
 	"github.com/eolinker/go-common/store"
-
-	user_group "github.com/eolinker/ap-account/service/user-group"
 
 	team_member "github.com/eolinker/apipark/service/team-member"
 
@@ -32,14 +30,40 @@ var (
 )
 
 type imlTeamModule struct {
-	teamService             team.ITeamService                  `autowired:""`
-	teamMemberService       team_member.ITeamMemberService     `autowired:""`
-	userGroupMemberService  user_group.IUserGroupMemberService `autowired:""`
-	userService             user.IUserService                  `autowired:""`
-	departmentMemberService department_member.IMemberService   `autowired:""`
-	projectService          project.IProjectService            `autowired:""`
-	partitionService        partition.IPartitionService        `autowired:""`
-	transaction             store.ITransaction                 `autowired:""`
+	teamService             team.ITeamService                `autowired:""`
+	teamMemberService       team_member.ITeamMemberService   `autowired:""`
+	roleService             role.IRoleService                `autowired:""`
+	roleMemberService       role.IRoleMemberService          `autowired:""`
+	userService             user.IUserService                `autowired:""`
+	departmentMemberService department_member.IMemberService `autowired:""`
+	projectService          project.IProjectService          `autowired:""`
+	transaction             store.ITransaction               `autowired:""`
+}
+
+func (m *imlTeamModule) UpdateMemberRole(ctx context.Context, id string, input *team_dto.UpdateMemberRole) error {
+	_, err := m.teamService.Get(ctx, id)
+	if err != nil {
+		return err
+	}
+	return m.transaction.Transaction(ctx, func(ctx context.Context) error {
+		for _, roleId := range input.Roles {
+			err = m.roleMemberService.RemoveUserRole(ctx, roleId, input.Users...)
+			if err != nil {
+				return err
+			}
+			for _, userId := range input.Users {
+				err = m.roleMemberService.Add(ctx, &role.AddMember{
+					Role:   roleId,
+					User:   userId,
+					Target: role.TeamTarget(id),
+				})
+				if err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	})
 }
 
 func (m *imlTeamModule) GetTeam(ctx context.Context, id string) (*team_dto.Team, error) {
@@ -47,34 +71,15 @@ func (m *imlTeamModule) GetTeam(ctx context.Context, id string) (*team_dto.Team,
 	if err != nil {
 		return nil, err
 	}
-	//availablePartitions, err := m.organizationService.Partitions(ctx, tv.Organization)
-	//if err != nil {
-	//	return nil, err
-	//}
-	globalPartitions, err := m.partitionService.List(ctx)
-	if err != nil {
-		return nil, err
-	}
-	globalPartitionMap := utils.SliceToMapO(globalPartitions, func(p *partition.Partition) (string, struct{}) {
-		return p.UUID, struct{}{}
-	})
-	//for _, p := range availablePartitions {
-	//	delete(globalPartitionMap, p)
-	//}
+
 	return &team_dto.Team{
-		Id:           tv.Id,
-		Name:         tv.Name,
-		Description:  tv.Description,
-		Master:       auto.UUID(tv.Master),
-		CreateTime:   auto.TimeLabel(tv.CreateTime),
-		UpdateTime:   auto.TimeLabel(tv.UpdateTime),
-		Organization: auto.UUID(tv.Organization),
-		Creator:      auto.UUID(tv.Creator),
-		Updater:      auto.UUID(tv.Updater),
-		//AvailablePartitions: auto.List(availablePartitions),
-		DisablePartitions: auto.List(utils.MapToSlice(globalPartitionMap, func(k string, v struct{}) string {
-			return k
-		})),
+		Id:          tv.Id,
+		Name:        tv.Name,
+		Description: tv.Description,
+		CreateTime:  auto.TimeLabel(tv.CreateTime),
+		UpdateTime:  auto.TimeLabel(tv.UpdateTime),
+		Creator:     auto.UUID(tv.Creator),
+		Updater:     auto.UUID(tv.Updater),
 	}, nil
 }
 
@@ -124,7 +129,6 @@ func (m *imlTeamModule) Edit(ctx context.Context, id string, input *team_dto.Edi
 		return m.teamService.Save(ctx, id, &team.EditTeam{
 			Name:        input.Name,
 			Description: input.Description,
-			Master:      input.Master,
 		})
 	})
 
@@ -150,45 +154,34 @@ func (m *imlTeamModule) SimpleTeams(ctx context.Context, keyword string) ([]*tea
 	if err != nil {
 		return nil, err
 	}
-	//partitionMap, err := m.organizationService.PartitionsByOrganization(ctx)
-	//if err != nil {
-	//	return nil, err
-	//}
-	globalPartitions, err := m.partitionService.List(ctx)
-	if err != nil {
-		return nil, err
-	}
-	apps, err := m.projectService.Search(ctx, "", map[string]interface{}{
-		"team":   teamIDs,
-		"as_app": true,
-		"master": utils.UserId(ctx),
+
+	projects, err := m.projectService.Search(ctx, "", map[string]interface{}{
+		"team": teamIDs,
 	})
+	projectCount := make(map[string]int64)
 	appCount := make(map[string]int64)
-	for _, app := range apps {
-		if _, ok := appCount[app.Team]; !ok {
-			appCount[app.Team] = 0
+	for _, p := range projects {
+		if p.AsServer {
+			if _, ok := projectCount[p.Team]; !ok {
+				projectCount[p.Team] = 0
+			}
+			projectCount[p.Team]++
 		}
-		appCount[app.Team]++
+		if p.AsApp {
+			if _, ok := appCount[p.Team]; !ok {
+				appCount[p.Team] = 0
+			}
+			appCount[p.Team]++
+		}
 	}
 
 	outList := utils.SliceToSlice(list, func(s *team.Team) *team_dto.SimpleTeam {
-		globalPartitionMap := utils.SliceToMapO(globalPartitions, func(p *partition.Partition) (string, struct{}) {
-			return p.UUID, struct{}{}
-		})
-		//availablePartitions := partitionMap[s.Organization]
-		//for _, p := range availablePartitions {
-		//	delete(globalPartitionMap, p)
-		//}
 		return &team_dto.SimpleTeam{
-			Id:           s.Id,
-			Name:         s.Name,
-			Description:  s.Description,
-			Organization: auto.UUID(s.Organization),
-			//AvailablePartitions: auto.List(availablePartitions),
-			DisablePartitions: auto.List(utils.MapToSlice(globalPartitionMap, func(k string, v struct{}) string {
-				return k
-			})),
-			AppNum: appCount[s.Id],
+			Id:          s.Id,
+			Name:        s.Name,
+			Description: s.Description,
+			ServiceNum:  projectCount[s.Id],
+			AppNum:      appCount[s.Id],
 		}
 	})
 	return outList, nil
@@ -199,27 +192,69 @@ func (m *imlTeamModule) AddMember(ctx context.Context, id string, uuids ...strin
 	if err != nil {
 		return err
 	}
+	return m.transaction.Transaction(ctx, func(ctx context.Context) error {
+		err = m.teamMemberService.AddMemberTo(ctx, id, uuids...)
+		if err != nil {
+			return err
+		}
+		r, err := m.roleService.GetDefaultRole(ctx, role.GroupTeam)
+		if err != nil {
+			return err
+		}
+		for _, uid := range uuids {
+			err = m.roleMemberService.Add(ctx, &role.AddMember{Role: r.Id, User: uid, Target: role.TeamTarget(id)})
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 
-	return m.teamMemberService.AddMemberTo(ctx, id, uuids...)
 }
 
 func (m *imlTeamModule) RemoveMember(ctx context.Context, id string, uuids ...string) error {
-	teamInfo, err := m.teamService.Get(ctx, id)
+	_, err := m.teamService.Get(ctx, id)
 	if err != nil {
 		return err
 	}
-	newUuids := make([]string, 0, len(uuids))
-	for _, uuid := range uuids {
-		if teamInfo.Master == uuid {
-			continue
-		}
-		newUuids = append(newUuids, uuid)
+
+	supperRole, err := m.roleService.GetSupperRole(ctx, role.GroupTeam)
+	if err != nil {
+		return err
 	}
-	return m.teamMemberService.RemoveMemberFrom(ctx, id, newUuids...)
+	count, err := m.roleMemberService.CountByRole(ctx, role.TeamTarget(id), supperRole.Id)
+	if err != nil {
+		return err
+	}
+	members, err := m.roleMemberService.List(ctx, role.TeamTarget(id), uuids...)
+	if err != nil {
+		return err
+	}
+	if len(members) >= int(count) {
+		supperRoleCount := 0
+		for _, member := range members {
+			if member.Role == supperRole.Id {
+				supperRoleCount++
+			}
+		}
+
+		if supperRoleCount == int(count) {
+			return errors.New("can not delete all team admin")
+		}
+	}
+
+	return m.transaction.Transaction(ctx, func(ctx context.Context) error {
+		err = m.roleMemberService.RemoveUserRole(ctx, role.TeamTarget(id), uuids...)
+		if err != nil {
+			return err
+		}
+		return m.teamMemberService.RemoveMemberFrom(ctx, id, uuids...)
+	})
+
 }
 
 func (m *imlTeamModule) Members(ctx context.Context, id string, keyword string) ([]*team_dto.Member, error) {
-	teamInfo, err := m.teamService.Get(ctx, id)
+	_, err := m.teamService.Get(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -234,12 +269,17 @@ func (m *imlTeamModule) Members(ctx context.Context, id string, keyword string) 
 	if err != nil {
 		return nil, err
 	}
+	roleMembers, err := m.roleMemberService.List(ctx, role.TeamTarget(id))
+	if err != nil {
+		return nil, err
+	}
+	roleMemberMap := utils.SliceToMapArrayO(roleMembers, func(r *role.Member) (string, string) {
+		return r.User, r.Role
+	})
 
-	groupMemberMap, err := m.userGroupMemberService.FilterMembersForUser(ctx, userIds...)
 	out := make([]*team_dto.Member, 0, len(members))
 	for _, member := range members {
-		gIDs, _ := groupMemberMap[member.UID]
-		out = append(out, team_dto.ToMember(member, teamInfo.Master, gIDs...))
+		out = append(out, team_dto.ToMember(member, roleMemberMap[member.UID]...))
 	}
 
 	return out, nil

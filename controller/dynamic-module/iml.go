@@ -15,29 +15,29 @@ type imlDynamicModuleController struct {
 	module dynamic_module.IDynamicModuleModule `autowired:""`
 }
 
-func (i *imlDynamicModuleController) Online(ctx *gin.Context, module string, id string, partitionInput *dynamic_module_dto.PartitionInput) error {
+func (i *imlDynamicModuleController) Online(ctx *gin.Context, module string, id string, partitionInput *dynamic_module_dto.ClusterInput) error {
 	return i.module.Online(ctx, module, id, partitionInput)
 }
 
-func (i *imlDynamicModuleController) Offline(ctx *gin.Context, module string, id string, partitionInput *dynamic_module_dto.PartitionInput) error {
+func (i *imlDynamicModuleController) Offline(ctx *gin.Context, module string, id string, partitionInput *dynamic_module_dto.ClusterInput) error {
 	return i.module.Offline(ctx, module, id, partitionInput)
 }
 
-func (i *imlDynamicModuleController) PartitionStatuses(ctx *gin.Context, module string, keyword string, page string, pageSize string) (map[string]map[string]string, error) {
-	p, err := strconv.Atoi(page)
-	if err != nil {
-		p = 1
-	}
-	ps, err := strconv.Atoi(pageSize)
-	if err != nil {
-		ps = 20
-	}
-	return i.module.PartitionStatuses(ctx, module, keyword, p, ps)
-}
-
-func (i *imlDynamicModuleController) PartitionStatus(ctx *gin.Context, module string, id string) (*dynamic_module_dto.OnlineInfo, error) {
-	return i.module.PartitionStatus(ctx, module, id)
-}
+//func (i *imlDynamicModuleController) PartitionStatuses(ctx *gin.Context, module string, keyword string, page string, pageSize string) (map[string]map[string]string, error) {
+//	p, err := strconv.Atoi(page)
+//	if err != nil {
+//		p = 1
+//	}
+//	ps, err := strconv.Atoi(pageSize)
+//	if err != nil {
+//		ps = 20
+//	}
+//	return i.module.PartitionStatuses(ctx, module, keyword, p, ps)
+//}
+//
+//func (i *imlDynamicModuleController) PartitionStatus(ctx *gin.Context, module string, id string) (*dynamic_module_dto.OnlineInfo, error) {
+//	return i.module.PartitionStatus(ctx, module, id)
+//}
 
 func (i *imlDynamicModuleController) ModuleDrivers(ctx *gin.Context, group string) ([]*dynamic_module_dto.ModuleDriver, error) {
 	return i.module.ModuleDrivers(ctx, group)

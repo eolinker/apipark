@@ -4,6 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/eolinker/go-common/utils"
+
+	"github.com/eolinker/ap-account/service/role"
+
 	"github.com/eolinker/apipark/service/project"
 
 	"github.com/eolinker/go-common/store"
@@ -23,11 +27,13 @@ var (
 )
 
 type imlTeamModule struct {
-	service        team.ITeamService              `autowired:""`
-	memberService  team_member.ITeamMemberService `autowired:""`
-	userService    user.IUserService              `autowired:""`
-	projectService project.IProjectService        `autowired:""`
-	transaction    store.ITransaction             `autowired:""`
+	service           team.ITeamService              `autowired:""`
+	memberService     team_member.ITeamMemberService `autowired:""`
+	userService       user.IUserService              `autowired:""`
+	projectService    project.IProjectService        `autowired:""`
+	roleService       role.IRoleService              `autowired:""`
+	roleMemberService role.IRoleMemberService        `autowired:""`
+	transaction       store.ITransaction             `autowired:""`
 }
 
 func (m *imlTeamModule) GetTeam(ctx context.Context, id string) (*team_dto.Team, error) {
@@ -70,12 +76,28 @@ func (m *imlTeamModule) Create(ctx context.Context, input *team_dto.CreateTeam) 
 			Id:          input.Id,
 			Name:        input.Name,
 			Description: input.Description,
-			Master:      input.Master,
 		})
 		if err != nil {
 			return err
 		}
-		return m.memberService.AddMemberTo(ctx, input.Id, input.Master)
+		if input.Master == "" {
+			input.Master = utils.UserId(ctx)
+		}
+
+		err = m.memberService.AddMemberTo(ctx, input.Id, input.Master)
+		if err != nil {
+			return err
+		}
+		supperRole, err := m.roleService.GetDefaultRole(ctx, role.GroupTeam)
+		if err != nil {
+			return err
+		}
+
+		return m.roleMemberService.Add(ctx, &role.AddMember{
+			Role:   supperRole.Id,
+			User:   input.Master,
+			Target: role.TeamTarget(input.Id),
+		})
 	})
 	if err != nil {
 		return nil, err
@@ -85,23 +107,9 @@ func (m *imlTeamModule) Create(ctx context.Context, input *team_dto.CreateTeam) 
 
 func (m *imlTeamModule) Edit(ctx context.Context, id string, input *team_dto.EditTeam) (*team_dto.Team, error) {
 	err := m.transaction.Transaction(ctx, func(ctx context.Context) error {
-		if input.Master != nil {
-			// 负责人是否在团队内，若不在，则新增
-			members, err := m.memberService.Members(ctx, []string{id}, []string{*input.Master})
-			if err != nil {
-				return err
-			}
-			if len(members) == 0 {
-				err = m.memberService.AddMemberTo(ctx, id, *input.Master)
-				if err != nil {
-					return err
-				}
-			}
-		}
 		return m.service.Save(ctx, id, &team.EditTeam{
 			Name:        input.Name,
 			Description: input.Description,
-			Master:      input.Master,
 		})
 	})
 
@@ -122,7 +130,11 @@ func (m *imlTeamModule) Delete(ctx context.Context, id string) error {
 		if count != 0 {
 			return fmt.Errorf("team has projects,cannot delete")
 		}
-		return m.service.Delete(ctx, id)
+		err = m.service.Delete(ctx, id)
+		if err != nil {
+			return err
+		}
+		return nil
 	})
 	return err
 }

@@ -1,22 +1,23 @@
 package cluster
 
 import (
+	"reflect"
+
 	"github.com/eolinker/go-common/autowire"
 	"github.com/eolinker/go-common/store"
-	"reflect"
 )
 
 type IClusterNodeStore interface {
-	store.IBaseStore[ClusterNode]
+	store.IBaseStore[Node]
 }
 type storeClusterNode struct {
-	store.Store[ClusterNode] // 用struct方式继承,会自动填充并初始化表
+	store.Store[Node] // 用struct方式继承,会自动填充并初始化表
 }
 type IClusterNodeAddressStore interface {
-	store.IBaseStore[ClusterNodeAddr]
+	store.IBaseStore[NodeAddr]
 }
 type storeClusterNodeAddr struct {
-	store.Store[ClusterNodeAddr] // 用struct方式继承,会自动填充并初始化表
+	store.Store[NodeAddr] // 用struct方式继承,会自动填充并初始化表
 }
 
 func init() {

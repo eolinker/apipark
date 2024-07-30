@@ -1,25 +1,19 @@
-import { getItem, getTabItem } from "@common/utils/navigation";
+import { getItem } from "@common/utils/navigation";
 import { ProColumns } from "@ant-design/pro-components";
 import { PartitionCertTableListItem, PartitionClusterNodeModalTableListItem, PartitionClusterNodeTableListItem, PartitionClusterTableListItem, PartitionTableListItem } from "./types";
 import { ColumnType } from "antd/es/table";
 import CopyAddrList from "@common/components/aoplatform/CopyAddrList";
-import { MenuProps, TabsProps } from "antd";
+import { MenuProps } from "antd";
 import { Link } from "react-router-dom";
 
-// export const PARTITIONS_INNER_MENU: TabsProps['items'] = [
-//         getTabItem(<span>集群</span>, 'cluster',undefined,undefined,'system.partition.cluster.view'),
-//         getTabItem(<span>证书管理</span>, 'cert',undefined,undefined,'system.partition.cert.view'),
-//         getTabItem(<span>监控配置</span>, 'dashboard_setting',undefined,undefined,'system.partition.self.view'),
-//         getTabItem(<span>分区设置</span>, 'setting',undefined,undefined,'system.partition.self.view'),
-//         ] as TabsProps['items'] 
-
+const APP_MODE = import.meta.env.VITE_APP_MODE;
 
 export const PARTITIONS_INNER_MENU: MenuProps['items'] = [
     getItem('管理', 'grp', null,
         [getItem(<Link to="cluster">集群</Link>, 'cluster',undefined,undefined,undefined,'system.partition.cluster.view'),
             getItem(<Link to="cert">证书管理</Link>, 'cert',undefined,undefined,undefined,'system.partition.cert.view'),
-            getItem(<Link to="dashboard_setting">监控配置</Link>, 'dashboard_setting',undefined,undefined,undefined,'system.partition.self.view'),
-            getItem(<Link to="setting">分区设置</Link>, 'setting',undefined,undefined,undefined,'system.partition.self.view')],
+            APP_MODE ==='pro' ? getItem(<Link to="dashboard_setting">监控配置</Link>, 'dashboard_setting',undefined,undefined,undefined,'system.partition.self.view'):null,
+            getItem(<Link to="setting">环境设置</Link>, 'setting',undefined,undefined,undefined,'system.partition.self.view')],
         'group'),
 ];
 
@@ -68,7 +62,7 @@ export const PARTITION_CERT_TABLE_COLUMNS: ProColumns<PartitionCertTableListItem
         key: 'updateTime',
         dataIndex: 'updateTime',
         ellipsis:true,
-        width:176,
+        width:182,
         sorter: (a,b)=> {
             return a.updateTime.localeCompare(b.updateTime)
         },
@@ -176,11 +170,10 @@ export const NODE_MODAL_COLUMNS:ColumnType<PartitionClusterNodeModalTableListIte
 
 export const PARTITION_LIST_COLUMNS: ProColumns<PartitionTableListItem>[] = [
     {
-        title: '分区名称',
+        title: '环境名称',
         dataIndex: 'name',
         copyable: true,
         ellipsis:true,
-        width:160,
         fixed:'left',
         sorter: (a,b)=> {
             return a.name.localeCompare(b.name)
@@ -193,19 +186,20 @@ export const PARTITION_LIST_COLUMNS: ProColumns<PartitionTableListItem>[] = [
         ellipsis:true,
         width:140,
     },
-    {
-        title: '集群数量',
-        dataIndex: 'clusterNum',
-        sorter: (a,b)=> {
-            return a.clusterNum - b.clusterNum
-        },
-    },
+    // {
+    //     title: '集群数量',
+    //     dataIndex: 'clusterNum',
+    //     sorter: (a,b)=> {
+    //         return a.clusterNum - b.clusterNum
+    //     },
+    // },
     {
         title: '更新者',
         dataIndex: ['updater','name'],
         ellipsis: true,
         filters: true,
         onFilter: true,
+        width:100,
         valueType: 'select',
         filterSearch: true
     },
@@ -213,7 +207,7 @@ export const PARTITION_LIST_COLUMNS: ProColumns<PartitionTableListItem>[] = [
         title: '更新时间',
         dataIndex: 'updateTime',
         ellipsis:true,
-        width:176,
+        width:182,
         sorter: (a,b)=> {
             return a.updateTime.localeCompare(b.updateTime)
         },

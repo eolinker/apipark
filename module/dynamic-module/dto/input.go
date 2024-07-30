@@ -16,6 +16,6 @@ type EditDynamicModule struct {
 	Config      *map[string]PartitionConfig `json:"config"`
 }
 
-type PartitionInput struct {
-	Partitions []string `json:"partitions" aocheck:"partition"`
+type ClusterInput struct {
+	Clusters []string `json:"clusters" aocheck:"cluster"`
 }

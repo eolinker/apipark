@@ -37,7 +37,7 @@ const MyServiceInsideMenu:FC = ()=> {
                     <Menu
                         selectedKeys={[selectedKeys]}
                         onClick={onMenuClick}
-                        style={{ width: 176 }}
+                        style={{ width: 182 }}
                         mode="inline"
                         items={items}
                     />

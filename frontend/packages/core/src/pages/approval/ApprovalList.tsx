@@ -23,7 +23,7 @@ import {
     PublishApprovalModalHandle
 } from "@common/components/aoplatform/PublishApprovalModalContent.tsx";
 import WithPermission from "@common/components/aoplatform/WithPermission.tsx";
-import { SimpleMemberItem } from "../../const/system/type.ts";
+import { SimpleMemberItem } from "@common/const/type.ts";
 import TableBtnWithPermission from "@common/components/aoplatform/TableBtnWithPermission.tsx";
 
 export default function ApprovalList({pageType,pageStatus}:{pageType:'subscribe'|'release',pageStatus:0|1}){
