@@ -1,11 +1,13 @@
 package release
 
 import (
-	"github.com/eolinker/apipark/module/project_diff"
+	"reflect"
+
+	service_diff "github.com/eolinker/apipark/module/service-diff"
+
 	"github.com/eolinker/apipark/module/release/dto"
 	"github.com/eolinker/go-common/autowire"
 	"github.com/gin-gonic/gin"
-	"reflect"
 )
 
 type IReleaseController interface {
@@ -13,7 +15,7 @@ type IReleaseController interface {
 	Delete(ctx *gin.Context, project string, id string) error
 	Detail(ctx *gin.Context, project string, id string) (*dto.Detail, error)
 	List(ctx *gin.Context, project string) ([]*dto.Release, error)
-	Preview(ctx *gin.Context, project string) (*dto.Release, *project_diff.DiffOut, bool, error)
+	Preview(ctx *gin.Context, project string) (*dto.Release, *service_diff.DiffOut, bool, error)
 }
 
 func init() {

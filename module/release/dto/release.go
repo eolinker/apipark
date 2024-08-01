@@ -8,7 +8,7 @@ import (
 type Release struct {
 	Id          string         `json:"id,omitempty"`
 	Version     string         `json:"version,omitempty"`
-	Project     auto.Label     `json:"project,omitempty" aolabel:"project"`
+	Service     auto.Label     `json:"service,omitempty" aolabel:"service"`
 	CreateTime  auto.TimeLabel `json:"create_time"`
 	Creator     auto.Label     `json:"creator" aolabel:"user"`
 	Status      Status         `json:"status,omitempty"`
@@ -22,10 +22,8 @@ type Detail struct {
 	Id         string         `json:"id,omitempty"`
 	Version    string         `json:"version,omitempty"`
 	Remark     string         `json:"remark,omitempty"`
-	Project    auto.Label     `json:"project,omitempty" aolabel:"project"`
+	Service    auto.Label     `json:"service,omitempty" aolabel:"service"`
 	CreateTime auto.TimeLabel `json:"createTime"`
 	Creator    auto.Label     `json:"creator" aolabel:"user"`
-	//Apis       []*project_diff.ApiDiff      `json:"apis,omitempty"`
-	//Upstreams  []*project_diff.UpstreamDiff `json:"upstreams,omitempty"`
-	Diffs *dto.DiffOut `json:"diffs,omitempty"`
+	Diffs      *dto.DiffOut   `json:"diffs,omitempty"`
 }

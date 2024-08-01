@@ -8,7 +8,7 @@ import (
 
 type Publish struct {
 	Id          string
-	Project     string
+	Service     string
 	Release     string
 	Previous    string
 	Version     string
@@ -24,7 +24,7 @@ type Publish struct {
 func FromEntity(e *publish.Publish) *Publish {
 	return &Publish{
 		Id:          e.UUID,
-		Project:     e.Project,
+		Service:     e.Service,
 		Release:     e.Release,
 		Previous:    e.Previous,
 		Version:     e.Version,
@@ -39,9 +39,8 @@ func FromEntity(e *publish.Publish) *Publish {
 }
 
 type Status struct {
-	Publish string
-	Cluster string
-	//Partition string
+	Publish  string
+	Cluster  string
 	Status   StatusType
 	Error    string
 	UpdateAt time.Time

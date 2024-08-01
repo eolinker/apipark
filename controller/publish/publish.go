@@ -13,18 +13,18 @@ var (
 )
 
 type IPublishController interface {
-	CheckPublish(ctx *gin.Context, project string, releaseId string) (*dto.DiffOut, error)
-
-	ApplyOnRelease(ctx *gin.Context, project string, input *dto.ApplyOnReleaseInput) (*dto.Publish, error)
-	Apply(ctx *gin.Context, project string, input *dto.ApplyInput) (*dto.Publish, error)
-	Close(ctx *gin.Context, project string, id string) error
-	Stop(ctx *gin.Context, project string, id string) error
-	Refuse(ctx *gin.Context, project string, id string, input *dto.Comments) error
-	Accept(ctx *gin.Context, project string, id string, input *dto.Comments) error
-	Publish(ctx *gin.Context, project string, id string) error
-	ListPage(ctx *gin.Context, project string, page, pageSize string) ([]*dto.Publish, int, int, int64, error)
-	Detail(ctx *gin.Context, project string, id string) (*dto.PublishDetail, error)
-	PublishStatuses(ctx *gin.Context, project string, id string) ([]*dto.PublishStatus, error)
+	CheckPublish(ctx *gin.Context, serviceId string, releaseId string) (*dto.DiffOut, error)
+	ReleaseDo(ctx *gin.Context, serviceId string, input *dto.ApplyOnReleaseInput) error
+	ApplyOnRelease(ctx *gin.Context, serviceId string, input *dto.ApplyOnReleaseInput) (*dto.Publish, error)
+	Apply(ctx *gin.Context, serviceId string, input *dto.ApplyInput) (*dto.Publish, error)
+	Close(ctx *gin.Context, serviceId string, id string) error
+	Stop(ctx *gin.Context, serviceId string, id string) error
+	Refuse(ctx *gin.Context, serviceId string, id string, input *dto.Comments) error
+	Accept(ctx *gin.Context, serviceId string, id string, input *dto.Comments) error
+	Publish(ctx *gin.Context, serviceId string, id string) error
+	ListPage(ctx *gin.Context, serviceId string, page, pageSize string) ([]*dto.Publish, int, int, int64, error)
+	Detail(ctx *gin.Context, serviceId string, id string) (*dto.PublishDetail, error)
+	PublishStatuses(ctx *gin.Context, serviceId string, id string) ([]*dto.PublishStatus, error)
 }
 
 func init() {

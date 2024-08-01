@@ -12,9 +12,9 @@ type imlAPIController struct {
 	module api.IApiModule `autowired:""`
 }
 
-func (i *imlAPIController) SimpleList(ctx *gin.Context, serviceId string) ([]*api_dto.ApiSimpleItem, error) {
-	return i.module.SimpleList(ctx, serviceId)
-}
+//func (i *imlAPIController) SimpleList(ctx *gin.Context, serviceId string) ([]*api_dto.ApiSimpleItem, error) {
+//	return i.module.SimpleList(ctx, serviceId)
+//}
 
 func (i *imlAPIController) Detail(ctx *gin.Context, serviceId string, apiId string) (*api_dto.ApiDetail, error) {
 	return i.module.Detail(ctx, serviceId, apiId)

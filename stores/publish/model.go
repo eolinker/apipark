@@ -5,7 +5,7 @@ import "time"
 type Publish struct {
 	Id          int64     `gorm:"column:id;type:BIGINT(20);AUTO_INCREMENT;NOT NULL;comment:id;primary_key;comment:主键ID;"`
 	UUID        string    `gorm:"type:varchar(36);not null;column:uuid;uniqueIndex:uuid;comment:UUID;"`
-	Project     string    `gorm:"size:36;not null;column:project;comment:项目;index:project;"`
+	Service     string    `gorm:"type:varchar(50);not null;column:service;comment:服务名;index:service"`
 	Release     string    `gorm:"type:varchar(36);not null;column:release;comment:release id;"`
 	Previous    string    `gorm:"type:varchar(50);not null;column:previous;comment:上一个版本release id;index:previous"`
 	Version     string    `gorm:"type:varchar(50);not null;column:version;comment:版本号(冗余);index:version;"`
@@ -22,7 +22,7 @@ func (t *Publish) IdValue() int64 {
 	return t.Id
 }
 func (t *Publish) TableName() string {
-	return "project_publish"
+	return "service_publish"
 }
 
 type Diff struct {
@@ -35,7 +35,7 @@ func (t *Diff) IdValue() int64 {
 	return t.Id
 }
 func (t *Diff) TableName() string {
-	return "project_publish_diff"
+	return "service_publish_diff"
 }
 
 type Latest struct {
@@ -48,7 +48,7 @@ func (t *Latest) IdValue() int64 {
 	return t.Id
 }
 func (t *Latest) TableName() string {
-	return "project_publish_latest"
+	return "service_publish_latest"
 }
 
 type Status struct {
@@ -64,5 +64,5 @@ func (t *Status) IdValue() int64 {
 	return t.Id
 }
 func (t *Status) TableName() string {
-	return "project_publish_status"
+	return "service_publish_status"
 }

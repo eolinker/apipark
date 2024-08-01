@@ -257,7 +257,7 @@ func (i *imlCatalogueModule) ServiceDetail(ctx context.Context, sid string) (*ca
 	//	Description: s.Description,
 	//	Document:    docStr,
 	//	Basic: &catalogue_dto.ServiceBasic{
-	//		//Service:       auto.UUID(s.Project),
+	//		//Service:       auto.UUID(s.Service),
 	//		Team:          auto.UUID(s.Team),
 	//		ApiNum:        len(apis),
 	//		SubscriberNum: subscribeCount[s.Id],

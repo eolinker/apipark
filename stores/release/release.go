@@ -6,7 +6,7 @@ type Release struct {
 	Id       int64     `gorm:"column:id;type:BIGINT(20);AUTO_INCREMENT;NOT NULL;comment:id;primary_key;comment:主键ID;"`
 	UUID     string    `gorm:"type:varchar(36);not null;column:uuid;uniqueIndex:uuid;comment:UUID;"`
 	Name     string    `gorm:"type:varchar(100);not null;column:name;comment:name"`
-	Project  string    `gorm:"size:36;not null;column:project;comment:项目;index:project"` // 项目id
+	Service  string    `gorm:"type:varchar(50);not null;column:service;comment:服务ID;index:service"`
 	Remark   string    `gorm:"size:255;not null;column:remark;comment:备注"`
 	Creator  string    `gorm:"size:36;not null;column:creator;comment:创建人;index:creator"` // 创建人
 	CreateAt time.Time `gorm:"type:timestamp;NOT NULL;DEFAULT:CURRENT_TIMESTAMP;column:create_at;comment:创建时间"`

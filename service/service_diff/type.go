@@ -1,4 +1,4 @@
-package project_diff
+package service_diff
 
 import (
 	"encoding/json"

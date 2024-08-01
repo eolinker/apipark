@@ -19,7 +19,7 @@ type IAPIController interface {
 	Search(ctx *gin.Context, keyword string, serviceId string) ([]*api_dto.ApiItem, error)
 	// SimpleSearch 获取API简要列表
 	SimpleSearch(ctx *gin.Context, keyword string, serviceId string) ([]*api_dto.ApiSimpleItem, error)
-	SimpleList(ctx *gin.Context, serviceId string) ([]*api_dto.ApiSimpleItem, error)
+	//SimpleList(ctx *gin.Context, serviceId string) ([]*api_dto.ApiSimpleItem, error)
 	// Create 创建API
 	Create(ctx *gin.Context, serviceId string, dto *api_dto.CreateApi) (*api_dto.ApiSimpleDetail, error)
 	// Edit 编辑API

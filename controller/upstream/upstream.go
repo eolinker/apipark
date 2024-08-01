@@ -10,8 +10,8 @@ import (
 )
 
 type IUpstreamController interface {
-	Get(ctx *gin.Context, pid string) (upstream_dto.UpstreamConfig, error)
-	Save(ctx *gin.Context, pid string, upstream *upstream_dto.UpstreamConfig) (upstream_dto.UpstreamConfig, error)
+	Get(ctx *gin.Context, serviceId string) (upstream_dto.UpstreamConfig, error)
+	Save(ctx *gin.Context, serviceId string, upstream *upstream_dto.UpstreamConfig) (upstream_dto.UpstreamConfig, error)
 }
 
 func init() {

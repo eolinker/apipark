@@ -7,11 +7,11 @@ import (
 
 	"github.com/eolinker/apipark/service/cluster"
 	"github.com/eolinker/apipark/service/service"
+	"github.com/eolinker/apipark/service/service_diff"
 
-	projectDiff "github.com/eolinker/apipark/module/project_diff"
 	"github.com/eolinker/apipark/module/release/dto"
+	serviceDiff "github.com/eolinker/apipark/module/service-diff"
 	"github.com/eolinker/apipark/service/api"
-	"github.com/eolinker/apipark/service/project_diff"
 	"github.com/eolinker/apipark/service/publish"
 	"github.com/eolinker/apipark/service/release"
 	"github.com/eolinker/apipark/service/universally/commit"
@@ -30,7 +30,7 @@ var (
 )
 
 type imlReleaseModule struct {
-	projectDiffModule projectDiff.IProjectDiffModule `autowired:""`
+	projectDiffModule serviceDiff.IServiceDiffModule `autowired:""`
 	releaseService    release.IReleaseService        `autowired:""`
 	apiService        api.IAPIService                `autowired:""`
 	upstreamService   upstream.IUpstreamService      `autowired:""`
@@ -40,9 +40,9 @@ type imlReleaseModule struct {
 	clusterService    cluster.IClusterService        `autowired:""`
 }
 
-func (m *imlReleaseModule) Create(ctx context.Context, projectId string, input *dto.CreateInput) (string, error) {
+func (m *imlReleaseModule) Create(ctx context.Context, serviceId string, input *dto.CreateInput) (string, error) {
 
-	proInfo, err := m.projectService.Check(ctx, projectId, projectRuleMustServer)
+	proInfo, err := m.projectService.Check(ctx, serviceId, projectRuleMustServer)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return "", errors.New("project not found")
@@ -87,7 +87,7 @@ func (m *imlReleaseModule) Create(ctx context.Context, projectId string, input *
 	if len(apis) != len(apiDocs) {
 		return "", errors.New("api or document not found")
 	}
-	upstreams, err := m.upstreamService.ListLatestCommit(ctx, projectId)
+	upstreams, err := m.upstreamService.ListLatestCommit(ctx, serviceId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return "", errors.New("api  config or  document not found")
@@ -114,7 +114,7 @@ func (m *imlReleaseModule) Create(ctx context.Context, projectId string, input *
 	}), apiUUIDS, apiProxy, apiDocs, upstreams) {
 		return "", errors.New("completeness check failed")
 	}
-	newRelease, err := m.releaseService.CreateRelease(ctx, projectId, input.Version, input.Remark, apiProxyCommits, apiDocumentCommits, upstreamCommitsForUKC)
+	newRelease, err := m.releaseService.CreateRelease(ctx, serviceId, input.Version, input.Remark, apiProxyCommits, apiDocumentCommits, upstreamCommitsForUKC)
 	if err != nil {
 		return "", err
 	}
@@ -126,7 +126,7 @@ func (m *imlReleaseModule) Detail(ctx context.Context, project string, id string
 	if err != nil {
 		return nil, err
 	}
-	if r.Project != project {
+	if r.Service != project {
 		return nil, errors.New("release not found")
 	}
 	running, err := m.releaseService.GetRunning(ctx, project)
@@ -149,7 +149,7 @@ func (m *imlReleaseModule) Detail(ctx context.Context, project string, id string
 		Id:         r.UUID,
 		Version:    r.Version,
 		Remark:     r.Remark,
-		Project:    auto.UUID(r.Project),
+		Service:    auto.UUID(r.Service),
 		CreateTime: auto.TimeLabel(r.CreateAt),
 		Creator:    auto.UUID(r.Creator),
 		Diffs:      out,
@@ -185,7 +185,7 @@ func (m *imlReleaseModule) List(ctx context.Context, project string) ([]*dto.Rel
 
 		r := &dto.Release{
 			Id:          s.UUID,
-			Project:     auto.UUID(s.Project),
+			Service:     auto.UUID(s.Service),
 			Version:     s.Version,
 			Remark:      s.Remark,
 			Status:      dto.StatusNone,
@@ -233,7 +233,7 @@ func (m *imlReleaseModule) Delete(ctx context.Context, project string, id string
 		if r == nil {
 			return errors.New("release not found")
 		}
-		if r.Project != project {
+		if r.Service != project {
 			return errors.New("project not match")
 		}
 		running, err := m.releaseService.GetRunning(ctx, project)
@@ -257,7 +257,7 @@ func (m *imlReleaseModule) Delete(ctx context.Context, project string, id string
 
 }
 
-func (m *imlReleaseModule) Preview(ctx context.Context, project string) (*dto.Release, *project_diff.Diff, bool, error) {
+func (m *imlReleaseModule) Preview(ctx context.Context, project string) (*dto.Release, *service_diff.Diff, bool, error) {
 	_, err := m.projectService.Check(ctx, project, projectRuleMustServer)
 	if err != nil {
 		return nil, nil, false, err
@@ -278,7 +278,7 @@ func (m *imlReleaseModule) Preview(ctx context.Context, project string) (*dto.Re
 	return &dto.Release{
 		Id:          running.UUID,
 		Version:     running.Version,
-		Project:     auto.UUID(project),
+		Service:     auto.UUID(project),
 		CreateTime:  auto.TimeLabel(running.CreateAt),
 		Creator:     auto.UUID(running.Creator),
 		Status:      dto.StatusNone,

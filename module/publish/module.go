@@ -11,16 +11,17 @@ import (
 )
 
 type IPublishModule interface {
-	CheckPublish(ctx context.Context, project string, releaseId string) (*dto.DiffOut, error)
+	CheckPublish(ctx context.Context, serviceId string, releaseId string) (*dto.DiffOut, error)
+	ReleaseDo(ctx context.Context, serviceId string, input *dto.ApplyOnReleaseInput) error
 
-	Apply(ctx context.Context, project string, input *dto.ApplyInput) (*dto.Publish, error)
-	Stop(ctx context.Context, project string, id string) error
-	Refuse(ctx context.Context, project string, id string, commits string) error
-	Accept(ctx context.Context, project string, id string, commits string) error
-	Publish(ctx context.Context, project string, id string) error
-	List(ctx context.Context, project string, page, pageSize int) ([]*dto.Publish, int64, error)
-	Detail(ctx context.Context, project string, id string) (*dto.PublishDetail, error)
-	PublishStatuses(ctx context.Context, project string, id string) ([]*dto.PublishStatus, error)
+	Apply(ctx context.Context, serviceId string, input *dto.ApplyInput) (*dto.Publish, error)
+	Stop(ctx context.Context, serviceId string, id string) error
+	Refuse(ctx context.Context, serviceId string, id string, commits string) error
+	Accept(ctx context.Context, serviceId string, id string, commits string) error
+	Publish(ctx context.Context, serviceId string, id string) error
+	List(ctx context.Context, serviceId string, page, pageSize int) ([]*dto.Publish, int64, error)
+	Detail(ctx context.Context, serviceId string, id string) (*dto.PublishDetail, error)
+	PublishStatuses(ctx context.Context, serviceId string, id string) ([]*dto.PublishStatus, error)
 }
 
 func init() {

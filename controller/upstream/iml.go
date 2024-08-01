@@ -18,10 +18,10 @@ type imlUpstreamController struct {
 	partitionModule cluster.IClusterModule   `autowired:""`
 }
 
-func (i *imlUpstreamController) Get(ctx *gin.Context, pid string) (upstream_dto.UpstreamConfig, error) {
-	return i.upstreamModule.Get(ctx, pid)
+func (i *imlUpstreamController) Get(ctx *gin.Context, serviceId string) (upstream_dto.UpstreamConfig, error) {
+	return i.upstreamModule.Get(ctx, serviceId)
 }
 
-func (i *imlUpstreamController) Save(ctx *gin.Context, pid string, upstream *upstream_dto.UpstreamConfig) (upstream_dto.UpstreamConfig, error) {
-	return i.upstreamModule.Save(ctx, pid, *upstream)
+func (i *imlUpstreamController) Save(ctx *gin.Context, serviceId string, upstream *upstream_dto.UpstreamConfig) (upstream_dto.UpstreamConfig, error) {
+	return i.upstreamModule.Save(ctx, serviceId, *upstream)
 }

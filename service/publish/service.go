@@ -4,7 +4,7 @@ import (
 	"context"
 	"reflect"
 
-	"github.com/eolinker/apipark/service/project_diff"
+	"github.com/eolinker/apipark/service/service_diff"
 	"github.com/eolinker/go-common/autowire"
 )
 
@@ -14,13 +14,13 @@ type IPublishService interface {
 	Latest(ctx context.Context, release ...string) ([]*Publish, error)
 	GetLatest(ctx context.Context, id string) (*Publish, error)
 	Get(ctx context.Context, id string) (*Publish, error)
-	GetDiff(ctx context.Context, id string) (*project_diff.Diff, error)
+	GetDiff(ctx context.Context, id string) (*service_diff.Diff, error)
 	ListProject(ctx context.Context, project string) ([]*Publish, error)
 	ListProjectPage(ctx context.Context, project string, page int, pageSize int) ([]*Publish, int64, error)
 	ListForStatus(ctx context.Context, project string, status ...StatusType) ([]*Publish, error)
 	ListForStatusPage(ctx context.Context, page int, pageSize int, status ...StatusType) ([]*Publish, int64, error)
 
-	Create(ctx context.Context, uuid, project, release, previous, version, remark string, diff *project_diff.Diff) error
+	Create(ctx context.Context, uuid, project, release, previous, version, remark string, diff *service_diff.Diff) error
 
 	SetStatus(ctx context.Context, project, id string, status StatusType) error
 	Refuse(ctx context.Context, project, id string, comments string) error

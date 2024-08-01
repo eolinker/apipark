@@ -1,8 +1,8 @@
-package project_diff
+package service_diff
 
 import (
 	"github.com/eolinker/apipark/service/api"
-	"github.com/eolinker/apipark/service/project_diff"
+	"github.com/eolinker/apipark/service/service_diff"
 	"github.com/eolinker/apipark/service/universally/commit"
 	"github.com/eolinker/apipark/service/upstream"
 	"github.com/eolinker/go-common/auto"
@@ -19,15 +19,12 @@ type ApiDiffOut struct {
 	Method string     `json:"method,omitempty"`
 	Path   string     `json:"path,omitempty"`
 	//Upstream auto.Label              `json:"upstream,omitempty" aolabel:"upstream"`
-	Change project_diff.ChangeType `json:"change,omitempty"`
-	Status project_diff.Status     `json:"status,omitempty"`
+	Change service_diff.ChangeType `json:"change,omitempty"`
+	Status service_diff.Status     `json:"status,omitempty"`
 }
 type UpstreamDiffOut struct {
-	//Upstream  auto.Label              `json:"upstream,omitempty" aolabel:"upstream"`
-	Partition auto.Label `json:"partition,omitempty" aolabel:"partition"`
-	//Cluster   auto.Label              `json:"cluster,omitempty" aolabel:"cluster"`
-	Change project_diff.ChangeType `json:"change,omitempty"`
-	Status project_diff.StatusType `json:"status,omitempty"`
+	Change service_diff.ChangeType `json:"change,omitempty"`
+	Status service_diff.StatusType `json:"status,omitempty"`
 	Type   string                  `json:"type,omitempty"`
 	Addr   []string                `json:"addr,omitempty"`
 }

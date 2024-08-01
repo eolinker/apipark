@@ -1,4 +1,4 @@
-package project_diff
+package service_diff
 
 import (
 	"context"
@@ -7,22 +7,22 @@ import (
 
 	"github.com/eolinker/apipark/service/api"
 	"github.com/eolinker/apipark/service/cluster"
-	"github.com/eolinker/apipark/service/project_diff"
 	"github.com/eolinker/apipark/service/release"
+	"github.com/eolinker/apipark/service/service_diff"
 	"github.com/eolinker/apipark/service/universally/commit"
 	"github.com/eolinker/apipark/service/upstream"
 	"github.com/eolinker/go-common/auto"
 	"github.com/eolinker/go-common/utils"
 )
 
-type imlProjectDiff struct {
+type imlServiceDiff struct {
 	apiService      api.IAPIService           `autowired:""`
 	upstreamService upstream.IUpstreamService `autowired:""`
 	releaseService  release.IReleaseService   `autowired:""`
 	clusterService  cluster.IClusterService   `autowired:""`
 }
 
-func (m *imlProjectDiff) Diff(ctx context.Context, projectId string, baseRelease, targetRelease string) (*project_diff.Diff, error) {
+func (m *imlServiceDiff) Diff(ctx context.Context, serviceId string, baseRelease, targetRelease string) (*service_diff.Diff, error) {
 	if targetRelease == "" {
 		return nil, fmt.Errorf("target release is required")
 	}
@@ -33,7 +33,7 @@ func (m *imlProjectDiff) Diff(ctx context.Context, projectId string, baseRelease
 	if err != nil {
 		return nil, fmt.Errorf("get target release  failed:%w", err)
 	}
-	if targetReleaseValue.Project != projectId {
+	if targetReleaseValue.Service != serviceId {
 		return nil, errors.New("project not match")
 	}
 
@@ -41,11 +41,11 @@ func (m *imlProjectDiff) Diff(ctx context.Context, projectId string, baseRelease
 	if err != nil {
 		return nil, err
 	}
-	base, err := m.getBaseInfo(ctx, projectId, baseRelease)
+	base, err := m.getBaseInfo(ctx, serviceId, baseRelease)
 	if err != nil {
 		return nil, err
 	}
-	target.id = projectId
+	target.id = serviceId
 	clusters, err := m.clusterService.List(ctx)
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func (m *imlProjectDiff) Diff(ctx context.Context, projectId string, baseRelease
 	return diff, nil
 
 }
-func (m *imlProjectDiff) getBaseInfo(ctx context.Context, projectId, baseRelease string) (*projectInfo, error) {
+func (m *imlServiceDiff) getBaseInfo(ctx context.Context, serviceId, baseRelease string) (*projectInfo, error) {
 	if baseRelease == "" {
 		return &projectInfo{}, nil
 	}
@@ -65,7 +65,7 @@ func (m *imlProjectDiff) getBaseInfo(ctx context.Context, projectId, baseRelease
 	if err != nil {
 		return nil, fmt.Errorf("get base release  failed:%w", err)
 	}
-	if baseReleaseValue.Project != projectId {
+	if baseReleaseValue.Service != serviceId {
 		return nil, errors.New("project not match")
 	}
 	base, err := m.getReleaseInfo(ctx, baseRelease)
@@ -75,9 +75,9 @@ func (m *imlProjectDiff) getBaseInfo(ctx context.Context, projectId, baseRelease
 
 	return base, nil
 }
-func (m *imlProjectDiff) DiffForLatest(ctx context.Context, projectId string, baseRelease string) (*project_diff.Diff, bool, error) {
+func (m *imlServiceDiff) DiffForLatest(ctx context.Context, serviceId string, baseRelease string) (*service_diff.Diff, bool, error) {
 
-	apis, err := m.apiService.ListForService(ctx, projectId)
+	apis, err := m.apiService.ListForService(ctx, serviceId)
 	if err != nil {
 		return nil, false, err
 	}
@@ -98,17 +98,17 @@ func (m *imlProjectDiff) DiffForLatest(ctx context.Context, projectId string, ba
 		return nil, false, err
 	}
 
-	upstreamCommits, err := m.upstreamService.ListLatestCommit(ctx, projectId)
+	upstreamCommits, err := m.upstreamService.ListLatestCommit(ctx, serviceId)
 	if err != nil {
 		return nil, false, err
 	}
 
-	base, err := m.getBaseInfo(ctx, projectId, baseRelease)
+	base, err := m.getBaseInfo(ctx, serviceId, baseRelease)
 	if err != nil {
 		return nil, false, err
 	}
 	target := &projectInfo{
-		id:              projectId,
+		id:              serviceId,
 		apis:            apiInfos,
 		apiCommits:      proxy,
 		apiDocs:         documents,
@@ -123,7 +123,7 @@ func (m *imlProjectDiff) DiffForLatest(ctx context.Context, projectId string, ba
 	})
 	return m.diff(clusterIds, base, target), true, nil
 }
-func (m *imlProjectDiff) getReleaseInfo(ctx context.Context, releaseId string) (*projectInfo, error) {
+func (m *imlServiceDiff) getReleaseInfo(ctx context.Context, releaseId string) (*projectInfo, error) {
 	commits, err := m.releaseService.GetCommits(ctx, releaseId)
 	if err != nil {
 		return nil, err
@@ -172,8 +172,8 @@ func (m *imlProjectDiff) getReleaseInfo(ctx context.Context, releaseId string) (
 		upstreamCommits: upstreamCommits,
 	}, nil
 }
-func (m *imlProjectDiff) diff(partitions []string, base, target *projectInfo) *project_diff.Diff {
-	out := &project_diff.Diff{
+func (m *imlServiceDiff) diff(partitions []string, base, target *projectInfo) *service_diff.Diff {
+	out := &service_diff.Diff{
 		Apis:      nil,
 		Upstreams: nil,
 		//Clusters: partitions,
@@ -197,55 +197,55 @@ func (m *imlProjectDiff) diff(partitions []string, base, target *projectInfo) *p
 
 	for _, apiInfo := range target.apis {
 		apiId := apiInfo.UUID
-		a := &project_diff.ApiDiff{
+		a := &service_diff.ApiDiff{
 			APi:    apiInfo.UUID,
 			Name:   apiInfo.Name,
 			Method: apiInfo.Method,
 			Path:   apiInfo.Path,
-			Status: project_diff.Status{},
+			Status: service_diff.Status{},
 		}
 
 		pc, hasPc := targetApiProxy[apiId]
 		dc, hasDC := targetAPIDoc[apiId]
 		if !hasPc {
 			// 未设置proxy信息
-			a.Status.Proxy = project_diff.StatusUnset
+			a.Status.Proxy = service_diff.StatusUnset
 		}
 		if !hasDC {
 			// 未设置文档
-			a.Status.Doc = project_diff.StatusUnset
+			a.Status.Doc = service_diff.StatusUnset
 		}
 
 		if !baseApis.Has(apiId) {
-			a.Change = project_diff.ChangeTypeNew
+			a.Change = service_diff.ChangeTypeNew
 		} else {
-			a.Change = project_diff.ChangeTypeNone
+			a.Change = service_diff.ChangeTypeNone
 
 			baseProxy, hasBaseProxy := baseApiProxy[apiId]
 			baseDoc, hasBaseDoc := baseAPIDoc[apiId]
 			if hasBaseDoc != hasDC || hasBaseProxy != hasPc {
 				// 文档或者proxy变更
-				a.Change = project_diff.ChangeTypeUpdate
+				a.Change = service_diff.ChangeTypeUpdate
 			} else if (hasPc && pc.UUID != baseProxy.UUID) || (hasDC && dc.UUID != baseDoc.UUID) {
 				// 文档 或者 proxy 变更
-				a.Change = project_diff.ChangeTypeUpdate
+				a.Change = service_diff.ChangeTypeUpdate
 			}
 		}
 		out.Apis = append(out.Apis, a)
 
 	}
-	baseApis.Remove(utils.SliceToSlice(out.Apis, func(i *project_diff.ApiDiff) string {
+	baseApis.Remove(utils.SliceToSlice(out.Apis, func(i *service_diff.ApiDiff) string {
 		return i.APi
 	})...)
 	for _, apiInfo := range base.apis {
 		if baseApis.Has(apiInfo.UUID) {
-			out.Apis = append(out.Apis, &project_diff.ApiDiff{
+			out.Apis = append(out.Apis, &service_diff.ApiDiff{
 				APi:    apiInfo.UUID,
 				Name:   apiInfo.Name,
 				Method: apiInfo.Method,
 				Path:   apiInfo.Path,
-				Status: project_diff.Status{},
-				Change: project_diff.ChangeTypeDelete,
+				Status: service_diff.Status{},
+				Change: service_diff.ChangeTypeDelete,
 			})
 		}
 
@@ -260,12 +260,12 @@ func (m *imlProjectDiff) diff(partitions []string, base, target *projectInfo) *p
 
 	for _, partitionId := range partitions {
 		key := fmt.Sprintf("%s-%s", target.id, partitionId)
-		o := &project_diff.UpstreamDiff{
-			Upstream:  target.id,
-			Partition: partitionId,
-			Data:      nil,
-			Change:    project_diff.ChangeTypeNone,
-			Status:    0,
+		o := &service_diff.UpstreamDiff{
+			Upstream: target.id,
+			//Partition: partitionId,
+			Data:   nil,
+			Change: service_diff.ChangeTypeNone,
+			Status: 0,
 		}
 		out.Upstreams = append(out.Upstreams, o)
 		bu, hasBu := baseUpstreamMap[key]
@@ -273,15 +273,15 @@ func (m *imlProjectDiff) diff(partitions []string, base, target *projectInfo) *p
 		if hasTu {
 			o.Data = tu.Data
 			if !hasBu {
-				o.Change = project_diff.ChangeTypeNew
+				o.Change = service_diff.ChangeTypeNew
 			} else if tu.UUID != bu.UUID {
-				o.Change = project_diff.ChangeTypeUpdate
+				o.Change = service_diff.ChangeTypeUpdate
 			}
 
 		} else {
-			o.Status = project_diff.StatusLoss
+			o.Status = service_diff.StatusLoss
 			if hasBu {
-				o.Change = project_diff.ChangeTypeDelete
+				o.Change = service_diff.ChangeTypeDelete
 			}
 		}
 	}
@@ -289,7 +289,7 @@ func (m *imlProjectDiff) diff(partitions []string, base, target *projectInfo) *p
 	return out
 }
 
-func (m *imlProjectDiff) Out(ctx context.Context, diff *project_diff.Diff) (*DiffOut, error) {
+func (m *imlServiceDiff) Out(ctx context.Context, diff *service_diff.Diff) (*DiffOut, error) {
 
 	clusters, err := m.clusterService.List(ctx, diff.Clusters...)
 	if err != nil {
@@ -298,30 +298,9 @@ func (m *imlProjectDiff) Out(ctx context.Context, diff *project_diff.Diff) (*Dif
 	if len(clusters) == 0 {
 		return nil, fmt.Errorf("unset gateway for clusters %v", diff.Clusters)
 	}
-	//// 检查分区是否配置集群，若没有配置，则报错
-	//requirePartition := make([]*partition.Partition, 0, len(partitions))
-	//for _, p := range partitions {
-	//	if p.Cluster == "" {
-	//		requirePartition = append(requirePartition, p)
-	//		continue
-	//	}
-	//	_, err = m.clusterService.Get(ctx, p.Cluster)
-	//	if err != nil {
-	//		if !errors.Is(err, gorm.ErrRecordNotFound) {
-	//			requirePartition = append(requirePartition, p)
-	//			continue
-	//		}
-	//		return nil, err
-	//	}
-	//
-	//}
-	//
-	//if len(requirePartition) > 0 {
-	//	return nil, fmt.Errorf("unset gateway for partitions %v", requirePartition)
-	//}
 
 	out := &DiffOut{}
-	out.Apis = utils.SliceToSlice(diff.Apis, func(i *project_diff.ApiDiff) *ApiDiffOut {
+	out.Apis = utils.SliceToSlice(diff.Apis, func(i *service_diff.ApiDiff) *ApiDiffOut {
 		return &ApiDiffOut{
 			Api:    auto.UUID(i.APi),
 			Name:   i.Name,
@@ -339,10 +318,9 @@ func (m *imlProjectDiff) Out(ctx context.Context, diff *project_diff.Diff) (*Dif
 			typeValue = "static"
 		}
 		out.Upstreams = append(out.Upstreams, &UpstreamDiffOut{
-			Partition: auto.UUID(u.Partition),
-			Change:    u.Change,
-			Type:      typeValue,
-			Status:    u.Status,
+			Change: u.Change,
+			Type:   typeValue,
+			Status: u.Status,
 			Addr: utils.SliceToSlice(u.Data.Nodes, func(i *upstream.NodeConfig) string {
 				return i.Address
 			}),

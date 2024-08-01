@@ -8,7 +8,7 @@ import (
 
 type Release struct {
 	UUID     string
-	Project  string
+	Service  string
 	Version  string
 	Remark   string
 	Creator  string
@@ -18,7 +18,7 @@ type Release struct {
 func FromEntity(e *release.Release) *Release {
 	return &Release{
 		UUID:     e.UUID,
-		Project:  e.Project,
+		Service:  e.Service,
 		Version:  e.Name,
 		Remark:   e.Remark,
 		Creator:  e.Creator,

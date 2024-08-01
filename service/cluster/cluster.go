@@ -277,14 +277,25 @@ func (s *imlClusterService) UpdateAddress(ctx context.Context, id string, addres
 	if err != nil {
 		return nil, err
 	}
-	if info.Cluster != id {
-		return nil, errors.New("cluster id not match")
-	}
+	//if info.Cluster != id {
+	//	return nil, errors.New("cluster id not match")
+	//}
+	operator := utils.UserId(ctx)
+	now := time.Now()
 	cv, err := s.store.FirstQuery(ctx, "`uuid` = ?", []interface{}{id}, "id desc")
 	if err != nil {
-		return nil, err
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, err
+		}
+		cv = &cluster.Cluster{
+			UUID:     id,
+			Name:     "默认集群",
+			Resume:   "默认集群",
+			Creator:  operator,
+			CreateAt: now,
+		}
 	}
-	operator := utils.UserId(ctx)
+
 	// check node
 	nodeIds := utils.SliceToSlice(info.Nodes, func(i *admin.Node) string {
 		return i.Id
@@ -316,14 +327,14 @@ func (s *imlClusterService) UpdateAddress(ctx context.Context, id string, addres
 			return err
 		}
 		cv.Updater = operator
-		cv.UpdateAt = time.Now()
-		uc, err := s.store.Update(ctx, cv)
+		cv.UpdateAt = now
+		err = s.store.Save(ctx, cv)
 		if err != nil {
 			return err
 		}
-		if uc == 0 {
-			return errors.New("no update")
-		}
+		//if uc == 0 {
+		//	return errors.New("no update")
+		//}
 		err = s.nodeStore.Insert(ctx, nodeEn...)
 		if err != nil {
 			return err

@@ -1,4 +1,4 @@
-package project_diff
+package service_diff
 
 import (
 	"github.com/eolinker/apipark/service/upstream"
@@ -31,11 +31,11 @@ type UpstreamConfig struct {
 	Addr []string `json:"addr"`
 }
 type UpstreamDiff struct {
-	Upstream  string           `json:"upstream,omitempty" `
-	Partition string           `json:"partition,omitempty"`
-	Data      *upstream.Config `json:"data,omitempty"`
-	Change    ChangeType       `json:"change,omitempty"`
-	Status    StatusType       `json:"status,omitempty"`
+	Upstream string `json:"upstream,omitempty" `
+	//Partition string           `json:"partition,omitempty"`
+	Data   *upstream.Config `json:"data,omitempty"`
+	Change ChangeType       `json:"change,omitempty"`
+	Status StatusType       `json:"status,omitempty"`
 }
 
 type Diff struct {

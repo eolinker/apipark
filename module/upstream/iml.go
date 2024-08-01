@@ -18,8 +18,8 @@ import (
 )
 
 var (
-	_                     IUpstreamModule = (*imlUpstreamModule)(nil)
-	projectRuleMustServer                 = map[string]bool{
+	_        IUpstreamModule = (*imlUpstreamModule)(nil)
+	asServer                 = map[string]bool{
 		"as_server": true,
 	}
 )
@@ -31,7 +31,7 @@ type imlUpstreamModule struct {
 }
 
 func (i *imlUpstreamModule) Get(ctx context.Context, pid string) (upstream_dto.UpstreamConfig, error) {
-	_, err := i.projectService.Check(ctx, pid, projectRuleMustServer)
+	_, err := i.projectService.Check(ctx, pid, asServer)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (i *imlUpstreamModule) Get(ctx context.Context, pid string) (upstream_dto.U
 }
 
 func (i *imlUpstreamModule) Save(ctx context.Context, pid string, upstreamConfig upstream_dto.UpstreamConfig) (upstream_dto.UpstreamConfig, error) {
-	pInfo, err := i.projectService.Check(ctx, pid, projectRuleMustServer)
+	pInfo, err := i.projectService.Check(ctx, pid, asServer)
 	if err != nil {
 		return nil, err
 	}
