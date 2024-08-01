@@ -26,7 +26,7 @@ func (p *plugin) ServiceApis() []pm3.Api {
 		pm3.CreateApiWidthDoc(http.MethodGet, "/api/v1/my_apps", []string{"context", "query:team", "query:keyword"}, []string{"apps"}, p.appController.SearchMyApps),
 		pm3.CreateApiWidthDoc(http.MethodPut, "/api/v1/app/info", []string{"context", "query:app", "body"}, []string{"app"}, p.appController.UpdateApp),
 
-		pm3.CreateApiWidthDoc(http.MethodGet, "/api/v1/service/service/doc", []string{"context", "query:service"}, []string{"doc"}, p.serviceController.ServiceDoc),
-		pm3.CreateApiWidthDoc(http.MethodPut, "/api/v1/service/service/doc", []string{"context", "query:service", "body"}, nil, p.serviceController.SaveServiceDoc),
+		pm3.CreateApiWidthDoc(http.MethodGet, "/api/v1/service/doc", []string{"context", "query:service"}, []string{"doc"}, p.serviceController.ServiceDoc),
+		pm3.CreateApiWidthDoc(http.MethodPut, "/api/v1/service/doc", []string{"context", "query:service", "body"}, nil, p.serviceController.SaveServiceDoc),
 	}
 }

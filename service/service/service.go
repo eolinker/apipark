@@ -15,6 +15,7 @@ type IServiceService interface {
 	universally.IServiceEdit[Edit]
 	ServiceCountByTeam(ctx context.Context, teamId ...string) (map[string]int64, error)
 	AppCountByTeam(ctx context.Context, teamId ...string) (map[string]int64, error)
+	SearchPublicServices(ctx context.Context, keyword string) ([]*Service, error)
 	Check(ctx context.Context, id string, rule map[string]bool) (*Service, error)
 	AppList(ctx context.Context, appIds ...string) ([]*Service, error)
 }

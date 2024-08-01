@@ -40,6 +40,14 @@ type imlAPIService struct {
 	universally.IServiceDelete
 }
 
+func (i *imlAPIService) CountMapByService(ctx context.Context, service ...string) (map[string]int64, error) {
+	w := map[string]interface{}{}
+	if len(service) > 0 {
+		w["service"] = service
+	}
+	return i.store.CountByGroup(ctx, "", w, "service")
+}
+
 func (i *imlAPIService) ListInfoForService(ctx context.Context, serviceId string) ([]*Info, error) {
 	apis, err := i.store.List(ctx, map[string]interface{}{
 		"service": serviceId,

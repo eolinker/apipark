@@ -42,6 +42,16 @@ type imlSubscribeService struct {
 	universally.IServiceEdit[UpdateSubscribe]
 }
 
+func (i *imlSubscribeService) CountMapByService(ctx context.Context, status int, service ...string) (map[string]int64, error) {
+	w := make(map[string]interface{})
+	if len(service) > 0 {
+		w["service"] = service
+	}
+
+	w["apply_status"] = status
+	return i.store.CountByGroup(ctx, "", w, "service")
+}
+
 func (i *imlSubscribeService) ListByServices(ctx context.Context, serviceIds ...string) ([]*Subscribe, error) {
 	w := make(map[string]interface{})
 	if len(serviceIds) > 0 {
@@ -73,10 +83,10 @@ func (i *imlSubscribeService) DeleteByApplication(ctx context.Context, service s
 	return err
 }
 
-func (i *imlSubscribeService) SubscribersByProject(ctx context.Context, projectIds ...string) ([]*Subscribe, error) {
+func (i *imlSubscribeService) SubscribersByProject(ctx context.Context, serviceIds ...string) ([]*Subscribe, error) {
 	w := make(map[string]interface{})
-	if len(projectIds) > 0 {
-		w["project"] = projectIds
+	if len(serviceIds) > 0 {
+		w["service"] = serviceIds
 	}
 
 	w["apply_status"] = ApplyStatusSubscribe
@@ -87,18 +97,18 @@ func (i *imlSubscribeService) SubscribersByProject(ctx context.Context, projectI
 	return utils.SliceToSlice(list, FromEntity), nil
 }
 
-func (i *imlSubscribeService) Subscribers(ctx context.Context, project string, status int) ([]*Subscribe, error) {
-	list, err := i.store.List(ctx, map[string]interface{}{"apply_status": status, "project": project}, "create_at desc")
+func (i *imlSubscribeService) Subscribers(ctx context.Context, service string, status int) ([]*Subscribe, error) {
+	list, err := i.store.List(ctx, map[string]interface{}{"apply_status": status, "service": service}, "create_at desc")
 	if err != nil {
 		return nil, err
 	}
 	return utils.SliceToSlice(list, FromEntity), nil
 }
 
-func (i *imlSubscribeService) ListBySubscribeStatus(ctx context.Context, projectId string, status int) ([]*Subscribe, error) {
+func (i *imlSubscribeService) ListBySubscribeStatus(ctx context.Context, serviceId string, status int) ([]*Subscribe, error) {
 	w := make(map[string]interface{})
-	if projectId != "" {
-		w["project"] = projectId
+	if serviceId != "" {
+		w["service"] = serviceId
 	}
 	w["apply_status"] = status
 	list, err := i.store.List(ctx, w, "create_at desc")
@@ -119,17 +129,15 @@ func (i *imlSubscribeService) UpdateSubscribeStatus(ctx context.Context, applica
 	return i.store.Save(ctx, info)
 }
 
-func (i *imlSubscribeService) MySubscribeServices(ctx context.Context, application string, projectIds []string, serviceIDs []string, partitionIds ...string) ([]*Subscribe, error) {
+func (i *imlSubscribeService) MySubscribeServices(ctx context.Context, application string, serviceIDs []string) ([]*Subscribe, error) {
 	w := make(map[string]interface{})
-	if len(projectIds) > 0 {
-		w["project"] = projectIds
-	}
+
 	if len(serviceIDs) > 0 {
 		w["service"] = serviceIDs
 	}
-	if len(partitionIds) > 0 {
-		w["partition"] = partitionIds
-	}
+	//if len(partitionIds) > 0 {
+	//	w["partition"] = partitionIds
+	//}
 	w["application"] = application
 	list, err := i.store.List(ctx, w, "create_at desc")
 	if err != nil {
@@ -170,10 +178,10 @@ func (i *imlSubscribeService) uniquestHandler(t *CreateSubscribe) []map[string]i
 func (i *imlSubscribeService) createEntityHandler(t *CreateSubscribe) *subscribe.Subscribe {
 	return &subscribe.Subscribe{
 		UUID:        t.Uuid,
-		Project:     t.Project,
 		Application: t.Application,
 		Service:     t.Service,
 		From:        t.From,
+		Applier:     t.Applier,
 		CreateAt:    time.Now(),
 		ApplyStatus: t.ApplyStatus,
 	}
@@ -204,9 +212,17 @@ type imlSubscribeApplyService struct {
 	universally.IServiceEdit[EditApply]
 }
 
+func (i *imlSubscribeApplyService) GetApply(ctx context.Context, serviceId string, appId string) (*Apply, error) {
+	info, err := i.store.First(ctx, map[string]interface{}{"service": serviceId, "application": appId})
+	if err != nil {
+		return nil, err
+	}
+	return FromApplyEntity(info), err
+}
+
 func (i *imlSubscribeApplyService) ListByStatus(ctx context.Context, pid string, status ...int) ([]*Apply, error) {
 	w := make(map[string]interface{})
-	w["project"] = pid
+	w["service"] = pid
 	if len(status) > 0 {
 		w["status"] = status
 	}
@@ -267,6 +283,7 @@ func (i *imlSubscribeApplyService) createEntityHandler(t *CreateApply) *subscrib
 func (i *imlSubscribeApplyService) updateHandler(e *subscribe.Apply, t *EditApply) {
 	if t.Approver != nil {
 		e.Approver = *t.Approver
+		e.ApproveAt = time.Now()
 	}
 	if t.Status != nil {
 		e.Status = *t.Status
@@ -274,8 +291,8 @@ func (i *imlSubscribeApplyService) updateHandler(e *subscribe.Apply, t *EditAppl
 	if t.Opinion != nil {
 		e.Opinion = *t.Opinion
 	}
-	if t.Approver != nil {
-		e.Approver = *t.Approver
+	if t.Applier != nil {
+		e.Applier = *t.Applier
 		e.ApplyAt = time.Now()
 	}
 

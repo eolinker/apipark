@@ -19,9 +19,36 @@ type imlPublishController struct {
 	releaseModule release.IReleaseModule `autowired:""`
 }
 
-func (c *imlPublishController) ReleaseDo(ctx *gin.Context, serviceId string, input *dto.ApplyOnReleaseInput) error {
-
-	return c.publishModule.ReleaseDo(ctx, serviceId, input)
+func (c *imlPublishController) ReleaseDo(ctx *gin.Context, serviceId string, input *dto.ApplyOnReleaseInput) (*dto.Publish, error) {
+	newReleaseId, err := c.releaseModule.Create(ctx, serviceId, &dto2.CreateInput{
+		Version: input.Version,
+		Remark:  input.VersionRemark,
+	})
+	if err != nil {
+		return nil, err
+	}
+	apply, err := c.publishModule.Apply(ctx, serviceId, &dto.ApplyInput{
+		Release: newReleaseId,
+		Remark:  input.PublishRemark,
+	})
+	if err != nil {
+		return nil, err
+	}
+	err = c.publishModule.Accept(ctx, serviceId, apply.Id, "")
+	if err != nil {
+		c.releaseModule.Delete(ctx, serviceId, newReleaseId)
+		return nil, err
+	}
+	err = c.publishModule.Publish(ctx, serviceId, apply.Id)
+	if err != nil {
+		c.releaseModule.Delete(ctx, serviceId, newReleaseId)
+		return nil, err
+	}
+	err = c.publishModule.ReleaseDo(ctx, serviceId, input)
+	if err != nil {
+		return nil, err
+	}
+	return apply, err
 }
 
 func (c *imlPublishController) PublishStatuses(ctx *gin.Context, serviceId string, id string) ([]*dto.PublishStatus, error) {

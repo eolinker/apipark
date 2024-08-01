@@ -18,7 +18,7 @@ type ISubscribeController interface {
 	// Search 关键字获取订阅者列表
 	Search(ctx *gin.Context, project string, keyword string) ([]*subscribe_dto.Subscriber, error)
 	// SearchSubscriptions 关键字获取订阅服务列表
-	SearchSubscriptions(ctx *gin.Context, partitionId string, projectId string, keyword string) ([]*subscribe_dto.SubscriptionItem, error)
+	SearchSubscriptions(ctx *gin.Context, appId string, keyword string) ([]*subscribe_dto.SubscriptionItem, error)
 	// RevokeSubscription 取消订阅
 	RevokeSubscription(ctx *gin.Context, project string, uuid string) error
 	// DeleteSubscription 删除订阅

@@ -25,6 +25,18 @@ type imlServiceService struct {
 	universally.IServiceEdit[Edit]
 }
 
+func (i *imlServiceService) SearchPublicServices(ctx context.Context, keyword string) ([]*Service, error) {
+	w := map[string]interface{}{
+		"as_server":    true,
+		"service_type": PublicService.Int(),
+	}
+	list, err := i.store.Search(ctx, keyword, w)
+	if err != nil {
+		return nil, err
+	}
+	return utils.SliceToSlice(list, FromEntity), nil
+}
+
 func (i *imlServiceService) ServiceCountByTeam(ctx context.Context, teamId ...string) (map[string]int64, error) {
 	w := map[string]interface{}{
 		"as_server": true,
@@ -117,6 +129,7 @@ func createEntityHandler(i *Create) *service.Service {
 		Prefix:      i.Prefix,
 		Team:        i.Team,
 		ServiceType: i.ServiceType.Int(),
+		Catalogue:   i.Catalogue,
 		AsServer:    i.AsServer,
 		AsApp:       i.AsApp,
 	}
@@ -130,6 +143,9 @@ func updateHandler(e *service.Service, i *Edit) {
 	}
 	if i.ServiceType != nil {
 		e.ServiceType = (*i.ServiceType).Int()
+	}
+	if i.Catalogue != nil {
+		e.Catalogue = *i.Catalogue
 	}
 	if i.Logo != nil {
 		e.Logo = *i.Logo

@@ -20,12 +20,12 @@ type ServiceItem struct {
 }
 
 type ServiceDetail struct {
-	Name        string             `json:"name"`
-	Description string             `json:"description"`
-	Document    string             `json:"document"`
-	Basic       *ServiceBasic      `json:"basic"`
-	Apis        []*ServiceApi      `json:"apis"`
-	DisableApis []*ServiceApiBasic `json:"disable_apis"`
+	Name        string        `json:"name"`
+	Description string        `json:"description"`
+	Document    string        `json:"document"`
+	Basic       *ServiceBasic `json:"basic"`
+	Apis        []*ServiceApi `json:"apis"`
+	//DisableApis []*ServiceApiBasic `json:"disable_apis"`
 }
 
 type ServiceBasic struct {

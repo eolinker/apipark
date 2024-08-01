@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
+
 	"github.com/eolinker/eosc/log"
 
 	"github.com/eolinker/apipark/gateway"
@@ -15,8 +17,6 @@ import (
 	"github.com/eolinker/apipark/service/service"
 
 	"github.com/eolinker/go-common/store"
-
-	"github.com/google/uuid"
 
 	"github.com/eolinker/go-common/auto"
 
@@ -37,8 +37,8 @@ type imlSubscribeModule struct {
 	transaction           store.ITransaction               `autowired:""`
 }
 
-func (i *imlSubscribeModule) getSubscribers(ctx context.Context, projectIds []string) ([]*gateway.SubscribeRelease, error) {
-	subscribers, err := i.subscribeService.SubscribersByProject(ctx, projectIds...)
+func (i *imlSubscribeModule) getSubscribers(ctx context.Context, serviceIds []string) ([]*gateway.SubscribeRelease, error) {
+	subscribers, err := i.subscribeService.SubscribersByProject(ctx, serviceIds...)
 	if err != nil {
 		return nil, err
 	}
@@ -57,10 +57,10 @@ func (i *imlSubscribeModule) initGateway(ctx context.Context, clientDriver gatew
 	if err != nil {
 		return err
 	}
-	projectIds := utils.SliceToSlice(projects, func(p *service.Service) string {
+	serviceIds := utils.SliceToSlice(projects, func(p *service.Service) string {
 		return p.Id
 	})
-	releases, err := i.getSubscribers(ctx, projectIds)
+	releases, err := i.getSubscribers(ctx, serviceIds)
 	if err != nil {
 		return err
 	}
@@ -68,58 +68,56 @@ func (i *imlSubscribeModule) initGateway(ctx context.Context, clientDriver gatew
 	return clientDriver.Subscribe().Online(ctx, releases...)
 }
 
-func (i *imlSubscribeModule) SearchSubscriptions(ctx context.Context, partitionId string, app string, keyword string) ([]*subscribe_dto.SubscriptionItem, error) {
-	//pInfo, err := i.serviceService.Get(ctx, app)
-	//if err != nil {
-	//	return nil, fmt.Errorf("get application error: %w", err)
-	//}
-	//if !pInfo.AsApp {
-	//	return nil, fmt.Errorf("project %s is not an application", app)
-	//}
-	//
-	//// 获取当前订阅服务列表
-	//subscriptions, err := i.subscribeService.MySubscribeServices(ctx, app, nil, nil, partitionId)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//serviceIds := utils.SliceToSlice(subscriptions, func(s *subscribe.Subscribe) string {
-	//	return s.Service
-	//})
-	//services, err := i.serviceService.SearchByUuids(ctx, keyword, serviceIds...)
-	//if err != nil {
-	//	return nil, fmt.Errorf("search service error: %w", err)
-	//}
-	//serviceMap := utils.SliceToMapArray(services, func(s *service.Service) string {
-	//	return s.Id
-	//})
+func (i *imlSubscribeModule) SearchSubscriptions(ctx context.Context, appId string, keyword string) ([]*subscribe_dto.SubscriptionItem, error) {
+	info, err := i.serviceService.Get(ctx, appId)
+	if err != nil {
+		return nil, fmt.Errorf("get application error: %w", err)
+	}
+	if !info.AsApp {
+		return nil, fmt.Errorf("service %s is not an application", appId)
+	}
 
-	//return utils.SliceToSlice(subscriptions, func(s *subscribe.Subscribe) *subscribe_dto.SubscriptionItem {
-	//	return &subscribe_dto.SubscriptionItem{
-	//		Id:          s.Id,
-	//		Service:     auto.UUID(s.Service),
-	//		ApplyStatus: s.ApplyStatus,
-	//		Service:     auto.UUID(s.Service),
-	//		Team:        auto.UUID(pInfo.Team),
-	//		From:        s.From,
-	//		CreateTime:  auto.TimeLabel(s.CreateAt),
-	//	}
-	//}, func(s *subscribe.Subscribe) bool {
-	//	_, ok := serviceMap[s.Service]
-	//	if !ok {
-	//		return false
-	//	}
-	//	if s.ApplyStatus != subscribe.ApplyStatusSubscribe && s.ApplyStatus != subscribe.ApplyStatusReview {
-	//		return false
-	//	}
-	//	return true
-	//}), nil
-	return nil, nil
+	// 获取当前订阅服务列表
+	subscriptions, err := i.subscribeService.MySubscribeServices(ctx, appId, nil)
+	if err != nil {
+		return nil, err
+	}
+	serviceIds := utils.SliceToSlice(subscriptions, func(s *subscribe.Subscribe) string {
+		return s.Service
+	})
+	services, err := i.serviceService.List(ctx, serviceIds...)
+	if err != nil {
+		return nil, fmt.Errorf("search service error: %w", err)
+	}
+	serviceMap := utils.SliceToMapArray(services, func(s *service.Service) string {
+		return s.Id
+	})
+
+	return utils.SliceToSlice(subscriptions, func(s *subscribe.Subscribe) *subscribe_dto.SubscriptionItem {
+		return &subscribe_dto.SubscriptionItem{
+			Id:          s.Id,
+			ApplyStatus: s.ApplyStatus,
+			Service:     auto.UUID(s.Service),
+			Team:        auto.UUID(info.Team),
+			From:        s.From,
+			CreateTime:  auto.TimeLabel(s.CreateAt),
+		}
+	}, func(s *subscribe.Subscribe) bool {
+		_, ok := serviceMap[s.Service]
+		if !ok {
+			return false
+		}
+		if s.ApplyStatus != subscribe.ApplyStatusSubscribe && s.ApplyStatus != subscribe.ApplyStatusReview {
+			return false
+		}
+		return true
+	}), nil
 }
 
 func (i *imlSubscribeModule) RevokeSubscription(ctx context.Context, pid string, uuid string) error {
 	_, err := i.serviceService.Get(ctx, pid)
 	if err != nil {
-		return fmt.Errorf("get project error: %w", err)
+		return fmt.Errorf("get service error: %w", err)
 	}
 	subscription, err := i.subscribeService.Get(ctx, uuid)
 	if err != nil {
@@ -159,7 +157,7 @@ func (i *imlSubscribeModule) RevokeSubscription(ctx context.Context, pid string,
 func (i *imlSubscribeModule) DeleteSubscription(ctx context.Context, pid string, uuid string) error {
 	_, err := i.serviceService.Get(ctx, pid)
 	if err != nil {
-		return fmt.Errorf("get project error: %w", err)
+		return fmt.Errorf("get service error: %w", err)
 	}
 	subscription, err := i.subscribeService.Get(ctx, uuid)
 	if err != nil {
@@ -189,18 +187,15 @@ func (i *imlSubscribeModule) RevokeApply(ctx context.Context, app string, uuid s
 	})
 }
 
-func (i *imlSubscribeModule) AddSubscriber(ctx context.Context, project string, input *subscribe_dto.AddSubscriber) error {
-	_, err := i.serviceService.Get(ctx, project)
+func (i *imlSubscribeModule) AddSubscriber(ctx context.Context, serviceId string, input *subscribe_dto.AddSubscriber) error {
+	_, err := i.serviceService.Get(ctx, serviceId)
 	if err != nil {
 		return err
 	}
 
-	if input.Uuid == "" {
-		input.Uuid = uuid.New().String()
-	}
 	sub := &gateway.SubscribeRelease{
-		Service:     input.Service,
-		Application: input.Project,
+		Service:     serviceId,
+		Application: input.Application,
 		Expired:     "0",
 	}
 	clusters, err := i.clusterService.List(ctx)
@@ -210,12 +205,12 @@ func (i *imlSubscribeModule) AddSubscriber(ctx context.Context, project string, 
 
 	return i.transaction.Transaction(ctx, func(ctx context.Context) error {
 		err = i.subscribeService.Create(ctx, &subscribe.CreateSubscribe{
-			Uuid:        input.Uuid,
-			Service:     input.Service,
-			Project:     project,
-			Application: input.Project,
+			Uuid:        uuid.New().String(),
+			Service:     serviceId,
+			Application: input.Application,
 			ApplyStatus: subscribe.ApplyStatusSubscribe,
 			From:        subscribe.FromUser,
+			Applier:     input.Applier,
 		})
 		if err != nil {
 			return err
@@ -245,8 +240,8 @@ func (i *imlSubscribeModule) onlineSubscriber(ctx context.Context, clusterId str
 
 }
 
-func (i *imlSubscribeModule) DeleteSubscriber(ctx context.Context, project string, serviceId string, applicationId string) error {
-	_, err := i.serviceService.Get(ctx, project)
+func (i *imlSubscribeModule) DeleteSubscriber(ctx context.Context, service string, serviceId string, applicationId string) error {
+	_, err := i.serviceService.Get(ctx, service)
 	if err != nil {
 		return err
 	}
@@ -291,14 +286,14 @@ func (i *imlSubscribeModule) offlineForCluster(ctx context.Context, clusterId st
 	return client.Subscribe().Offline(ctx, config)
 }
 
-func (i *imlSubscribeModule) SearchSubscribers(ctx context.Context, projectId string, keyword string) ([]*subscribe_dto.Subscriber, error) {
-	pInfo, err := i.serviceService.Get(ctx, projectId)
+func (i *imlSubscribeModule) SearchSubscribers(ctx context.Context, serviceId string, keyword string) ([]*subscribe_dto.Subscriber, error) {
+	pInfo, err := i.serviceService.Get(ctx, serviceId)
 	if err != nil {
 		return nil, err
 	}
 
 	// 获取当前项目所有订阅方
-	list, err := i.subscribeService.ListBySubscribeStatus(ctx, projectId, subscribe.ApplyStatusSubscribe)
+	list, err := i.subscribeService.ListBySubscribeStatus(ctx, serviceId, subscribe.ApplyStatusSubscribe)
 	if err != nil {
 		return nil, err
 	}
@@ -308,10 +303,10 @@ func (i *imlSubscribeModule) SearchSubscribers(ctx context.Context, projectId st
 		for _, subscriber := range list {
 			items = append(items, &subscribe_dto.Subscriber{
 				Id:         subscriber.Application,
-				Project:    auto.UUID(subscriber.Project),
 				Service:    auto.UUID(subscriber.Service),
 				Subscriber: auto.UUID(subscriber.Application),
 				Team:       auto.UUID(pInfo.Team),
+				Applier:    auto.UUID(subscriber.Applier),
 				ApplyTime:  auto.TimeLabel(subscriber.CreateAt),
 				From:       subscriber.From,
 			})
@@ -319,7 +314,7 @@ func (i *imlSubscribeModule) SearchSubscribers(ctx context.Context, projectId st
 		return items, nil
 	}
 	serviceList, err := i.serviceService.Search(ctx, keyword, map[string]interface{}{
-		"project": projectId,
+		"service": serviceId,
 	})
 	if err != nil {
 		return nil, err
@@ -333,7 +328,6 @@ func (i *imlSubscribeModule) SearchSubscribers(ctx context.Context, projectId st
 		if _, ok := serviceMap[subscriber.Service]; ok {
 			items = append(items, &subscribe_dto.Subscriber{
 				Id:         subscriber.Id,
-				Project:    auto.UUID(subscriber.Project),
 				Service:    auto.UUID(subscriber.Service),
 				Subscriber: auto.UUID(subscriber.Application),
 				Team:       auto.UUID(pInfo.Team),
@@ -444,9 +438,8 @@ func (i *imlSubscribeApprovalModule) GetApprovalList(ctx context.Context, pid st
 		return &subscribe_dto.ApprovalItem{
 			Id:           s.Id,
 			Service:      auto.UUID(s.Service),
-			Project:      auto.UUID(s.Project),
 			Team:         auto.UUID(s.Team),
-			ApplyProject: auto.UUID(s.Application),
+			Application:  auto.UUID(s.Application),
 			ApplyTeam:    auto.UUID(s.ApplyTeam),
 			ApplyTime:    auto.TimeLabel(s.ApplyAt),
 			Applier:      auto.UUID(s.Applier),
@@ -470,9 +463,8 @@ func (i *imlSubscribeApprovalModule) GetApprovalDetail(ctx context.Context, pid 
 	return &subscribe_dto.Approval{
 		Id:           item.Id,
 		Service:      auto.UUID(item.Service),
-		Project:      auto.UUID(item.Project),
 		Team:         auto.UUID(item.Team),
-		ApplyProject: auto.UUID(item.Application),
+		Application:  auto.UUID(item.Application),
 		ApplyTeam:    auto.UUID(item.ApplyTeam),
 		ApplyTime:    auto.TimeLabel(item.ApplyAt),
 		Applier:      auto.UUID(item.Applier),

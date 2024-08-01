@@ -9,7 +9,7 @@ import (
 func (p *plugin) getApis() []pm3.Api {
 	return []pm3.Api{
 		pm3.CreateApiWidthDoc(http.MethodPost, "/api/v1/service/publish/release", []string{"context", "query:service", "body"}, []string{"publish"}, p.controller.ApplyOnRelease),
-		pm3.CreateApiWidthDoc(http.MethodPost, "/api/v1/service/publish/release/do", []string{"context", "query:service", "body"}, []string{}, p.controller.ReleaseDo),
+		pm3.CreateApiWidthDoc(http.MethodPost, "/api/v1/service/publish/release/do", []string{"context", "query:service", "body"}, []string{"publish"}, p.controller.ReleaseDo),
 		pm3.CreateApiWidthDoc(http.MethodPost, "/api/v1/service/publish/apply", []string{"context", "query:service", "body"}, []string{"publish"}, p.controller.Apply),
 		pm3.CreateApiWidthDoc(http.MethodGet, "/api/v1/service/publishs", []string{"context", "query:service", "query:page", "query:page_size"}, []string{"publishs", "page", "size", "total"}, p.controller.ListPage),
 		pm3.CreateApiWidthDoc(http.MethodGet, "/api/v1/service/publish", []string{"context", "query:service", "query:id"}, []string{"publish"}, p.controller.Detail),

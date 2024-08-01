@@ -6,6 +6,12 @@ import (
 	"github.com/eolinker/apipark/stores/service"
 )
 
+const (
+	InnerService   ServiceType = "inner"
+	PublicService  ServiceType = "public"
+	UnknownService ServiceType = "unknown"
+)
+
 type ServiceType string
 
 func (s ServiceType) String() string {
@@ -14,9 +20,9 @@ func (s ServiceType) String() string {
 
 func (s ServiceType) Int() int {
 	switch s {
-	case "inner":
+	case InnerService:
 		return 1
-	case "public":
+	case PublicService:
 		return 2
 	default:
 		return 0
@@ -27,11 +33,11 @@ func ToServiceType(s int) ServiceType {
 
 	switch s {
 	case 1:
-		return "inner"
+		return InnerService
 	case 2:
-		return "public"
+		return PublicService
 	default:
-		return "unknown"
+		return UnknownService
 	}
 }
 
@@ -43,6 +49,7 @@ type Service struct {
 	Prefix      string
 	Logo        string
 	ServiceType ServiceType
+	Catalogue   string
 	AsServer    bool
 	AsApp       bool
 	CreateTime  time.Time
@@ -58,6 +65,7 @@ func FromEntity(e *service.Service) *Service {
 		Prefix:      e.Prefix,
 		Logo:        e.Logo,
 		ServiceType: ToServiceType(e.ServiceType),
+		Catalogue:   e.Catalogue,
 		AsServer:    e.AsServer,
 		AsApp:       e.AsApp,
 		CreateTime:  e.CreateAt,
@@ -72,6 +80,7 @@ type Create struct {
 	Team        string
 	Prefix      string
 	ServiceType ServiceType
+	Catalogue   string
 	AsServer    bool
 	AsApp       bool
 }
@@ -80,6 +89,7 @@ type Edit struct {
 	Name        *string
 	Description *string
 	ServiceType *ServiceType
+	Catalogue   *string
 	Logo        *string
 }
 

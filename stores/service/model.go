@@ -12,6 +12,7 @@ type Service struct {
 	Team        string    `gorm:"size:36;not null;column:team;comment:团队id;index:team"` // 团队id
 	Logo        string    `gorm:"type:text;not null;column:logo;comment:logo"`
 	ServiceType int       `gorm:"type:int(11);not null;column:service_type;comment:服务类型"`
+	Catalogue   string    `gorm:"type:text;not null;column:catalogue;comment:目录"`
 	CreateAt    time.Time `gorm:"type:timestamp;NOT NULL;DEFAULT:CURRENT_TIMESTAMP;column:create_at;comment:创建时间"`
 	UpdateAt    time.Time `gorm:"type:timestamp;NOT NULL;DEFAULT:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;column:update_at;comment:修改时间"`
 	IsDelete    int       `gorm:"type:tinyint(1);not null;column:is_delete;comment:是否删除"`

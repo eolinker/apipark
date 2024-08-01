@@ -13,7 +13,6 @@ type EditCatalogue struct {
 
 type SubscribeService struct {
 	Service      string   `json:"service"`
-	Partitions   []string `json:"partitions" aocheck:"partition"`
 	Applications []string `json:"applications" aocheck:"project"`
 	Reason       string   `json:"reason"`
 }

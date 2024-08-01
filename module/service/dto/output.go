@@ -51,6 +51,7 @@ type Service struct {
 	CreateTime  auto.TimeLabel `json:"create_time"`
 	UpdateTime  auto.TimeLabel `json:"update_time"`
 	ServiceType string         `json:"service_type"`
+	Catalogue   auto.Label     `json:"catalogue" aolabel:"catalogue"`
 	Tags        []auto.Label   `json:"tags" aolabel:"tag"`
 	Logo        string         `json:"logo"`
 	AsServer    bool           `json:"as_server"`
@@ -76,6 +77,7 @@ func ToService(model *service.Service) *Service {
 		Team:        auto.UUID(model.Team),
 		ServiceType: model.ServiceType.String(),
 		Logo:        model.Logo,
+		Catalogue:   auto.UUID(model.Catalogue),
 		CreateTime:  auto.TimeLabel(model.CreateTime),
 		UpdateTime:  auto.TimeLabel(model.UpdateTime),
 		AsServer:    model.AsServer,

@@ -244,7 +244,11 @@ func (i *imlServiceModule) Create(ctx context.Context, teamID string, input *ser
 		Description: input.Description,
 		Team:        teamID,
 		ServiceType: service.ServiceType(input.ServiceType),
+		Catalogue:   input.Catalogue,
 		Prefix:      input.Prefix,
+	}
+	if mo.ServiceType == service.PublicService && mo.Catalogue == "" {
+		return nil, fmt.Errorf("catalogue can not be empty")
 	}
 	if input.AsApp == nil {
 		// 默认值为false
@@ -274,12 +278,19 @@ func (i *imlServiceModule) Edit(ctx context.Context, id string, input *service_d
 		return nil, err
 	}
 	err = i.transaction.Transaction(ctx, func(ctx context.Context) error {
+		serviceType := (*service.ServiceType)(input.ServiceType)
+		if serviceType != nil && *serviceType == service.PublicService {
+			if input.Catalogue == nil || *input.Catalogue == "" {
+				return fmt.Errorf("catalogue can not be empty")
+			}
+		}
 
 		err = i.serviceService.Save(ctx, id, &service.Edit{
 			Name:        input.Name,
 			Description: input.Description,
 			Logo:        input.Logo,
-			ServiceType: (*service.ServiceType)(input.ServiceType),
+			ServiceType: serviceType,
+			Catalogue:   input.Catalogue,
 		})
 		if err != nil {
 			return err

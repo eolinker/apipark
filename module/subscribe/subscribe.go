@@ -17,7 +17,7 @@ type ISubscribeModule interface {
 	// SearchSubscribers 关键字获取订阅方列表
 	SearchSubscribers(ctx context.Context, pid string, keyword string) ([]*subscribe_dto.Subscriber, error)
 	// SearchSubscriptions 关键字获取订阅服务列表
-	SearchSubscriptions(ctx context.Context, partitionId string, app string, keyword string) ([]*subscribe_dto.SubscriptionItem, error)
+	SearchSubscriptions(ctx context.Context, appId string, keyword string) ([]*subscribe_dto.SubscriptionItem, error)
 	// RevokeSubscription 取消订阅
 	RevokeSubscription(ctx context.Context, pid string, uuid string) error
 	// DeleteSubscription 删除订阅

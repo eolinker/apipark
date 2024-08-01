@@ -7,25 +7,21 @@ import (
 )
 
 type Subscribe struct {
-	Id string
-	// 被订阅服务相关
-	Project string
+	Id      string
 	Service string
 
 	// 订阅方相关
 	Application string
 	From        int
+	Applier     string
 	ApplyStatus int
 	CreateAt    time.Time
-	//Applier     string
-	//Approver    string
 }
 
 type CreateSubscribe struct {
-	Uuid    string
-	Service string
-	Project string
-
+	Uuid        string
+	Service     string
+	Applier     string
 	Application string
 	ApplyStatus int
 	From        int
@@ -38,10 +34,10 @@ type UpdateSubscribe struct {
 func FromEntity(e *subscribe.Subscribe) *Subscribe {
 	return &Subscribe{
 		Id:          e.UUID,
-		Project:     e.Project,
 		Service:     e.Service,
 		ApplyStatus: e.ApplyStatus,
 		Application: e.Application,
+		Applier:     e.Applier,
 		From:        e.From,
 		CreateAt:    e.CreateAt,
 	}
@@ -61,13 +57,13 @@ type CreateApply struct {
 type EditApply struct {
 	Opinion  *string
 	Status   *int
+	Applier  *string
 	Approver *string
 }
 
 type Apply struct {
 	Id          string
 	Service     string
-	Project     string
 	Team        string
 	Application string
 	ApplyTeam   string
@@ -84,7 +80,6 @@ func FromApplyEntity(e *subscribe.Apply) *Apply {
 	return &Apply{
 		Id:          e.Uuid,
 		Service:     e.Service,
-		Project:     e.Project,
 		Team:        e.Team,
 		Application: e.Application,
 		ApplyTeam:   e.ApplyTeam,

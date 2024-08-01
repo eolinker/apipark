@@ -14,7 +14,7 @@ var (
 
 type IPublishController interface {
 	CheckPublish(ctx *gin.Context, serviceId string, releaseId string) (*dto.DiffOut, error)
-	ReleaseDo(ctx *gin.Context, serviceId string, input *dto.ApplyOnReleaseInput) error
+	ReleaseDo(ctx *gin.Context, serviceId string, input *dto.ApplyOnReleaseInput) (*dto.Publish, error)
 	ApplyOnRelease(ctx *gin.Context, serviceId string, input *dto.ApplyOnReleaseInput) (*dto.Publish, error)
 	Apply(ctx *gin.Context, serviceId string, input *dto.ApplyInput) (*dto.Publish, error)
 	Close(ctx *gin.Context, serviceId string, id string) error

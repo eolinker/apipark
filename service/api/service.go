@@ -13,7 +13,8 @@ import (
 type IAPIService interface {
 	universally.IServiceGet[API]
 	universally.IServiceDelete
-	CountByService(ctx context.Context, project string) (int64, error)
+	CountByService(ctx context.Context, service string) (int64, error)
+	CountMapByService(ctx context.Context, service ...string) (map[string]int64, error)
 	Exist(ctx context.Context, aid string, api *ExistAPI) error
 	ListForService(ctx context.Context, serviceId string) ([]*API, error)
 	GetInfo(ctx context.Context, aid string) (*Info, error)
