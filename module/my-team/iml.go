@@ -9,8 +9,6 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/eolinker/apipark/service/project"
-
 	department_member "github.com/eolinker/ap-account/service/department-member"
 	"github.com/eolinker/go-common/auto"
 
@@ -18,6 +16,7 @@ import (
 
 	"github.com/eolinker/go-common/store"
 
+	"github.com/eolinker/apipark/service/service"
 	team_member "github.com/eolinker/apipark/service/team-member"
 
 	team_dto "github.com/eolinker/apipark/module/my-team/dto"
@@ -36,7 +35,7 @@ type imlTeamModule struct {
 	roleMemberService       role.IRoleMemberService          `autowired:""`
 	userService             user.IUserService                `autowired:""`
 	departmentMemberService department_member.IMemberService `autowired:""`
-	projectService          project.IProjectService          `autowired:""`
+	serviceService          service.IServiceService          `autowired:""`
 	transaction             store.ITransaction               `autowired:""`
 }
 
@@ -99,14 +98,18 @@ func (m *imlTeamModule) Search(ctx context.Context, keyword string) ([]*team_dto
 	if err != nil {
 		return nil, err
 	}
-	projectNumMap, err := m.projectService.CountByTeam(ctx, keyword)
+	serviceNumMap, err := m.serviceService.ServiceCountByTeam(ctx, keyword)
+	if err != nil {
+		return nil, err
+	}
+	appNumMap, err := m.serviceService.AppCountByTeam(ctx, keyword)
 	if err != nil {
 		return nil, err
 	}
 
 	outList := make([]*team_dto.Item, 0, len(list))
 	for _, v := range list {
-		outList = append(outList, team_dto.ToItem(v, projectNumMap[v.Id]))
+		outList = append(outList, team_dto.ToItem(v, serviceNumMap[v.Id], appNumMap[v.Id]))
 	}
 	return outList, nil
 }
@@ -155,7 +158,7 @@ func (m *imlTeamModule) SimpleTeams(ctx context.Context, keyword string) ([]*tea
 		return nil, err
 	}
 
-	projects, err := m.projectService.Search(ctx, "", map[string]interface{}{
+	projects, err := m.serviceService.Search(ctx, "", map[string]interface{}{
 		"team": teamIDs,
 	})
 	projectCount := make(map[string]int64)

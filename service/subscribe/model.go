@@ -50,7 +50,6 @@ func FromEntity(e *subscribe.Subscribe) *Subscribe {
 type CreateApply struct {
 	Uuid        string
 	Service     string
-	Project     string
 	Team        string
 	Application string
 	ApplyTeam   string

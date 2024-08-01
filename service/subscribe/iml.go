@@ -251,7 +251,6 @@ func (i *imlSubscribeApplyService) createEntityHandler(t *CreateApply) *subscrib
 	return &subscribe.Apply{
 		Uuid:        t.Uuid,
 		Service:     t.Service,
-		Project:     t.Project,
 		Team:        t.Team,
 		Application: t.Application,
 		ApplyTeam:   t.ApplyTeam,

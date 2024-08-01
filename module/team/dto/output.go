@@ -12,18 +12,20 @@ type Item struct {
 	CreateTime  auto.TimeLabel `json:"create_time"`
 	UpdateTime  auto.TimeLabel `json:"update_time"`
 	CanDelete   bool           `json:"can_delete"`
-	ProjectNum  int64          `json:"system_num"`
+	ServiceNum  int64          `json:"service_num"`
+	AppNum      int64          `json:"app_num"`
 }
 
-func ToItem(model *team.Team, projectNum int64) *Item {
+func ToItem(model *team.Team, serviceNum int64, appNum int64) *Item {
 	return &Item{
 		Id:          model.Id,
 		Name:        model.Name,
 		Description: model.Description,
 		CreateTime:  auto.TimeLabel(model.CreateTime),
 		UpdateTime:  auto.TimeLabel(model.UpdateTime),
-		ProjectNum:  projectNum,
-		CanDelete:   projectNum == 0,
+		ServiceNum:  serviceNum,
+		AppNum:      appNum,
+		CanDelete:   serviceNum == 0 && appNum == 0,
 	}
 }
 
@@ -38,7 +40,7 @@ type Team struct {
 	CanDelete   bool           `json:"can_delete"`
 }
 
-func ToTeam(model *team.Team, projectNum int) *Team {
+func ToTeam(model *team.Team, serviceNum int64, appNum int64) *Team {
 	return &Team{
 		Id:          model.Id,
 		Name:        model.Name,
@@ -47,6 +49,6 @@ func ToTeam(model *team.Team, projectNum int) *Team {
 		UpdateTime:  auto.TimeLabel(model.UpdateTime),
 		Creator:     auto.UUID(model.Creator),
 		Updater:     auto.UUID(model.Updater),
-		CanDelete:   projectNum == 0,
+		CanDelete:   serviceNum == 0 && appNum == 0,
 	}
 }

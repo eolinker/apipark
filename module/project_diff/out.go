@@ -62,7 +62,7 @@ type UpstreamDiffOut struct {
 
 type projectInfo struct {
 	id              string
-	apis            []*api.APIInfo
+	apis            []*api.Info
 	apiCommits      []*commit.Commit[api.Proxy]
 	apiDocs         []*commit.Commit[api.Document]
 	upstreamCommits []*commit.Commit[upstream.Config]

@@ -12,19 +12,21 @@ type Item struct {
 	Description string         `json:"description"`
 	CreateTime  auto.TimeLabel `json:"create_time"`
 	UpdateTime  auto.TimeLabel `json:"update_time"`
-	ProjectNum  int64          `json:"system_num"`
+	ServiceNum  int64          `json:"service_num"`
+	AppNum      int64          `json:"app_num"`
 	CanDelete   bool           `json:"can_delete"`
 }
 
-func ToItem(model *team.Team, projectNum int64) *Item {
+func ToItem(model *team.Team, serviceNum int64, appNum int64) *Item {
 	return &Item{
 		Id:          model.Id,
 		Name:        model.Name,
 		Description: model.Description,
 		CreateTime:  auto.TimeLabel(model.CreateTime),
 		UpdateTime:  auto.TimeLabel(model.UpdateTime),
-		ProjectNum:  projectNum,
-		CanDelete:   projectNum == 0,
+		ServiceNum:  serviceNum,
+		AppNum:      appNum,
+		CanDelete:   serviceNum == 0 && appNum == 0,
 	}
 }
 

@@ -11,13 +11,11 @@ import (
 
 	"github.com/eolinker/apipark/controller/common"
 
-	"github.com/eolinker/apipark/controller/topology"
-
 	dynamic_module "github.com/eolinker/apipark/controller/dynamic-module"
 
 	"github.com/eolinker/apipark/controller/release"
 
-	project_authorization "github.com/eolinker/apipark/controller/project-authorization"
+	application_authorization "github.com/eolinker/apipark/controller/application-authorization"
 
 	"github.com/eolinker/apipark/controller/subscribe"
 
@@ -28,8 +26,6 @@ import (
 	"github.com/eolinker/apipark/controller/service"
 
 	"github.com/eolinker/apipark/controller/catalogue"
-
-	"github.com/eolinker/apipark/controller/project"
 
 	"github.com/eolinker/apipark/controller/my_team"
 
@@ -58,26 +54,25 @@ func (d *Driver) Create() (pm3.IPlugin, error) {
 }
 
 type plugin struct {
-	clusterController              cluster.IClusterController                            `autowired:""`
-	certificateController          certificate.ICertificateController                    `autowired:""`
-	teamManagerController          team_manager.ITeamManagerController                   `autowired:""`
-	myTeamController               my_team.ITeamController                               `autowired:""`
-	appController                  project.IAppController                                `autowired:""`
-	projectController              project.IProjectController                            `autowired:""`
-	serviceController              service.IServiceController                            `autowired:""`
-	catalogueController            catalogue.ICatalogueController                        `autowired:""`
-	upstreamController             upstream.IUpstreamController                          `autowired:""`
-	apiController                  api.IAPIController                                    `autowired:""`
-	subscribeController            subscribe.ISubscribeController                        `autowired:""`
-	projectAuthorizationController project_authorization.IProjectAuthorizationController `autowired:""`
-	releaseController              release.IReleaseController                            `autowired:""`
-	roleController                 role.IRoleController                                  `autowired:""`
-	subscribeApprovalController    subscribe.ISubscribeApprovalController                `autowired:""`
-	dynamicModuleController        dynamic_module.IDynamicModuleController               `autowired:""`
-	topologyController             topology.ITopologyController                          `autowired:""`
-	pluginClusterController        plugin_cluster.IPluginClusterController               `autowired:""`
-	commonController               common.ICommonController                              `autowired:""`
-	apis                           []pm3.Api
+	clusterController     cluster.IClusterController          `autowired:""`
+	certificateController certificate.ICertificateController  `autowired:""`
+	teamManagerController team_manager.ITeamManagerController `autowired:""`
+	myTeamController      my_team.ITeamController             `autowired:""`
+	appController         service.IAppController              `autowired:""`
+	serviceController     service.IServiceController          `autowired:""`
+	//serviceController              service.IServiceController                         `autowired:""`
+	catalogueController         catalogue.ICatalogueController                     `autowired:""`
+	upstreamController          upstream.IUpstreamController                       `autowired:""`
+	apiController               api.IAPIController                                 `autowired:""`
+	subscribeController         subscribe.ISubscribeController                     `autowired:""`
+	appAuthorizationController  application_authorization.IAuthorizationController `autowired:""`
+	releaseController           release.IReleaseController                         `autowired:""`
+	roleController              role.IRoleController                               `autowired:""`
+	subscribeApprovalController subscribe.ISubscribeApprovalController             `autowired:""`
+	dynamicModuleController     dynamic_module.IDynamicModuleController            `autowired:""`
+	pluginClusterController     plugin_cluster.IPluginClusterController            `autowired:""`
+	commonController            common.ICommonController                           `autowired:""`
+	apis                        []pm3.Api
 }
 
 func (p *plugin) OnComplete() {
@@ -86,16 +81,15 @@ func (p *plugin) OnComplete() {
 	p.apis = append(p.apis, p.clusterApi()...)
 	p.apis = append(p.apis, p.TeamManagerApi()...)
 	p.apis = append(p.apis, p.MyTeamApi()...)
-	p.apis = append(p.apis, p.ProjectApi()...)
+	p.apis = append(p.apis, p.ServiceApis()...)
 	p.apis = append(p.apis, p.catalogueApi()...)
-	p.apis = append(p.apis, p.serviceApi()...)
 	p.apis = append(p.apis, p.upstreamApis()...)
 	p.apis = append(p.apis, p.apiApis()...)
 	p.apis = append(p.apis, p.subscribeApis()...)
 	p.apis = append(p.apis, p.projectAuthorizationApis()...)
 	p.apis = append(p.apis, p.releaseApis()...)
 	p.apis = append(p.apis, p.DynamicModuleApis()...)
-	p.apis = append(p.apis, p.TopologyApis()...)
+
 	p.apis = append(p.apis, p.PartitionPluginApi()...)
 	p.apis = append(p.apis, p.commonApis()...)
 }

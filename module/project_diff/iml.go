@@ -77,7 +77,7 @@ func (m *imlProjectDiff) getBaseInfo(ctx context.Context, projectId, baseRelease
 }
 func (m *imlProjectDiff) DiffForLatest(ctx context.Context, projectId string, baseRelease string) (*project_diff.Diff, bool, error) {
 
-	apis, err := m.apiService.ListForProject(ctx, projectId)
+	apis, err := m.apiService.ListForService(ctx, projectId)
 	if err != nil {
 		return nil, false, err
 	}
@@ -178,7 +178,7 @@ func (m *imlProjectDiff) diff(partitions []string, base, target *projectInfo) *p
 		Upstreams: nil,
 		//Clusters: partitions,
 	}
-	baseApis := utils.NewSet(utils.SliceToSlice(base.apis, func(i *api.APIInfo) string {
+	baseApis := utils.NewSet(utils.SliceToSlice(base.apis, func(i *api.Info) string {
 		return i.UUID
 	})...)
 	baseApiProxy := utils.SliceToMap(base.apiCommits, func(i *commit.Commit[api.Proxy]) string {

@@ -6,11 +6,11 @@ import (
 	"fmt"
 
 	"github.com/eolinker/apipark/service/cluster"
+	"github.com/eolinker/apipark/service/service"
 
 	projectDiff "github.com/eolinker/apipark/module/project_diff"
 	"github.com/eolinker/apipark/module/release/dto"
 	"github.com/eolinker/apipark/service/api"
-	"github.com/eolinker/apipark/service/project"
 	"github.com/eolinker/apipark/service/project_diff"
 	"github.com/eolinker/apipark/service/publish"
 	"github.com/eolinker/apipark/service/release"
@@ -36,13 +36,13 @@ type imlReleaseModule struct {
 	upstreamService   upstream.IUpstreamService      `autowired:""`
 	publishService    publish.IPublishService        `autowired:""`
 	transaction       store.ITransaction             `autowired:""`
-	projectService    project.IProjectService        `autowired:""`
+	projectService    service.IServiceService        `autowired:""`
 	clusterService    cluster.IClusterService        `autowired:""`
 }
 
 func (m *imlReleaseModule) Create(ctx context.Context, projectId string, input *dto.CreateInput) (string, error) {
 
-	proInfo, err := m.projectService.CheckProject(ctx, projectId, projectRuleMustServer)
+	proInfo, err := m.projectService.Check(ctx, projectId, projectRuleMustServer)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return "", errors.New("project not found")
@@ -54,7 +54,7 @@ func (m *imlReleaseModule) Create(ctx context.Context, projectId string, input *
 		return "", fmt.Errorf("cluster not set:%w", err)
 	}
 
-	apis, err := m.apiService.ListForProject(ctx, proInfo.Id)
+	apis, err := m.apiService.ListForService(ctx, proInfo.Id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return "", errors.New("api not found")
@@ -157,7 +157,7 @@ func (m *imlReleaseModule) Detail(ctx context.Context, project string, id string
 }
 
 func (m *imlReleaseModule) List(ctx context.Context, project string) ([]*dto.Release, error) {
-	_, err := m.projectService.CheckProject(ctx, project, projectRuleMustServer)
+	_, err := m.projectService.Check(ctx, project, projectRuleMustServer)
 	if err != nil {
 		return nil, err
 	}
@@ -221,7 +221,7 @@ func (m *imlReleaseModule) List(ctx context.Context, project string) ([]*dto.Rel
 }
 
 func (m *imlReleaseModule) Delete(ctx context.Context, project string, id string) error {
-	_, err := m.projectService.CheckProject(ctx, project, projectRuleMustServer)
+	_, err := m.projectService.Check(ctx, project, projectRuleMustServer)
 	if err != nil {
 		return err
 	}
@@ -258,7 +258,7 @@ func (m *imlReleaseModule) Delete(ctx context.Context, project string, id string
 }
 
 func (m *imlReleaseModule) Preview(ctx context.Context, project string) (*dto.Release, *project_diff.Diff, bool, error) {
-	_, err := m.projectService.CheckProject(ctx, project, projectRuleMustServer)
+	_, err := m.projectService.Check(ctx, project, projectRuleMustServer)
 	if err != nil {
 		return nil, nil, false, err
 	}

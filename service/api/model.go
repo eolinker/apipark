@@ -1,16 +1,16 @@
 package api
 
 import (
-	"github.com/eolinker/apipark/model/plugin_model"
 	"time"
+
+	"github.com/eolinker/apipark/model/plugin_model"
 
 	"github.com/eolinker/apipark/stores/api"
 )
 
 type API struct {
-	UUID string
-	//Name     string
-	Project  string
+	UUID     string
+	Service  string
 	Team     string
 	Creator  string
 	Method   string
@@ -19,14 +19,13 @@ type API struct {
 	IsDelete bool
 }
 
-type APIInfo struct {
-	//Id          int64
+type Info struct {
 	UUID        string
 	Name        string
 	Description string
 	CreateAt    time.Time
 	UpdateAt    time.Time
-	Project     string
+	Service     string
 	Team        string
 	Creator     string
 	Updater     string
@@ -38,21 +37,14 @@ type APIInfo struct {
 
 func FromEntity(e *api.Api) *API {
 	return &API{
-		//Id:          e.Id,
-		UUID: e.UUID,
-		//Name:        e.Name,
-		//Description: e.Description,
+		UUID:     e.UUID,
 		CreateAt: e.CreateAt,
 		IsDelete: e.IsDelete != 0,
-		//UpdateAt:    e.UpdateAt,
-		Project: e.Project,
-		Team:    e.Team,
-		Creator: e.Creator,
-		//Updater:     e.Updater,
-		//Upstream:    e.Upstream,
-		Method: e.Method,
-		Path:   e.Path,
-		//Match:       e.Match,
+		Service:  e.Service,
+		Team:     e.Team,
+		Creator:  e.Creator,
+		Method:   e.Method,
+		Path:     e.Path,
 	}
 }
 
@@ -60,16 +52,14 @@ type CreateAPI struct {
 	UUID        string
 	Name        string
 	Description string
-	Project     string
+	Service     string
 	Team        string
 	Method      string
 	Path        string
 	Match       string
-	//Upstream    string
 }
 
 type EditAPI struct {
-	//UUID        string
 	Name        *string
 	Upstream    *string
 	Description *string

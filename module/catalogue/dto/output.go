@@ -29,7 +29,7 @@ type ServiceDetail struct {
 }
 
 type ServiceBasic struct {
-	Project       auto.Label `json:"project" aolabel:"project"`
+	//Service       auto.Label `json:"service" aolabel:"service"`
 	Team          auto.Label `json:"team" aolabel:"team"`
 	ApiNum        int        `json:"api_num"`
 	SubscriberNum int        `json:"subscriber_num"`

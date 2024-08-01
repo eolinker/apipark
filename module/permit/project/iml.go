@@ -12,7 +12,7 @@ import (
 	permit_identity "github.com/eolinker/apipark/middleware/permit/identity"
 	permit_dto "github.com/eolinker/apipark/module/permit/dto"
 	permit_type "github.com/eolinker/apipark/service/permit-type"
-	"github.com/eolinker/apipark/service/project"
+	"github.com/eolinker/apipark/service/service"
 	"github.com/eolinker/apipark/service/team"
 	team_member "github.com/eolinker/apipark/service/team-member"
 	"github.com/eolinker/eosc/log"
@@ -45,7 +45,7 @@ var (
 )
 
 type imlProjectPermitModule struct {
-	projectService project.IProjectService `autowired:""`
+	projectService service.IServiceService `autowired:""`
 	teamProject    team.ITeamService       `autowired:""`
 	permitService  permit.IPermit          `autowired:""`
 	//projectMemberService   project_member.IMemberService       `autowired:""`
@@ -140,7 +140,7 @@ func (m *imlProjectPermitModule) IdentifyProject(ctx context.Context, project st
 
 	return identities, nil
 }
-func (m *imlProjectPermitModule) getIdentity(ctx context.Context, p *project.Project, uid string) ([]string, error) {
+func (m *imlProjectPermitModule) getIdentity(ctx context.Context, p *service.Service, uid string) ([]string, error) {
 	members, err := m.projectMemberService.Members(ctx, []string{p.Id}, []string{uid})
 	if err != nil {
 		log.Info("get project member error", err)

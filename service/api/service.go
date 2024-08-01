@@ -13,14 +13,12 @@ import (
 type IAPIService interface {
 	universally.IServiceGet[API]
 	universally.IServiceDelete
-	//universally.IServiceCreate[CreateAPI]
-	//universally.IServiceEdit[EditAPI]
-	CountByProject(ctx context.Context, project string) (int64, error)
+	CountByService(ctx context.Context, project string) (int64, error)
 	Exist(ctx context.Context, aid string, api *ExistAPI) error
-	ListForProject(ctx context.Context, project string) ([]*API, error)
-	GetInfo(ctx context.Context, aid string) (*APIInfo, error)
-	ListInfo(ctx context.Context, aids ...string) ([]*APIInfo, error)
-	ListInfoForProject(ctx context.Context, project string) ([]*APIInfo, error)
+	ListForService(ctx context.Context, serviceId string) ([]*API, error)
+	GetInfo(ctx context.Context, aid string) (*Info, error)
+	ListInfo(ctx context.Context, aids ...string) ([]*Info, error)
+	ListInfoForService(ctx context.Context, serviceId string) ([]*Info, error)
 	ListLatestCommitProxy(ctx context.Context, aid ...string) ([]*commit.Commit[Proxy], error)
 	ListLatestCommitDocument(ctx context.Context, aid ...string) ([]*commit.Commit[Document], error)
 	LatestProxy(ctx context.Context, aid string) (*commit.Commit[Proxy], error)
@@ -33,7 +31,6 @@ type IAPIService interface {
 	SaveDocument(ctx context.Context, aid string, data *Document) error
 	Save(ctx context.Context, id string, model *EditAPI) error
 	Create(ctx context.Context, input *CreateAPI) (err error)
-	//CountByUpstream(ctx context.Context, upstreams ...string) (map[string]int64, error)
 }
 
 var (

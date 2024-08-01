@@ -6,21 +6,45 @@ import (
 	"github.com/eolinker/apipark/stores/service"
 )
 
-const (
-	StatusOn  = "on"
-	StatusOff = "off"
-)
+type ServiceType string
+
+func (s ServiceType) String() string {
+	return string(s)
+}
+
+func (s ServiceType) Int() int {
+	switch s {
+	case "inner":
+		return 1
+	case "public":
+		return 2
+	default:
+		return 0
+	}
+}
+
+func ToServiceType(s int) ServiceType {
+
+	switch s {
+	case 1:
+		return "inner"
+	case 2:
+		return "public"
+	default:
+		return "unknown"
+	}
+}
 
 type Service struct {
 	Id          string
 	Name        string
 	Description string
-	Logo        string
-	ServiceType string
-	Project     string
 	Team        string
-	Catalogue   string
-	Status      string
+	Prefix      string
+	Logo        string
+	ServiceType ServiceType
+	AsServer    bool
+	AsApp       bool
 	CreateTime  time.Time
 	UpdateTime  time.Time
 }
@@ -30,87 +54,36 @@ func FromEntity(e *service.Service) *Service {
 		Id:          e.UUID,
 		Name:        e.Name,
 		Description: e.Description,
-		Logo:        e.Logo,
-		ServiceType: e.ServiceType,
-		Project:     e.Project,
 		Team:        e.Team,
-		Catalogue:   e.Catalogue,
-		Status:      e.Status,
+		Prefix:      e.Prefix,
+		Logo:        e.Logo,
+		ServiceType: ToServiceType(e.ServiceType),
+		AsServer:    e.AsServer,
+		AsApp:       e.AsApp,
 		CreateTime:  e.CreateAt,
 		UpdateTime:  e.UpdateAt,
 	}
 }
 
-type CreateService struct {
-	Uuid        string
+type Create struct {
+	Id          string
 	Name        string
 	Description string
-	Logo        string
-	ServiceType string
-	Project     string
 	Team        string
-	Catalogue   string
-	Status      string
-	Tag         string
+	Prefix      string
+	ServiceType ServiceType
+	AsServer    bool
+	AsApp       bool
 }
 
-type EditService struct {
-	Uuid        string
+type Edit struct {
 	Name        *string
 	Description *string
+	ServiceType *ServiceType
 	Logo        *string
-	ServiceType *string
-	Catalogue   *string
-	Status      *string
-	Tag         *string
-}
-
-type SearchServicePage struct {
-	Keyword   string
-	Page      int
-	Size      int
-	Catalogue []string
-	Uuids     []string
 }
 
 type CreateTag struct {
-	Tid string
-	Sid string
-}
-
-type CreatePartition struct {
-	Pid string
-	Sid string
-}
-
-type Partition struct {
-	Pid string
-	Sid string
-}
-
-type Doc struct {
-	ID         int64
-	DocID      string
-	Name       string
-	Creator    string
-	Updater    string
-	Doc        string
-	UpdateTime time.Time
-	CreateTime time.Time
-}
-
-type SaveDoc struct {
-	Sid string
-	Doc string
-}
-
-type Api struct {
-	Sid  string
-	Aid  string
-	Sort int
-}
-
-type Tag struct {
 	Tid string
 	Sid string
 }

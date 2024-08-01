@@ -6,10 +6,9 @@ import (
 	"fmt"
 
 	"github.com/eolinker/apipark/service/cluster"
+	"github.com/eolinker/apipark/service/service"
 
 	"gorm.io/gorm"
-
-	"github.com/eolinker/apipark/service/project"
 
 	"github.com/eolinker/apipark/service/upstream"
 
@@ -26,13 +25,13 @@ var (
 )
 
 type imlUpstreamModule struct {
-	projectService  project.IProjectService   `autowired:""`
+	projectService  service.IServiceService   `autowired:""`
 	upstreamService upstream.IUpstreamService `autowired:""`
 	transaction     store.ITransaction        `autowired:""`
 }
 
 func (i *imlUpstreamModule) Get(ctx context.Context, pid string) (upstream_dto.UpstreamConfig, error) {
-	_, err := i.projectService.CheckProject(ctx, pid, projectRuleMustServer)
+	_, err := i.projectService.Check(ctx, pid, projectRuleMustServer)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +54,7 @@ func (i *imlUpstreamModule) Get(ctx context.Context, pid string) (upstream_dto.U
 }
 
 func (i *imlUpstreamModule) Save(ctx context.Context, pid string, upstreamConfig upstream_dto.UpstreamConfig) (upstream_dto.UpstreamConfig, error) {
-	pInfo, err := i.projectService.CheckProject(ctx, pid, projectRuleMustServer)
+	pInfo, err := i.projectService.Check(ctx, pid, projectRuleMustServer)
 	if err != nil {
 		return nil, err
 	}

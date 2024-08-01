@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/eolinker/apipark/service/service"
 	"github.com/eolinker/apipark/service/upstream"
 
 	"gorm.io/gorm"
@@ -18,8 +19,6 @@ import (
 	"github.com/eolinker/go-common/auto"
 	"github.com/eolinker/go-common/utils"
 
-	"github.com/eolinker/apipark/service/project"
-
 	"github.com/eolinker/go-common/store"
 
 	"github.com/eolinker/apipark/service/api"
@@ -29,26 +28,22 @@ import (
 
 var _ IApiModule = (*imlApiModule)(nil)
 var (
-	projectMustAsServer = map[string]bool{
+	asServer = map[string]bool{
 		"as_server": true,
 	}
 )
 
 type imlApiModule struct {
 	teamService     team.ITeamService         `autowired:""`
-	projectService  project.IProjectService   `autowired:""`
+	serviceService  service.IServiceService   `autowired:""`
 	apiService      api.IAPIService           `autowired:""`
 	upstreamService upstream.IUpstreamService `autowired:""`
 	transaction     store.ITransaction        `autowired:""`
 }
 
-func (i *imlApiModule) SimpleList(ctx context.Context, input *api_dto.ListInput) ([]*api_dto.ApiSimpleItem, error) {
-	projectIds := input.Projects
-	w := make(map[string]interface{})
-	if len(projectIds) > 0 {
-		w["project"] = projectIds
-	}
-	list, err := i.apiService.Search(ctx, "", w)
+func (i *imlApiModule) SimpleList(ctx context.Context, serviceId string) ([]*api_dto.ApiSimpleItem, error) {
+
+	list, err := i.apiService.ListForService(ctx, serviceId)
 	apiInfos, err := i.apiService.ListInfo(ctx, utils.SliceToSlice(list, func(s *api.API) string {
 		return s.UUID
 	})...)
@@ -56,7 +51,7 @@ func (i *imlApiModule) SimpleList(ctx context.Context, input *api_dto.ListInput)
 		return nil, err
 	}
 
-	out := utils.SliceToSlice(apiInfos, func(item *api.APIInfo) *api_dto.ApiSimpleItem {
+	out := utils.SliceToSlice(apiInfos, func(item *api.Info) *api_dto.ApiSimpleItem {
 		return &api_dto.ApiSimpleItem{
 			Id:     item.UUID,
 			Name:   item.Name,
@@ -67,13 +62,13 @@ func (i *imlApiModule) SimpleList(ctx context.Context, input *api_dto.ListInput)
 	return out, nil
 }
 
-func (i *imlApiModule) Detail(ctx context.Context, pid string, aid string) (*api_dto.ApiDetail, error) {
-	_, err := i.projectService.CheckProject(ctx, pid, projectMustAsServer)
+func (i *imlApiModule) Detail(ctx context.Context, serviceId string, apiId string) (*api_dto.ApiDetail, error) {
+	_, err := i.serviceService.Check(ctx, serviceId, asServer)
 	if err != nil {
 		return nil, err
 	}
 
-	detail, err := i.apiService.GetInfo(ctx, aid)
+	detail, err := i.apiService.GetInfo(ctx, apiId)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +76,7 @@ func (i *imlApiModule) Detail(ctx context.Context, pid string, aid string) (*api
 	apiDetail := &api_dto.ApiDetail{
 		ApiSimpleDetail: *api_dto.GenApiSimpleDetail(detail),
 	}
-	proxy, err := i.apiService.LatestProxy(ctx, aid)
+	proxy, err := i.apiService.LatestProxy(ctx, apiId)
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, err
@@ -92,7 +87,7 @@ func (i *imlApiModule) Detail(ctx context.Context, pid string, aid string) (*api
 		apiDetail.Proxy = api_dto.FromServiceProxy(proxy.Data)
 	}
 
-	document, err := i.apiService.LatestDocument(ctx, aid)
+	document, err := i.apiService.LatestDocument(ctx, apiId)
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, err
@@ -110,13 +105,13 @@ func (i *imlApiModule) Detail(ctx context.Context, pid string, aid string) (*api
 	return apiDetail, nil
 }
 
-func (i *imlApiModule) SimpleDetail(ctx context.Context, pid string, aid string) (*api_dto.ApiSimpleDetail, error) {
-	_, err := i.projectService.CheckProject(ctx, pid, projectMustAsServer)
+func (i *imlApiModule) SimpleDetail(ctx context.Context, serviceId string, apiId string) (*api_dto.ApiSimpleDetail, error) {
+	_, err := i.serviceService.Check(ctx, serviceId, asServer)
 	if err != nil {
 		return nil, err
 	}
 
-	detail, err := i.apiService.GetInfo(ctx, aid)
+	detail, err := i.apiService.GetInfo(ctx, apiId)
 	if err != nil {
 		return nil, err
 	}
@@ -124,14 +119,14 @@ func (i *imlApiModule) SimpleDetail(ctx context.Context, pid string, aid string)
 	return api_dto.GenApiSimpleDetail(detail), nil
 }
 
-func (i *imlApiModule) Search(ctx context.Context, keyword string, pid string) ([]*api_dto.ApiItem, error) {
-	_, err := i.projectService.CheckProject(ctx, pid, projectMustAsServer)
+func (i *imlApiModule) Search(ctx context.Context, keyword string, serviceId string) ([]*api_dto.ApiItem, error) {
+	_, err := i.serviceService.Check(ctx, serviceId, asServer)
 	if err != nil {
 		return nil, err
 	}
 
 	list, err := i.apiService.Search(ctx, keyword, map[string]interface{}{
-		"project": pid,
+		"service": serviceId,
 	})
 	if err != nil {
 		return nil, err
@@ -142,10 +137,10 @@ func (i *imlApiModule) Search(ctx context.Context, keyword string, pid string) (
 	if err != nil {
 		return nil, err
 	}
-	utils.Sort(apiInfos, func(a, b *api.APIInfo) bool {
+	utils.Sort(apiInfos, func(a, b *api.Info) bool {
 		return a.UpdateAt.After(b.UpdateAt)
 	})
-	out := utils.SliceToSlice(apiInfos, func(item *api.APIInfo) *api_dto.ApiItem {
+	out := utils.SliceToSlice(apiInfos, func(item *api.Info) *api_dto.ApiItem {
 		return &api_dto.ApiItem{
 			Id:         item.UUID,
 			Name:       item.Name,
@@ -162,22 +157,25 @@ func (i *imlApiModule) Search(ctx context.Context, keyword string, pid string) (
 	return out, nil
 }
 
-func (i *imlApiModule) SimpleSearch(ctx context.Context, keyword string, pid string) ([]*api_dto.ApiSimpleItem, error) {
-	_, err := i.projectService.CheckProject(ctx, pid, projectMustAsServer)
+func (i *imlApiModule) SimpleSearch(ctx context.Context, keyword string, serviceId string) ([]*api_dto.ApiSimpleItem, error) {
+	_, err := i.serviceService.Check(ctx, serviceId, asServer)
 	if err != nil {
 		return nil, err
 	}
 
 	list, err := i.apiService.Search(ctx, keyword, map[string]interface{}{
-		"project": pid,
+		"service": serviceId,
 	})
+	if err != nil {
+		return nil, err
+	}
 	apiInfos, err := i.apiService.ListInfo(ctx, utils.SliceToSlice(list, func(s *api.API) string {
 		return s.UUID
 	})...)
 	if err != nil {
 		return nil, err
 	}
-	out := utils.SliceToSlice(apiInfos, func(item *api.APIInfo) *api_dto.ApiSimpleItem {
+	out := utils.SliceToSlice(apiInfos, func(item *api.Info) *api_dto.ApiSimpleItem {
 		return &api_dto.ApiSimpleItem{
 			Id:     item.UUID,
 			Name:   item.Name,
@@ -188,12 +186,12 @@ func (i *imlApiModule) SimpleSearch(ctx context.Context, keyword string, pid str
 	return out, nil
 }
 
-func (i *imlApiModule) Create(ctx context.Context, pid string, dto *api_dto.CreateApi) (*api_dto.ApiSimpleDetail, error) {
-	info, err := i.projectService.CheckProject(ctx, pid, projectMustAsServer)
+func (i *imlApiModule) Create(ctx context.Context, serviceId string, dto *api_dto.CreateApi) (*api_dto.ApiSimpleDetail, error) {
+	info, err := i.serviceService.Check(ctx, serviceId, asServer)
 	if err != nil {
 		return nil, err
 	}
-	prefix, err := i.Prefix(ctx, pid)
+	prefix, err := i.Prefix(ctx, serviceId)
 	if err != nil {
 		return nil, err
 	}
@@ -226,7 +224,7 @@ func (i *imlApiModule) Create(ctx context.Context, pid string, dto *api_dto.Crea
 			UUID:        dto.Id,
 			Name:        dto.Name,
 			Description: dto.Description,
-			Project:     pid,
+			Service:     serviceId,
 			Team:        info.Team,
 			Method:      dto.Method,
 			Path:        path,
@@ -237,11 +235,11 @@ func (i *imlApiModule) Create(ctx context.Context, pid string, dto *api_dto.Crea
 	if err != nil {
 		return nil, err
 	}
-	return i.SimpleDetail(ctx, pid, dto.Id)
+	return i.SimpleDetail(ctx, serviceId, dto.Id)
 }
 
-func (i *imlApiModule) Edit(ctx context.Context, pid string, aid string, dto *api_dto.EditApi) (*api_dto.ApiSimpleDetail, error) {
-	_, err := i.projectService.CheckProject(ctx, pid, projectMustAsServer)
+func (i *imlApiModule) Edit(ctx context.Context, serviceId string, apiId string, dto *api_dto.EditApi) (*api_dto.ApiSimpleDetail, error) {
+	_, err := i.serviceService.Check(ctx, serviceId, asServer)
 	if err != nil {
 		return nil, err
 	}
@@ -249,7 +247,7 @@ func (i *imlApiModule) Edit(ctx context.Context, pid string, aid string, dto *ap
 	err = i.transaction.Transaction(ctx, func(ctx context.Context) error {
 		var up *string
 		if dto.Proxy != nil {
-			err = i.apiService.SaveProxy(ctx, aid, api_dto.ToServiceProxy(dto.Proxy))
+			err = i.apiService.SaveProxy(ctx, apiId, api_dto.ToServiceProxy(dto.Proxy))
 			if err != nil {
 				return err
 			}
@@ -257,7 +255,7 @@ func (i *imlApiModule) Edit(ctx context.Context, pid string, aid string, dto *ap
 			//	up = &dto.Proxy.Upstream
 			//}
 		}
-		err = i.apiService.Save(ctx, aid, &api.EditAPI{
+		err = i.apiService.Save(ctx, apiId, &api.EditAPI{
 			Name:        dto.Info.Name,
 			Description: dto.Info.Description,
 			Upstream:    up,
@@ -267,7 +265,7 @@ func (i *imlApiModule) Edit(ctx context.Context, pid string, aid string, dto *ap
 		}
 
 		if dto.Doc != nil {
-			err = i.apiService.SaveDocument(ctx, aid, api_dto.ToServiceDocument(*dto.Doc))
+			err = i.apiService.SaveDocument(ctx, apiId, api_dto.ToServiceDocument(*dto.Doc))
 			if err != nil {
 				return err
 			}
@@ -278,27 +276,27 @@ func (i *imlApiModule) Edit(ctx context.Context, pid string, aid string, dto *ap
 	if err != nil {
 		return nil, err
 	}
-	return i.SimpleDetail(ctx, pid, aid)
+	return i.SimpleDetail(ctx, serviceId, apiId)
 }
 
-func (i *imlApiModule) Delete(ctx context.Context, pid string, aid string) error {
-	_, err := i.projectService.CheckProject(ctx, pid, projectMustAsServer)
+func (i *imlApiModule) Delete(ctx context.Context, serviceId string, apiId string) error {
+	_, err := i.serviceService.Check(ctx, serviceId, asServer)
 	if err != nil {
 		return err
 	}
-	return i.apiService.Delete(ctx, aid)
+	return i.apiService.Delete(ctx, apiId)
 }
 
-func (i *imlApiModule) Copy(ctx context.Context, pid string, aid string, dto *api_dto.CreateApi) (*api_dto.ApiSimpleDetail, error) {
-	info, err := i.projectService.CheckProject(ctx, pid, projectMustAsServer)
+func (i *imlApiModule) Copy(ctx context.Context, serviceId string, apiId string, dto *api_dto.CreateApi) (*api_dto.ApiSimpleDetail, error) {
+	info, err := i.serviceService.Check(ctx, serviceId, asServer)
 	if err != nil {
 		return nil, err
 	}
-	oldApi, err := i.apiService.Get(ctx, aid)
+	oldApi, err := i.apiService.Get(ctx, apiId)
 	if err != nil {
 		return nil, err
 	}
-	prefix, err := i.Prefix(ctx, pid)
+	prefix, err := i.Prefix(ctx, serviceId)
 	if err != nil {
 		return nil, err
 	}
@@ -312,7 +310,7 @@ func (i *imlApiModule) Copy(ctx context.Context, pid string, aid string, dto *ap
 		}
 
 		path := fmt.Sprintf("%s/%s", strings.TrimSuffix(prefix, "/"), strings.TrimPrefix(dto.Path, "/"))
-		err = i.apiService.Exist(ctx, pid, &api.ExistAPI{Path: path, Method: dto.Method})
+		err = i.apiService.Exist(ctx, serviceId, &api.ExistAPI{Path: path, Method: dto.Method})
 		if err != nil {
 			return err
 		}
@@ -348,7 +346,7 @@ func (i *imlApiModule) Copy(ctx context.Context, pid string, aid string, dto *ap
 		return i.apiService.Create(ctx, &api.CreateAPI{
 			UUID:    dto.Id,
 			Name:    dto.Name,
-			Project: pid,
+			Service: serviceId,
 			Team:    info.Team,
 			Method:  dto.Method,
 			Path:    path,
@@ -360,16 +358,16 @@ func (i *imlApiModule) Copy(ctx context.Context, pid string, aid string, dto *ap
 	if err != nil {
 		return nil, err
 	}
-	return i.SimpleDetail(ctx, pid, dto.Id)
+	return i.SimpleDetail(ctx, serviceId, dto.Id)
 }
 
-func (i *imlApiModule) ApiDocDetail(ctx context.Context, pid string, aid string) (*api_dto.ApiDocDetail, error) {
-	_, err := i.projectService.CheckProject(ctx, pid, projectMustAsServer)
+func (i *imlApiModule) ApiDocDetail(ctx context.Context, serviceId string, apiId string) (*api_dto.ApiDocDetail, error) {
+	_, err := i.serviceService.Check(ctx, serviceId, asServer)
 	if err != nil {
 		return nil, err
 	}
 
-	apiBase, err := i.apiService.Get(ctx, aid)
+	apiBase, err := i.apiService.Get(ctx, apiId)
 	if err != nil {
 		return nil, err
 	}
@@ -381,7 +379,7 @@ func (i *imlApiModule) ApiDocDetail(ctx context.Context, pid string, aid string)
 	if err != nil {
 		return nil, err
 	}
-	document, err := i.apiService.LatestDocument(ctx, aid)
+	document, err := i.apiService.LatestDocument(ctx, apiId)
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, err
@@ -401,23 +399,23 @@ func (i *imlApiModule) ApiDocDetail(ctx context.Context, pid string, aid string)
 	}, nil
 }
 
-func (i *imlApiModule) ApiProxyDetail(ctx context.Context, pid string, aid string) (*api_dto.ApiProxyDetail, error) {
-	_, err := i.projectService.CheckProject(ctx, pid, projectMustAsServer)
+func (i *imlApiModule) ApiProxyDetail(ctx context.Context, serviceId string, apiId string) (*api_dto.ApiProxyDetail, error) {
+	_, err := i.serviceService.Check(ctx, serviceId, asServer)
 	if err != nil {
 		return nil, err
 	}
-	apiBase, err := i.apiService.Get(ctx, aid)
+	apiBase, err := i.apiService.Get(ctx, apiId)
 	if err != nil {
 		return nil, err
 	}
 	if apiBase.IsDelete {
 		return nil, errors.New("api is delete")
 	}
-	if apiBase.Project != pid {
+	if apiBase.Service != serviceId {
 		return nil, errors.New("api is not in project")
 	}
 
-	detail, err := i.apiService.GetInfo(ctx, aid)
+	detail, err := i.apiService.GetInfo(ctx, apiId)
 	if err != nil {
 		return nil, err
 	}
@@ -425,7 +423,7 @@ func (i *imlApiModule) ApiProxyDetail(ctx context.Context, pid string, aid strin
 	apiDetail := &api_dto.ApiProxyDetail{
 		ApiSimpleDetail: *api_dto.GenApiSimpleDetail(detail),
 	}
-	proxy, err := i.apiService.LatestProxy(ctx, aid)
+	proxy, err := i.apiService.LatestProxy(ctx, apiId)
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, err
@@ -438,8 +436,8 @@ func (i *imlApiModule) ApiProxyDetail(ctx context.Context, pid string, aid strin
 
 }
 
-func (i *imlApiModule) Prefix(ctx context.Context, pid string) (string, error) {
-	pInfo, err := i.projectService.CheckProject(ctx, pid, projectMustAsServer)
+func (i *imlApiModule) Prefix(ctx context.Context, serviceId string) (string, error) {
+	pInfo, err := i.serviceService.Check(ctx, serviceId, asServer)
 	if err != nil {
 		return "", err
 	}

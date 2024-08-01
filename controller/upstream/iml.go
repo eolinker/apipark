@@ -2,7 +2,7 @@ package upstream
 
 import (
 	"github.com/eolinker/apipark/module/cluster"
-	"github.com/eolinker/apipark/module/project"
+	"github.com/eolinker/apipark/module/service"
 	"github.com/eolinker/apipark/module/upstream"
 	upstream_dto "github.com/eolinker/apipark/module/upstream/dto"
 	"github.com/gin-gonic/gin"
@@ -14,7 +14,7 @@ var (
 
 type imlUpstreamController struct {
 	upstreamModule  upstream.IUpstreamModule `autowired:""`
-	projectModule   project.IProjectModule   `autowired:""`
+	projectModule   service.IServiceModule   `autowired:""`
 	partitionModule cluster.IClusterModule   `autowired:""`
 }
 

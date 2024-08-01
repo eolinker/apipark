@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/eolinker/apipark/service/service"
+
 	"github.com/eolinker/apipark/service/universally/commit"
 
 	"github.com/eolinker/apipark/service/api"
@@ -16,8 +18,6 @@ import (
 	"github.com/eolinker/apipark/gateway"
 
 	"github.com/eolinker/eosc/log"
-
-	"github.com/eolinker/apipark/service/project"
 
 	projectDiff "github.com/eolinker/apipark/module/project_diff"
 	"github.com/eolinker/apipark/module/publish/dto"
@@ -43,16 +43,16 @@ type imlPublishModule struct {
 	upstreamService   upstream.IUpstreamService      `autowired:""`
 	releaseService    release.IReleaseService        `autowired:""`
 	clusterService    cluster.IClusterService        `autowired:""`
-	projectService    project.IProjectService        `autowired:""`
+	serviceService    service.IServiceService        `autowired:""`
 }
 
 func (m *imlPublishModule) initGateway(ctx context.Context, partitionId string, clientDriver gateway.IClientDriver) error {
 
-	projects, err := m.projectService.List(ctx)
+	projects, err := m.serviceService.List(ctx)
 	if err != nil {
 		return err
 	}
-	projectIds := utils.SliceToSlice(projects, func(p *project.Project) string {
+	projectIds := utils.SliceToSlice(projects, func(p *service.Service) string {
 		return p.Id
 	})
 	for _, projectId := range projectIds {
@@ -279,7 +279,7 @@ func (m *imlPublishModule) getReleaseInfo(ctx context.Context, projectID, releas
 }
 
 func (m *imlPublishModule) PublishStatuses(ctx context.Context, project string, id string) ([]*dto.PublishStatus, error) {
-	_, err := m.projectService.CheckProject(ctx, project, projectRuleMustServer)
+	_, err := m.serviceService.Check(ctx, project, projectRuleMustServer)
 	if err != nil {
 		return nil, err
 	}
@@ -315,7 +315,7 @@ func (m *imlPublishModule) PublishStatuses(ctx context.Context, project string, 
 // ctx context.Context, project string, input *dto.ApplyInput
 // *dto.Publish, error
 func (m *imlPublishModule) Apply(ctx context.Context, project string, input *dto.ApplyInput) (*dto.Publish, error) {
-	_, err := m.projectService.CheckProject(ctx, project, projectRuleMustServer)
+	_, err := m.serviceService.Check(ctx, project, projectRuleMustServer)
 	if err != nil {
 		return nil, err
 	}
@@ -360,7 +360,7 @@ func (m *imlPublishModule) Apply(ctx context.Context, project string, input *dto
 }
 
 func (m *imlPublishModule) CheckPublish(ctx context.Context, project string, releaseId string) (*dto.DiffOut, error) {
-	_, err := m.projectService.CheckProject(ctx, project, projectRuleMustServer)
+	_, err := m.serviceService.Check(ctx, project, projectRuleMustServer)
 	if err != nil {
 		return nil, err
 	}
@@ -425,7 +425,7 @@ func (m *imlPublishModule) Close(ctx context.Context, project, id string) error 
 }
 
 func (m *imlPublishModule) Stop(ctx context.Context, project string, id string) error {
-	_, err := m.projectService.CheckProject(ctx, project, projectRuleMustServer)
+	_, err := m.serviceService.Check(ctx, project, projectRuleMustServer)
 	if err != nil {
 		return err
 	}
@@ -448,7 +448,7 @@ func (m *imlPublishModule) Stop(ctx context.Context, project string, id string) 
 }
 
 func (m *imlPublishModule) Refuse(ctx context.Context, project string, id string, commits string) error {
-	_, err := m.projectService.CheckProject(ctx, project, projectRuleMustServer)
+	_, err := m.serviceService.Check(ctx, project, projectRuleMustServer)
 	if err != nil {
 		return err
 	}
@@ -456,7 +456,7 @@ func (m *imlPublishModule) Refuse(ctx context.Context, project string, id string
 }
 
 func (m *imlPublishModule) Accept(ctx context.Context, project string, id string, commits string) error {
-	_, err := m.projectService.CheckProject(ctx, project, projectRuleMustServer)
+	_, err := m.serviceService.Check(ctx, project, projectRuleMustServer)
 	if err != nil {
 		return err
 	}
@@ -507,7 +507,7 @@ func (m *imlPublishModule) publish(ctx context.Context, id string, clusterId str
 }
 
 func (m *imlPublishModule) Publish(ctx context.Context, project string, id string) error {
-	_, err := m.projectService.CheckProject(ctx, project, projectRuleMustServer)
+	_, err := m.serviceService.Check(ctx, project, projectRuleMustServer)
 	if err != nil {
 		return err
 	}
@@ -555,7 +555,7 @@ func (m *imlPublishModule) Publish(ctx context.Context, project string, id strin
 }
 
 func (m *imlPublishModule) List(ctx context.Context, project string, page, pageSize int) ([]*dto.Publish, int64, error) {
-	_, err := m.projectService.CheckProject(ctx, project, projectRuleMustServer)
+	_, err := m.serviceService.Check(ctx, project, projectRuleMustServer)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -570,7 +570,7 @@ func (m *imlPublishModule) List(ctx context.Context, project string, page, pageS
 }
 
 func (m *imlPublishModule) Detail(ctx context.Context, project string, id string) (*dto.PublishDetail, error) {
-	_, err := m.projectService.CheckProject(ctx, project, projectRuleMustServer)
+	_, err := m.serviceService.Check(ctx, project, projectRuleMustServer)
 	if err != nil {
 		return nil, err
 	}

@@ -8,12 +8,11 @@ import (
 
 	"github.com/eolinker/ap-account/service/role"
 
-	"github.com/eolinker/apipark/service/project"
-
 	"github.com/eolinker/go-common/store"
 
 	"github.com/eolinker/ap-account/service/user"
 
+	"github.com/eolinker/apipark/service/service"
 	team_member "github.com/eolinker/apipark/service/team-member"
 
 	"github.com/google/uuid"
@@ -30,7 +29,7 @@ type imlTeamModule struct {
 	service           team.ITeamService              `autowired:""`
 	memberService     team_member.ITeamMemberService `autowired:""`
 	userService       user.IUserService              `autowired:""`
-	projectService    project.IProjectService        `autowired:""`
+	serviceService    service.IServiceService        `autowired:""`
 	roleService       role.IRoleService              `autowired:""`
 	roleMemberService role.IRoleMemberService        `autowired:""`
 	transaction       store.ITransaction             `autowired:""`
@@ -41,12 +40,16 @@ func (m *imlTeamModule) GetTeam(ctx context.Context, id string) (*team_dto.Team,
 	if err != nil {
 		return nil, err
 	}
-	projects, err := m.projectService.CountTeam(ctx, id, "")
+	serviceCountMap, err := m.serviceService.ServiceCountByTeam(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	appCountMap, err := m.serviceService.ServiceCountByTeam(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
-	return team_dto.ToTeam(tv, int(projects)), nil
+	return team_dto.ToTeam(tv, serviceCountMap[id], appCountMap[id]), nil
 
 }
 
@@ -55,13 +58,18 @@ func (m *imlTeamModule) Search(ctx context.Context, keyword string) ([]*team_dto
 	if err != nil {
 		return nil, err
 	}
-	projectNumMap, err := m.projectService.CountByTeam(ctx, keyword)
+
+	serviceCountMap, err := m.serviceService.ServiceCountByTeam(ctx)
+	if err != nil {
+		return nil, err
+	}
+	appCountMap, err := m.serviceService.AppCountByTeam(ctx)
 	if err != nil {
 		return nil, err
 	}
 	outList := make([]*team_dto.Item, 0, len(list))
 	for _, v := range list {
-		outList = append(outList, team_dto.ToItem(v, projectNumMap[v.Id]))
+		outList = append(outList, team_dto.ToItem(v, serviceCountMap[v.Id], appCountMap[v.Id]))
 	}
 	return outList, nil
 }
@@ -121,7 +129,7 @@ func (m *imlTeamModule) Edit(ctx context.Context, id string, input *team_dto.Edi
 
 func (m *imlTeamModule) Delete(ctx context.Context, id string) error {
 	err := m.transaction.Transaction(ctx, func(ctx context.Context) error {
-		count, err := m.projectService.Count(ctx, "", map[string]interface{}{
+		count, err := m.serviceService.Count(ctx, "", map[string]interface{}{
 			"team": id,
 		})
 		if err != nil {
