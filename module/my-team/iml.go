@@ -98,11 +98,11 @@ func (m *imlTeamModule) Search(ctx context.Context, keyword string) ([]*team_dto
 	if err != nil {
 		return nil, err
 	}
-	serviceNumMap, err := m.serviceService.ServiceCountByTeam(ctx, keyword)
+	serviceNumMap, err := m.serviceService.ServiceCountByTeam(ctx, teamIDs...)
 	if err != nil {
 		return nil, err
 	}
-	appNumMap, err := m.serviceService.AppCountByTeam(ctx, keyword)
+	appNumMap, err := m.serviceService.AppCountByTeam(ctx, teamIDs...)
 	if err != nil {
 		return nil, err
 	}

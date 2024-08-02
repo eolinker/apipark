@@ -21,8 +21,25 @@ func init() {
 		panic(err)
 	}
 	for group, asl := range ts {
-
 		access.Add(group, asl)
 
 	}
+	//defaultRoles := access.Roles()
+	//for group, rs := range defaultRoles {
+	//	p, has := access.GetPermit(group)
+	//	if !has {
+	//		continue
+	//	}
+	//
+	//	for _, r := range rs {
+	//		for _, pm := range r.Permits {
+	//			apis, err := p.GetPermits(pm)
+	//			if err != nil {
+	//				continue
+	//			}
+	//			permit.AddPermitRule(pm, apis...)
+	//		}
+	//	}
+	//
+	//}
 }

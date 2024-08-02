@@ -2,6 +2,9 @@ package permit_middleware
 
 import (
 	"errors"
+	"net/http"
+	"reflect"
+
 	permit_identity "github.com/eolinker/apipark/middleware/permit/identity"
 	permit_type "github.com/eolinker/apipark/service/permit-type"
 	"github.com/eolinker/eosc/log"
@@ -11,8 +14,6 @@ import (
 	"github.com/eolinker/go-common/utils"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-	"net/http"
-	"reflect"
 )
 
 var (
@@ -57,10 +58,10 @@ func (p *PermitMiddleware) Check(method string, path string) (bool, []gin.Handle
 				ginCtx.Abort()
 				return
 			}
-			if userId == "admin" {
-				// 超级管理员不校验
-				return
-			}
+			//if userId == "admin" {
+			//	// 超级管理员不校验
+			//	return
+			//}
 
 			for _, group := range checkSort {
 				accessList, has := accessRules[group]

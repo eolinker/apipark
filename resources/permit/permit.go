@@ -2,6 +2,7 @@ package permit
 
 import (
 	_ "embed"
+
 	"github.com/eolinker/go-common/permit"
 	"gopkg.in/yaml.v3"
 )
@@ -14,7 +15,7 @@ var (
 
 func init() {
 
-	reset()
+	//reset()
 
 }
 func reset() {
