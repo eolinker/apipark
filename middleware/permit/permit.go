@@ -1,23 +1,20 @@
 package permit_middleware
 
 import (
-	"errors"
 	"net/http"
 	"reflect"
 
 	permit_identity "github.com/eolinker/apipark/middleware/permit/identity"
-	permit_type "github.com/eolinker/apipark/service/permit-type"
 	"github.com/eolinker/eosc/log"
 	"github.com/eolinker/go-common/autowire"
 	"github.com/eolinker/go-common/permit"
 	"github.com/eolinker/go-common/pm3"
 	"github.com/eolinker/go-common/utils"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 var (
-	checkSort = []string{permit_identity.ProjectGroup, permit_identity.TeamGroup, permit_identity.SystemGroup}
+	checkSort = []string{permit_identity.TeamGroup, permit_identity.SystemGroup}
 )
 
 type IPermitMiddleware interface {
@@ -58,6 +55,7 @@ func (p *PermitMiddleware) Check(method string, path string) (bool, []gin.Handle
 				ginCtx.Abort()
 				return
 			}
+
 			//if userId == "admin" {
 			//	// 超级管理员不校验
 			//	return
@@ -74,48 +72,16 @@ func (p *PermitMiddleware) Check(method string, path string) (bool, []gin.Handle
 					// 当前分组没有配置身份handler
 					continue
 				}
-				domains, myIdentity, ok := domainHandler(ginCtx)
+				_, myAccess, ok := domainHandler(ginCtx)
 				if !ok {
-					// 无效的身份域
-					//ginCtx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"code": http.StatusForbidden, "msg": "domain not found", "success": "fail"})
-					//ginCtx.Abort()
-					//return
 					continue
 				}
-				myIdentitySet := utils.NewSet(myIdentity...)
-				myIdentitySet.Set(permit_type.AnyOne.Key)
-				for _, domain := range domains {
-					grantsOfAccess, err := p.permitService.GrantForDomain(ginCtx, domain)
-					if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-						//ginCtx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"code": http.StatusForbidden, "msg": "domain not found", "success": "fail"})
-						//ginCtx.Abort()
-						//return
-						continue
-					}
-					if len(grantsOfAccess) == 0 {
-						// 当前域没有配置权限
-						continue
-					}
-					checkCount := 0
-					for _, access := range accessList {
-						grants, ok := grantsOfAccess[access]
-						if !ok {
-							// 当前域没有配置目标权限
-							continue
-						}
-
-						for _, grant := range grants {
-							if myIdentitySet.Has(grant) {
-								// 当前用户有权限
-								return
-							}
-						}
-						checkCount++
-
-					}
-					if checkCount > 0 {
-						// 当前域有权限配置,且当前用户没有目标权限,则跳过当前group接下来的domain
-						break
+				accessMap := utils.SliceToMapO(myAccess, func(s string) (string, struct{}) {
+					return s, struct{}{}
+				})
+				for _, acc := range accessList {
+					if _, ok := accessMap[acc]; ok {
+						return
 					}
 				}
 			}

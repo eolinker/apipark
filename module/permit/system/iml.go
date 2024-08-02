@@ -2,7 +2,10 @@ package system
 
 import (
 	"context"
+	"errors"
 	"reflect"
+
+	"github.com/gin-gonic/gin"
 
 	"github.com/eolinker/ap-account/service/role"
 	"github.com/eolinker/go-common/autowire"
@@ -21,10 +24,11 @@ type imlSystemPermitModule struct {
 	roleMemberService role.IRoleMemberService `autowired:""`
 }
 
-func (m *imlSystemPermitModule) Permissions(ctx context.Context) ([]string, error) {
-
+func (m *imlSystemPermitModule) accesses(ctx context.Context) ([]string, error) {
 	uid := utils.UserId(ctx)
-
+	if uid == "" {
+		return nil, errors.New("not login")
+	}
 	roleMembers, err := m.roleMemberService.List(ctx, role.SystemTarget(), uid)
 	if err != nil {
 		return nil, err
@@ -45,13 +49,26 @@ func (m *imlSystemPermitModule) Permissions(ctx context.Context) ([]string, erro
 			permits[p] = struct{}{}
 		}
 	}
-
 	return utils.MapToSlice(permits, func(k string, v struct{}) string {
 		return k
 	}), nil
 }
 
+func (m *imlSystemPermitModule) Permissions(ctx context.Context) ([]string, error) {
+	return m.accesses(ctx)
+}
+
+func (m *imlSystemPermitModule) domain(ctx *gin.Context) ([]string, []string, bool) {
+
+	system, err := m.accesses(ctx)
+	if err != nil {
+		return nil, nil, false
+	}
+	return []string{role.GroupSystem}, system, true
+}
+
 func (m *imlSystemPermitModule) OnComplete() {
+	permit.AddDomainHandler(role.GroupSystem, m.domain)
 }
 
 func init() {
