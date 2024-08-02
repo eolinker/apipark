@@ -5,9 +5,9 @@ go 1.21
 //toolchain go1.21.1
 
 require (
-	github.com/eolinker/ap-account v1.0.2
+	github.com/eolinker/ap-account v1.0.3
 	github.com/eolinker/eosc v0.17.3
-	github.com/eolinker/go-common v1.0.0
+	github.com/eolinker/go-common v1.0.1
 	github.com/gabriel-vasile/mimetype v1.4.4
 	github.com/gin-gonic/gin v1.10.0
 	github.com/google/uuid v1.6.0
@@ -64,9 +64,4 @@ require (
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gorm.io/driver/mysql v1.5.2 // indirect
-)
-
-replace (
-	github.com/eolinker/ap-account => ../ap-account
-	github.com/eolinker/go-common => ../go-common
 )
