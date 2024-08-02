@@ -29,6 +29,8 @@ system:
               - "DELETE:/api/v1/user/department/member"
               - "POST:/api/v1/user/department/member/remove"
               - "POST:/api/v1/account/role"
+            dependents:
+              - system.organization.member.view
       - name: team
         cname: '团队'
         value: 'team'
@@ -46,7 +48,8 @@ system:
               - "POST:/api/v1/manager/team"
               - "PUT:/api/v1/manager/team"
               - "DELETE:/api/v1/manager/team"
-
+            dependents:
+              - system.organization.team.view
       - name: role
         cname: '角色'
         value: 'role'
@@ -84,6 +87,8 @@ system:
               - "PUT:/api/v1/catalogue"
               - "DELETE:/api/v1/catalogue"
               - "PUT:/api/v1/catalogue/sort"
+            dependents:
+              - system.api_market.service_classification.view
   - name: devops
     cname: 运维
     value: 'devops'
