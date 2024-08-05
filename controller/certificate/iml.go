@@ -14,16 +14,16 @@ type imlCertificate struct {
 	module certificate.ICertificateModule `autowired:""`
 }
 
-func (c *imlCertificate) Create(ctx *gin.Context, partitionId string, create *certificate_dto.FileInput) error {
-	return c.module.Create(ctx, partitionId, create)
+func (c *imlCertificate) Create(ctx *gin.Context, create *certificate_dto.FileInput) error {
+	return c.module.Create(ctx, create)
 }
 
 func (c *imlCertificate) Update(ctx *gin.Context, id string, edit *certificate_dto.FileInput) error {
 	return c.module.Update(ctx, id, edit)
 }
 
-func (c *imlCertificate) ListForPartition(ctx *gin.Context, partitionId string) ([]*certificate_dto.Certificate, error) {
-	return c.module.List(ctx, partitionId)
+func (c *imlCertificate) ListForPartition(ctx *gin.Context) ([]*certificate_dto.Certificate, error) {
+	return c.module.List(ctx)
 }
 
 func (c *imlCertificate) Detail(ctx *gin.Context, id string) (*certificate_dto.Certificate, *certificate_dto.File, error) {

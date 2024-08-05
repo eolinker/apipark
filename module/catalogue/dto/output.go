@@ -25,14 +25,16 @@ type ServiceDetail struct {
 	Document    string        `json:"document"`
 	Basic       *ServiceBasic `json:"basic"`
 	Apis        []*ServiceApi `json:"apis"`
-	//DisableApis []*ServiceApiBasic `json:"disable_apis"`
 }
 
 type ServiceBasic struct {
-	//Service       auto.Label `json:"service" aolabel:"service"`
-	Team          auto.Label `json:"team" aolabel:"team"`
-	ApiNum        int        `json:"api_num"`
-	SubscriberNum int        `json:"subscriber_num"`
+	Team       auto.Label     `json:"team" aolabel:"team"`
+	ApiNum     int            `json:"api_num"`
+	AppNum     int            `json:"app_num"`
+	Tags       []auto.Label   `json:"tags" aolabel:"tag"`
+	Catalogue  auto.Label     `json:"catalogue" aolabel:"catalogue"`
+	Version    string         `json:"version"`
+	UpdateTime auto.TimeLabel `json:"update_time"`
 }
 
 type ServiceApiBasic struct {

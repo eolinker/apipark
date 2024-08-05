@@ -80,6 +80,9 @@ func (m *imlTeamModule) Create(ctx context.Context, input *team_dto.CreateTeam) 
 	}
 
 	err := m.transaction.Transaction(ctx, func(ctx context.Context) error {
+		if input.Master == "" {
+			input.Master = utils.UserId(ctx)
+		}
 		err := m.service.Create(ctx, &team.CreateTeam{
 			Id:          input.Id,
 			Name:        input.Name,
@@ -88,15 +91,12 @@ func (m *imlTeamModule) Create(ctx context.Context, input *team_dto.CreateTeam) 
 		if err != nil {
 			return err
 		}
-		if input.Master == "" {
-			input.Master = utils.UserId(ctx)
-		}
 
 		err = m.memberService.AddMemberTo(ctx, input.Id, input.Master)
 		if err != nil {
 			return err
 		}
-		supperRole, err := m.roleService.GetDefaultRole(ctx, role.GroupTeam)
+		supperRole, err := m.roleService.GetSupperRole(ctx, role.GroupTeam)
 		if err != nil {
 			return err
 		}

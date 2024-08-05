@@ -59,6 +59,10 @@ type imlAppController struct {
 	module service.IAppModule `autowired:""`
 }
 
+func (i *imlAppController) Search(ctx *gin.Context, teamId string, keyword string) ([]*service_dto.AppItem, error) {
+	return i.module.Search(ctx, teamId, keyword)
+}
+
 func (i *imlAppController) CreateApp(ctx *gin.Context, teamID string, input *service_dto.CreateApp) (*service_dto.App, error) {
 	return i.module.CreateApp(ctx, teamID, input)
 }

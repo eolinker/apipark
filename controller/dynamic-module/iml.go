@@ -79,7 +79,7 @@ func (i *imlDynamicModuleController) Get(ctx *gin.Context, module string, id str
 	return i.module.Get(ctx, module, id)
 }
 
-func (i *imlDynamicModuleController) List(ctx *gin.Context, module string, keyword string, partitionId string, page string, pageSize string) ([]map[string]interface{}, *dynamic_module_dto.PluginInfo, int64, error) {
+func (i *imlDynamicModuleController) List(ctx *gin.Context, module string, keyword string, clusterId string, page string, pageSize string) ([]map[string]interface{}, *dynamic_module_dto.PluginInfo, int64, error) {
 	p, err := strconv.Atoi(page)
 	if err != nil {
 		p = 1
@@ -93,15 +93,15 @@ func (i *imlDynamicModuleController) List(ctx *gin.Context, module string, keywo
 	if err != nil {
 		return nil, nil, 0, err
 	}
-	if partitionId == "" {
-		partitionId = "[]"
-	}
-	ids := make([]string, 0)
-	err = json.Unmarshal([]byte(partitionId), &ids)
-	if err != nil {
-		return nil, nil, 0, err
-	}
-	plugin, err := i.module.PluginInfo(ctx, module, ids...)
+	//if clusterId == "" {
+	//	clusterId = "[]"
+	//}
+	//ids := make([]string, 0)
+	//err = json.Unmarshal([]byte(clusterId), &ids)
+	//if err != nil {
+	//	return nil, nil, 0, err
+	//}
+	plugin, err := i.module.PluginInfo(ctx, module)
 	if err != nil {
 		return nil, nil, 0, err
 	}

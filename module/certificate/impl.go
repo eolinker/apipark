@@ -75,7 +75,7 @@ func (m *imlCertificate) initGateway(ctx context.Context, clusterId string, clie
 	return certificateClient.Online(ctx, certs...)
 }
 
-func (m *imlCertificate) save(ctx context.Context, id string, partitionId string, create *certificatedto.FileInput) (*certificatedto.Certificate, error) {
+func (m *imlCertificate) save(ctx context.Context, id string, clusterId string, create *certificatedto.FileInput) (*certificatedto.Certificate, error) {
 
 	keyData, err := base64.StdEncoding.DecodeString(create.Key)
 	if err != nil {
@@ -86,7 +86,7 @@ func (m *imlCertificate) save(ctx context.Context, id string, partitionId string
 	if err != nil {
 		return nil, fmt.Errorf("decode cert error: %w", err)
 	}
-	o, err := m.service.Save(ctx, id, partitionId, keyData, certData)
+	o, err := m.service.Save(ctx, id, clusterId, keyData, certData)
 	if err != nil {
 		return nil, err
 	}
@@ -115,12 +115,12 @@ func (m *imlCertificate) syncGateway(ctx context.Context, clusterId string, rele
 	return dynamicClient.Offline(ctx, releaseInfo)
 }
 
-func (m *imlCertificate) Create(ctx context.Context, clusterId string, create *certificatedto.FileInput) error {
+func (m *imlCertificate) Create(ctx context.Context, create *certificatedto.FileInput) error {
 
 	return m.transaction.Transaction(ctx, func(ctx context.Context) error {
 		id := uuid.New().String()
 		version := time.Now().Format("20060102150405")
-		err := m.syncGateway(ctx, clusterId, &gateway.DynamicRelease{
+		err := m.syncGateway(ctx, cluster.DefaultClusterID, &gateway.DynamicRelease{
 			BasicItem: &gateway.BasicItem{
 				ID:          id,
 				Description: "",
@@ -137,7 +137,7 @@ func (m *imlCertificate) Create(ctx context.Context, clusterId string, create *c
 		if err != nil {
 			return err
 		}
-		_, err = m.save(ctx, id, clusterId, create)
+		_, err = m.save(ctx, id, cluster.DefaultClusterID, create)
 		if err != nil {
 			return err
 		}
@@ -183,8 +183,8 @@ func (m *imlCertificate) Update(ctx context.Context, id string, edit *certificat
 		return nil
 	})
 }
-func (m *imlCertificate) List(ctx context.Context, clusterId string) ([]*certificatedto.Certificate, error) {
-	certs, err := m.service.List(ctx, clusterId)
+func (m *imlCertificate) List(ctx context.Context) ([]*certificatedto.Certificate, error) {
+	certs, err := m.service.List(ctx, cluster.DefaultClusterID)
 	if err != nil {
 		return nil, err
 	}

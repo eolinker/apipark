@@ -47,9 +47,9 @@ func (i *imlDynamicModule) Online(ctx context.Context, module string, id string,
 	if !has {
 		return fmt.Errorf("模块【%s】不存在", module)
 	}
-	if len(clusterInput.Clusters) == 0 {
-		return fmt.Errorf("上线分区失败，分区为空")
-	}
+	//if len(clusterInput.Clusters) == 0 {
+	//	return fmt.Errorf("上线分区失败，分区为空")
+	//}
 
 	id = strings.ToLower(fmt.Sprintf("%s_%s", id, module))
 	info, err := i.dynamicModuleService.Get(ctx, id)
@@ -57,21 +57,13 @@ func (i *imlDynamicModule) Online(ctx context.Context, module string, id string,
 		return fmt.Errorf("上线失败，配置不存在")
 	}
 	clusters, err := i.clusterService.List(ctx, clusterInput.Clusters...)
-	if err != nil {
+	if err != nil || len(clusters) == 0 {
 		return fmt.Errorf("上线失败，集群不存在")
 	}
 
 	return i.transaction.Transaction(ctx, func(ctx context.Context) error {
-		data := make(map[string]*gateway.DynamicRelease)
-		err = json.Unmarshal([]byte(info.Config), &data)
-		if err != nil {
-			return err
-		}
 		for _, c := range clusters {
-			cfg, ok := data[c.Uuid]
-			if !ok {
-				continue
-			}
+
 			// 插入发布历史
 			err = i.dynamicModulePublishService.Create(ctx, &dynamic_module.CreateDynamicModulePublish{
 				ID:            uuid.New().String(),
@@ -84,6 +76,7 @@ func (i *imlDynamicModule) Online(ctx context.Context, module string, id string,
 				return err
 			}
 			err = i.dynamicClient(ctx, c.Uuid, module, func(dynamicClient gateway.IDynamicClient) error {
+				cfg := &gateway.DynamicRelease{}
 				err = json.Unmarshal([]byte(info.Config), &cfg)
 				if err != nil {
 					return err
@@ -114,12 +107,22 @@ func (i *imlDynamicModule) Offline(ctx context.Context, module string, id string
 	if !has {
 		return fmt.Errorf("模块【%s】不存在", module)
 	}
-	if len(clusterInput.Clusters) == 0 {
-		return fmt.Errorf("下线分区失败，分区为空")
-	}
+	//if len(clusterInput.Clusters) == 0 {
+	//	return fmt.Errorf("下线分区失败，分区为空")
+	//}
 
 	return i.transaction.Transaction(ctx, func(ctx context.Context) error {
 		id = strings.ToLower(fmt.Sprintf("%s_%s", id, module))
+		if len(clusterInput.Clusters) == 0 {
+			clusters, err := i.clusterService.List(ctx)
+			if err != nil {
+				return err
+			}
+			clusterInput.Clusters = make([]string, 0)
+			for _, c := range clusters {
+				clusterInput.Clusters = append(clusterInput.Clusters, c.Uuid)
+			}
+		}
 		for _, clusterId := range clusterInput.Clusters {
 			err := i.dynamicClient(ctx, clusterId, module, func(dynamicClient gateway.IDynamicClient) error {
 				return dynamicClient.Offline(ctx, &gateway.DynamicRelease{
@@ -422,7 +425,7 @@ func (i *imlDynamicModule) Get(ctx context.Context, module string, id string) (*
 	if err != nil {
 		return nil, err
 	}
-	cfg := make(map[string]dynamic_module_dto.PartitionConfig)
+	cfg := make(map[string]interface{})
 	err = json.Unmarshal([]byte(info.Config), &cfg)
 	if err != nil {
 		return nil, err
@@ -463,31 +466,65 @@ func (i *imlDynamicModule) List(ctx context.Context, module string, keyword stri
 	userIDs := utils.SliceToSlice(list, func(s *dynamic_module.DynamicModule) string {
 		return s.Updater
 	})
+	clusters, err := i.clusterService.List(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
 	userMap := i.userService.GetLabels(ctx, userIDs...)
 	items := make([]map[string]interface{}, 0, len(list))
 	suffix := fmt.Sprintf("_%s", module)
-	for _, l := range list {
-		item := map[string]interface{}{
-			"id":          strings.TrimSuffix(l.ID, suffix),
-			"title":       l.Name,
-			"driver":      l.Driver,
-			"description": l.Description,
-			"updater":     userMap[l.Updater],
-			"update_time": l.UpdateAt.Format("2006-01-02 15:04:05"),
-		}
-
-		tmp := make(map[string]interface{})
-		err = json.Unmarshal([]byte(l.Config), &tmp)
-		if err == nil {
-			for _, column := range d.Define().Columns() {
-				if _, ok := item[column]; ok {
-					continue
-				}
-				item[column] = tmp[column]
-
+	for _, c := range clusters {
+		err = i.dynamicClient(ctx, c.Uuid, module, func(dynamicClient gateway.IDynamicClient) error {
+			versions, err := dynamicClient.Versions(ctx, map[string]string{
+				"module": module,
+			})
+			if err != nil {
+				log.Error("get versions error", err)
 			}
+			for _, l := range list {
+				status := "未发布"
+				id := strings.TrimSuffix(l.ID, suffix)
+
+				item := map[string]interface{}{
+					"id":          id,
+					"title":       l.Name,
+					"driver":      l.Driver,
+					"description": l.Description,
+					"updater":     userMap[l.Updater],
+					"update_time": l.UpdateAt.Format("2006-01-02 15:04:05"),
+				}
+
+				tmp := make(map[string]interface{})
+				err = json.Unmarshal([]byte(l.Config), &tmp)
+				if err == nil {
+					for _, column := range d.Define().Columns() {
+						if _, ok := item[column]; ok {
+							continue
+						}
+						item[column] = tmp[column]
+
+					}
+				}
+				if versions != nil {
+					if v, ok := versions[strings.ToLower(l.ID)]; ok {
+						if v == l.Version {
+							status = "已发布"
+						} else {
+							status = "待发布"
+						}
+					}
+				}
+				item["status"] = status
+				items = append(items, item)
+			}
+			return nil
+		})
+		if err != nil {
+			return nil, 0, err
 		}
-		items = append(items, item)
+
 	}
+
 	return items, total, nil
 }

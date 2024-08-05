@@ -25,8 +25,8 @@ var (
 type IClusterService interface {
 	CountByPartition(ctx context.Context) (map[string]int, error)
 	List(ctx context.Context, clusterIds ...string) ([]*Cluster, error)
-	ListByClusters(ctx context.Context, partitionId string, ids ...string) ([]*Cluster, error)
-	Search(ctx context.Context, keyword string, partitionId ...string) ([]*Cluster, error)
+	ListByClusters(ctx context.Context, ids ...string) ([]*Cluster, error)
+	Search(ctx context.Context, keyword string, clusterId ...string) ([]*Cluster, error)
 	Create(ctx context.Context, name string, resume string, address string) (*Cluster, error)
 	UpdateInfo(ctx context.Context, id string, name *string, resume *string) (*Cluster, error)
 	UpdateAddress(ctx context.Context, id string, address string) ([]*Node, error)
@@ -56,11 +56,8 @@ func (s *imlClusterService) GatewayClient(ctx context.Context, id string) (gatew
 	})
 }
 
-func (s *imlClusterService) ListByClusters(ctx context.Context, partitionId string, ids ...string) ([]*Cluster, error) {
+func (s *imlClusterService) ListByClusters(ctx context.Context, ids ...string) ([]*Cluster, error) {
 	wm := make(map[string]interface{})
-	if partitionId != "" {
-		wm["partition"] = partitionId
-	}
 
 	if len(ids) > 0 {
 		wm["uuid"] = ids
@@ -391,7 +388,7 @@ func (s *imlClusterService) Nodes(ctx context.Context, clusterIds ...string) ([]
 func (s *imlClusterService) CountByPartition(ctx context.Context) (map[string]int, error) {
 	return s.store.Count(ctx)
 }
-func (s *imlClusterService) Search(ctx context.Context, keyword string, partitionId ...string) ([]*Cluster, error) {
+func (s *imlClusterService) Search(ctx context.Context, keyword string, clusterId ...string) ([]*Cluster, error) {
 	wheres := make([]string, 0, 2)
 	value := make([]interface{}, 0, 3)
 	if keyword != "" {
@@ -399,13 +396,13 @@ func (s *imlClusterService) Search(ctx context.Context, keyword string, partitio
 		value = append(value, "%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%")
 	}
 
-	if len(partitionId) > 0 {
-		if len(partitionId) == 1 {
-			wheres = append(wheres, "`partition` = ?")
-			value = append(value, partitionId[0])
+	if len(clusterId) > 0 {
+		if len(clusterId) == 1 {
+			wheres = append(wheres, "`uuid` = ?")
+			value = append(value, clusterId[0])
 		} else {
-			wheres = append(wheres, "`partition` in (?)")
-			value = append(value, partitionId)
+			wheres = append(wheres, "`uuid` in (?)")
+			value = append(value, clusterId)
 		}
 
 	}

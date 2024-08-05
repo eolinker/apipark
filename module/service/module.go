@@ -36,6 +36,7 @@ type IServiceModule interface {
 type IAppModule interface {
 	CreateApp(ctx context.Context, teamID string, input *service_dto.CreateApp) (*service_dto.App, error)
 	UpdateApp(ctx context.Context, appId string, input *service_dto.UpdateApp) (*service_dto.App, error)
+	Search(ctx context.Context, teamId string, keyword string) ([]*service_dto.AppItem, error)
 	SearchMyApps(ctx context.Context, teamId string, keyword string) ([]*service_dto.AppItem, error)
 	// SimpleApps 获取简易项目列表
 	SimpleApps(ctx context.Context, keyword string) ([]*service_dto.SimpleAppItem, error)

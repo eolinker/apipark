@@ -35,6 +35,7 @@ type IAppController interface {
 	CreateApp(ctx *gin.Context, teamID string, project *service_dto.CreateApp) (*service_dto.App, error)
 
 	UpdateApp(ctx *gin.Context, appId string, project *service_dto.UpdateApp) (*service_dto.App, error)
+	Search(ctx *gin.Context, teamId string, keyword string) ([]*service_dto.AppItem, error)
 	SearchMyApps(ctx *gin.Context, teamId string, keyword string) ([]*service_dto.AppItem, error)
 	// SimpleApps 获取简易项目列表
 	SimpleApps(ctx *gin.Context, keyword string) ([]*service_dto.SimpleAppItem, error)

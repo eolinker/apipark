@@ -9,9 +9,9 @@ import (
 )
 
 type ICertificateController interface {
-	Create(ctx *gin.Context, partitionId string, create *certificate_dto.FileInput) error
+	Create(ctx *gin.Context, create *certificate_dto.FileInput) error
 	Update(ctx *gin.Context, id string, edit *certificate_dto.FileInput) error
-	ListForPartition(ctx *gin.Context, partitionId string) ([]*certificate_dto.Certificate, error)
+	ListForPartition(ctx *gin.Context) ([]*certificate_dto.Certificate, error)
 	Detail(ctx *gin.Context, id string) (*certificate_dto.Certificate, *certificate_dto.File, error)
 	Delete(ctx *gin.Context, id string) (string, error)
 }

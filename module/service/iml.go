@@ -194,9 +194,9 @@ func (i *imlServiceModule) Search(ctx context.Context, teamID string, keyword st
 		if err != nil {
 			return nil, err
 		}
-		list, err = i.serviceService.Search(ctx, keyword, map[string]interface{}{"team": teamID}, "update_at desc")
+		list, err = i.serviceService.Search(ctx, keyword, map[string]interface{}{"team": teamID, "as_server": true}, "update_at desc")
 	} else {
-		list, err = i.serviceService.Search(ctx, keyword, nil, "update_at desc")
+		list, err = i.serviceService.Search(ctx, keyword, map[string]interface{}{"as_server": true}, "update_at desc")
 	}
 	if err != nil {
 		return nil, err
@@ -423,6 +423,80 @@ type imlAppModule struct {
 	teamMemberService team_member.ITeamMemberService `autowired:""`
 	subscribeService  subscribe.ISubscribeService    `autowired:""`
 	transaction       store.ITransaction             `autowired:""`
+}
+
+func (i *imlAppModule) Search(ctx context.Context, teamId string, keyword string) ([]*service_dto.AppItem, error) {
+	var services []*service.Service
+	var err error
+	if teamId != "" {
+		_, err = i.teamService.Get(ctx, teamId)
+		if err != nil {
+			return nil, err
+		}
+		services, err = i.serviceService.Search(ctx, keyword, map[string]interface{}{"team": teamId, "as_app": true}, "update_at desc")
+	} else {
+		services, err = i.serviceService.Search(ctx, keyword, map[string]interface{}{"as_app": true}, "update_at desc")
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	serviceIds := utils.SliceToSlice(services, func(p *service.Service) string {
+		return p.Id
+	})
+
+	subscribers, err := i.subscribeService.SubscriptionsByApplication(ctx, serviceIds...)
+	if err != nil {
+		return nil, err
+	}
+
+	subscribeCount := map[string]int64{}
+	subscribeVerifyCount := map[string]int64{}
+	verifyTmp := map[string]struct{}{}
+	subscribeTmp := map[string]struct{}{}
+	for _, s := range subscribers {
+		key := fmt.Sprintf("%s-%s", s.Service, s.Application)
+		switch s.ApplyStatus {
+		case subscribe.ApplyStatusSubscribe:
+			if _, ok := subscribeTmp[key]; !ok {
+				subscribeTmp[key] = struct{}{}
+				subscribeCount[s.Application]++
+			}
+		case subscribe.ApplyStatusReview:
+			if _, ok := verifyTmp[key]; !ok {
+				verifyTmp[key] = struct{}{}
+				subscribeVerifyCount[s.Application]++
+			}
+		default:
+
+		}
+	}
+	items := make([]*service_dto.AppItem, 0, len(services))
+	for _, model := range services {
+		subscribeNum := subscribeCount[model.Id]
+		verifyNum := subscribeVerifyCount[model.Id]
+		items = append(items, &service_dto.AppItem{
+			Id:                 model.Id,
+			Name:               model.Name,
+			Description:        model.Description,
+			CreateTime:         auto.TimeLabel(model.CreateTime),
+			UpdateTime:         auto.TimeLabel(model.UpdateTime),
+			Team:               auto.UUID(model.Team),
+			SubscribeNum:       subscribeNum,
+			SubscribeVerifyNum: verifyNum,
+			CanDelete:          subscribeNum == 0,
+		})
+	}
+	sort.Slice(items, func(i, j int) bool {
+		if items[i].SubscribeNum != items[j].SubscribeNum {
+			return items[i].SubscribeNum > items[j].SubscribeNum
+		}
+		if items[i].SubscribeVerifyNum != items[j].SubscribeVerifyNum {
+			return items[i].SubscribeVerifyNum > items[j].SubscribeVerifyNum
+		}
+		return items[i].Name < items[j].Name
+	})
+	return items, nil
 }
 
 func (i *imlAppModule) CreateApp(ctx context.Context, teamID string, input *service_dto.CreateApp) (*service_dto.App, error) {

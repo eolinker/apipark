@@ -252,15 +252,27 @@ func (i *imlCatalogueModule) ServiceDetail(ctx context.Context, sid string) (*ca
 	if err != nil {
 		return nil, err
 	}
-
+	tags, err := i.serviceTagService.List(ctx, []string{sid}, nil)
+	if err != nil {
+		return nil, err
+	}
+	tagIds := utils.SliceToSlice(tags, func(t *service_tag.Tag) string {
+		return t.Tid
+	}, func(t *service_tag.Tag) bool {
+		return t.Sid == sid
+	})
 	return &catalogue_dto.ServiceDetail{
 		Name:        s.Name,
 		Description: s.Description,
 		Document:    docStr,
 		Basic: &catalogue_dto.ServiceBasic{
-			Team:          auto.UUID(s.Team),
-			ApiNum:        len(apis),
-			SubscriberNum: int(countMap[s.Id]),
+			Team:       auto.UUID(s.Team),
+			ApiNum:     len(apis),
+			AppNum:     int(countMap[s.Id]),
+			Tags:       auto.List(tagIds),
+			Catalogue:  auto.UUID(s.Catalogue),
+			Version:    r.Version,
+			UpdateTime: auto.TimeLabel(r.CreateAt),
 		},
 		Apis: apis,
 	}, nil

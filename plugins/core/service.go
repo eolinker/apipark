@@ -13,6 +13,7 @@ func (p *plugin) ServiceApis() []pm3.Api {
 		pm3.CreateApiWidthDoc(http.MethodPut, "/api/v1/service/info", []string{"context", "query:service", "body"}, []string{"service"}, p.serviceController.Edit),
 		pm3.CreateApiWidthDoc(http.MethodDelete, "/api/v1/service/info", []string{"context", "query:service"}, nil, p.serviceController.Delete),
 		pm3.CreateApiWidthDoc(http.MethodGet, "/api/v1/my_services", []string{"context", "query:team", "query:keyword"}, []string{"services"}, p.serviceController.SearchMyServices),
+		pm3.CreateApiWidthDoc(http.MethodGet, "/api/v1/services", []string{"context", "query:team", "query:keyword"}, []string{"services"}, p.serviceController.Search),
 
 		pm3.CreateApiWidthDoc(http.MethodGet, "/api/v1/simple/services/mine", []string{"context", "query:keyword"}, []string{"services"}, p.serviceController.MySimple),
 
@@ -24,6 +25,7 @@ func (p *plugin) ServiceApis() []pm3.Api {
 		pm3.CreateApiWidthDoc(http.MethodGet, "/api/v1/simple/apps", []string{"context", "query:keyword"}, []string{"apps"}, p.appController.SimpleApps),
 		pm3.CreateApiWidthDoc(http.MethodGet, "/api/v1/simple/apps/mine", []string{"context", "query:keyword"}, []string{"apps"}, p.appController.MySimpleApps),
 		pm3.CreateApiWidthDoc(http.MethodGet, "/api/v1/my_apps", []string{"context", "query:team", "query:keyword"}, []string{"apps"}, p.appController.SearchMyApps),
+		pm3.CreateApiWidthDoc(http.MethodGet, "/api/v1/apps", []string{"context", "query:team", "query:keyword"}, []string{"apps"}, p.appController.Search),
 		pm3.CreateApiWidthDoc(http.MethodPut, "/api/v1/app/info", []string{"context", "query:app", "body"}, []string{"app"}, p.appController.UpdateApp),
 
 		pm3.CreateApiWidthDoc(http.MethodGet, "/api/v1/service/doc", []string{"context", "query:service"}, []string{"doc"}, p.serviceController.ServiceDoc),
