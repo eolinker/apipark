@@ -210,15 +210,15 @@ func (i *imlServiceModule) Search(ctx context.Context, teamID string, keyword st
 	if err != nil {
 		return nil, err
 	}
-	serviceCountMap, err := i.serviceService.CountByGroup(ctx, "", map[string]interface{}{"service": serviceIds}, "service")
-	if err != nil {
-		return nil, err
-	}
+	//serviceCountMap, err := i.serviceService.CountByGroup(ctx, "", map[string]interface{}{"uuid": serviceIds}, "service")
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	items := make([]*service_dto.ServiceItem, 0, len(list))
 	for _, model := range list {
 		apiCount := apiCountMap[model.Id]
-		serviceCount := serviceCountMap[model.Id]
+		//serviceCount := serviceCountMap[model.Id]
 		items = append(items, &service_dto.ServiceItem{
 			Id:          model.Id,
 			Name:        model.Name,
@@ -227,7 +227,7 @@ func (i *imlServiceModule) Search(ctx context.Context, teamID string, keyword st
 			UpdateTime:  auto.TimeLabel(model.UpdateTime),
 			Team:        auto.UUID(model.Team),
 			ApiNum:      apiCount,
-			CanDelete:   apiCount == 0 && serviceCount == 0,
+			CanDelete:   apiCount == 0,
 		})
 	}
 	return items, nil

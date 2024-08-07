@@ -44,8 +44,9 @@ func (c *imlPublishController) ReleaseDo(ctx *gin.Context, serviceId string, inp
 		c.releaseModule.Delete(ctx, serviceId, newReleaseId)
 		return nil, err
 	}
-	err = c.publishModule.ReleaseDo(ctx, serviceId, input)
+	err = c.publishModule.Publish(ctx, serviceId, apply.Id)
 	if err != nil {
+		c.releaseModule.Delete(ctx, serviceId, newReleaseId)
 		return nil, err
 	}
 	return apply, err

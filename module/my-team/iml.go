@@ -265,6 +265,9 @@ func (m *imlTeamModule) Members(ctx context.Context, id string, keyword string) 
 	if err != nil {
 		return nil, err
 	}
+	if len(users) == 0 {
+		return make([]*team_dto.Member, 0), nil
+	}
 	userIds := utils.SliceToSlice(users, func(s *user.User) string {
 		return s.UID
 	})

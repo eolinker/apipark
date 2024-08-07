@@ -12,7 +12,7 @@ import (
 
 type IPublishModule interface {
 	CheckPublish(ctx context.Context, serviceId string, releaseId string) (*dto.DiffOut, error)
-	ReleaseDo(ctx context.Context, serviceId string, input *dto.ApplyOnReleaseInput) error
+	//ReleaseDo(ctx context.Context, serviceId string, input *dto.ApplyOnReleaseInput) error
 
 	Apply(ctx context.Context, serviceId string, input *dto.ApplyInput) (*dto.Publish, error)
 	Stop(ctx context.Context, serviceId string, id string) error

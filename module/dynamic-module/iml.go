@@ -307,7 +307,7 @@ func (i *imlDynamicModule) PluginInfo(ctx context.Context, module string, cluste
 
 	fields = append(fields, &driver.Field{
 		Name:  "status",
-		Title: fmt.Sprintf("状态："),
+		Title: fmt.Sprintf("状态"),
 		Attr:  "status",
 		Enum: []string{
 			"已发布",
