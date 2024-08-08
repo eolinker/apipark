@@ -176,7 +176,7 @@ system:
             cname: 查看所有团队
             value: 'view_all'
             apis:
-              - "GET:/api/v1/teams"
+              - "GET:/api/v1/manager/teams"
       - name: api market
         cname: API市场
         value: 'api_market'
