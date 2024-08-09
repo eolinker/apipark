@@ -126,6 +126,7 @@ func createEntityHandler(i *Create) *service.Service {
 		CreateAt:    now,
 		UpdateAt:    now,
 		Description: i.Description,
+		Logo:        i.Logo,
 		Prefix:      i.Prefix,
 		Team:        i.Team,
 		ServiceType: i.ServiceType.Int(),

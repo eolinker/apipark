@@ -45,11 +45,11 @@ func (m *imlTeamModule) UpdateMemberRole(ctx context.Context, id string, input *
 		return err
 	}
 	return m.transaction.Transaction(ctx, func(ctx context.Context) error {
+		err = m.roleMemberService.RemoveUserRole(ctx, role.TeamTarget(id), input.Users...)
+		if err != nil {
+			return err
+		}
 		for _, roleId := range input.Roles {
-			err = m.roleMemberService.RemoveUserRole(ctx, roleId, input.Users...)
-			if err != nil {
-				return err
-			}
 			for _, userId := range input.Users {
 				err = m.roleMemberService.Add(ctx, &role.AddMember{
 					Role:   roleId,

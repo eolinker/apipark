@@ -79,6 +79,7 @@ type Create struct {
 	Description string
 	Team        string
 	Prefix      string
+	Logo        string
 	ServiceType ServiceType
 	Catalogue   string
 	AsServer    bool

@@ -6,6 +6,7 @@ type CreateService struct {
 	Prefix      string `json:"prefix"`
 	Description string `json:"description"`
 	ServiceType string `json:"service_type"`
+	Logo        string `json:"logo"`
 	Catalogue   string `json:"catalogue" aocheck:"catalogue"`
 	AsApp       *bool  `json:"as_app"`
 	AsServer    *bool  `json:"as_server"`

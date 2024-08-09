@@ -246,6 +246,7 @@ func (i *imlServiceModule) Create(ctx context.Context, teamID string, input *ser
 		ServiceType: service.ServiceType(input.ServiceType),
 		Catalogue:   input.Catalogue,
 		Prefix:      input.Prefix,
+		Logo:        input.Logo,
 	}
 	if mo.ServiceType == service.PublicService && mo.Catalogue == "" {
 		return nil, fmt.Errorf("catalogue can not be empty")

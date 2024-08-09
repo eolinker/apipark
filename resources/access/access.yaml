@@ -341,7 +341,6 @@ team:
             value: 'view'
             apis:
               - "GET:/api/v1/team/members"
-              - "GET:/api/v1/team/members/simple"
               - "GET:/api/v1/team/members/toadd"
           - name: manager
             cname: 管理
