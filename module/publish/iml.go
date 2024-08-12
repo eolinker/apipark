@@ -49,36 +49,6 @@ type imlPublishModule struct {
 	transaction       store.ITransaction             `autowired:""`
 }
 
-//func (m *imlPublishModule) ReleaseDo(ctx context.Context, serviceId string, input *dto.ApplyOnReleaseInput) error {
-//	return m.transaction.Transaction(ctx, func(ctx context.Context) error {
-//		newReleaseId, err := m.releaseModule.Create(ctx, serviceId, &dto2.CreateInput{
-//			Version: input.Version,
-//			Remark:  input.VersionRemark,
-//		})
-//		if err != nil {
-//			return err
-//		}
-//		apply, err := m.Apply(ctx, serviceId, &dto.ApplyInput{
-//			Release: newReleaseId,
-//			Remark:  input.PublishRemark,
-//		})
-//		if err != nil {
-//			return err
-//		}
-//		err = m.Accept(ctx, serviceId, apply.Id, "")
-//		if err != nil {
-//			m.releaseModule.Delete(ctx, serviceId, newReleaseId)
-//			return err
-//		}
-//		err = m.Publish(ctx, serviceId, apply.Id)
-//		if err != nil {
-//			m.releaseModule.Delete(ctx, serviceId, newReleaseId)
-//		}
-//
-//		return nil
-//	})
-//}
-
 func (m *imlPublishModule) initGateway(ctx context.Context, partitionId string, clientDriver gateway.IClientDriver) error {
 
 	projects, err := m.serviceService.List(ctx)
@@ -534,6 +504,13 @@ func (m *imlPublishModule) publish(ctx context.Context, id string, clusterId str
 		publishStatus.UpdateAt = time.Now()
 		return fmt.Errorf("online error: %v", err)
 	}
+	apiIds := utils.SliceToSlice(projectRelease.Apis, func(api *gateway.ApiRelease) string {
+		return api.ID
+	})
+	client.Service().Online(ctx, &gateway.ServiceRelease{
+		ID:   projectRelease.Id,
+		Apis: apiIds,
+	})
 	publishStatus.Status = publish.StatusDone
 	publishStatus.UpdateAt = time.Now()
 	return nil

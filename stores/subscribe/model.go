@@ -24,11 +24,11 @@ func (s *Subscribe) TableName() string {
 
 type Apply struct {
 	Id          int64     `gorm:"column:id;type:BIGINT(20);NOT NULL;comment:id;primary_key;comment:主键ID;"`
-	Uuid        string    `gorm:"size:36;not null;column:uuid;comment:uuid;uniqueIndex:uuid;"`                                           // uuid
-	Service     string    `gorm:"size:36;not null;column:service;comment:服务id;index:server;uniqueIndex:unique_apply"`                    // 服务id
-	Team        string    `gorm:"size:36;not null;column:team;comment:团队id;index:team;"`                                                 // 团队id
-	Application string    `gorm:"size:36;not null;column:application;comment:应用id,项目id,系统id;index:application;uniqueIndex:unique_apply"` // 订阅应用id
-	ApplyTeam   string    `gorm:"size:36;not null;column:apply_team;comment:申请团队id;index:apply_team;"`                                   // 申请团队id
+	Uuid        string    `gorm:"size:36;not null;column:uuid;comment:uuid;uniqueIndex:uuid;"`                  // uuid
+	Service     string    `gorm:"size:36;not null;column:service;comment:服务id;index:service"`                   // 服务id
+	Team        string    `gorm:"size:36;not null;column:team;comment:团队id;index:team;"`                        // 团队id
+	Application string    `gorm:"size:36;not null;column:application;comment:应用id,项目id,系统id;index:application"` // 订阅应用id
+	ApplyTeam   string    `gorm:"size:36;not null;column:apply_team;comment:申请团队id;index:apply_team;"`          // 申请团队id
 	Applier     string    `gorm:"size:36;not null;column:applier;comment:申请人;index:applier;" aovalue:"creator"`
 	ApplyAt     time.Time `gorm:"type:timestamp;NOT NULL;DEFAULT:CURRENT_TIMESTAMP;column:apply_at;comment:申请时间"`
 	Approver    string    `gorm:"size:36;not null;column:approver;comment:审批人;index:approver;"`

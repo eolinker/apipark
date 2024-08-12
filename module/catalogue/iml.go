@@ -88,29 +88,29 @@ func (i *imlCatalogueModule) Subscribe(ctx context.Context, subscribeInfo *catal
 				// 当系统不可作为订阅方时，不可订阅
 				continue
 			}
-			info, err := i.subscribeApplyService.GetApply(ctx, subscribeInfo.Service, appId)
-			if err != nil {
-				if !errors.Is(err, gorm.ErrRecordNotFound) {
-					return err
-				}
-				err = i.subscribeApplyService.Create(ctx, &subscribe.CreateApply{
-					Uuid:        uuid.New().String(),
-					Service:     subscribeInfo.Service,
-					Team:        s.Team,
-					Application: appId,
-					ApplyTeam:   appInfo.Team,
-					Reason:      subscribeInfo.Reason,
-					Status:      subscribe.ApplyStatusReview,
-					Applier:     userId,
-				})
+			//info, err := i.subscribeApplyService.GetApply(ctx, subscribeInfo.Service, appId)
+			//if err != nil {
+			//	if !errors.Is(err, gorm.ErrRecordNotFound) {
+			//		return err
+			//	}
+			err = i.subscribeApplyService.Create(ctx, &subscribe.CreateApply{
+				Uuid:        uuid.New().String(),
+				Service:     subscribeInfo.Service,
+				Team:        s.Team,
+				Application: appId,
+				ApplyTeam:   appInfo.Team,
+				Reason:      subscribeInfo.Reason,
+				Status:      subscribe.ApplyStatusReview,
+				Applier:     userId,
+			})
 
-			} else {
-				status := subscribe.ApplyStatusReview
-				err = i.subscribeApplyService.Save(ctx, info.Id, &subscribe.EditApply{
-					Status:  &status,
-					Applier: &userId,
-				})
-			}
+			//} else {
+			//	status := subscribe.ApplyStatusReview
+			//	err = i.subscribeApplyService.Save(ctx, info.Id, &subscribe.EditApply{
+			//		Status:  &status,
+			//		Applier: &userId,
+			//	})
+			//}
 			if err != nil {
 				return err
 			}
