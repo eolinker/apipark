@@ -374,43 +374,46 @@ const MemberList = ()=>{
         })
     }
 
-    return ( <PageList
-        id="global_member"
-        ref={pageListRef}
-        columns={[...columns, ...operation]}
-        request={()=>getMemberList()}
-        addNewBtnTitle={(!memberGroupId ||['unknown','disable'].indexOf(memberGroupId?.toString()) === -1)?"添加账号" : ""}
-        searchPlaceholder="输入用户名、邮箱查找成员"
-        onAddNewBtnClick={() => {
-           openModal('addMember')
-        }}
-        addNewBtnAccess="system.organization.member.add"
-        rowSelection={{
-            // selections: [Table.SELECTION_ALL, Table.SELECTION_INVERT],
-            selectedRowKeys,
-            columnWidth: 40,
-            onChange:handleSelectChange,
-            getCheckboxProps: (record: MemberTableListItem) => ({
-              disabled: record.id === 'admin', // Column configuration not to be checked
-              name: record.name,
-            }),
-        }}
-        onRowClick={handleRowClick}
-        tableClickAccess="system.organization.member.edit"
-        afterNewBtn={[
-            memberGroupId &&<WithPermission key="removeFromDepPermission" access="system.organization.member.edit"><Button className="mr-btnbase" disabled={selectedRowKeys.length === 0} key="removeFromDep" onClick={()=>openModal('removeFromDep')}>移出当前部门</Button></WithPermission>,
-            memberGroupId &&<WithPermission key="addToDepPermission" access="system.organization.member.edit"><Button className="mr-btnbase" disabled={selectedRowKeys.length === 0} key="addToDep" onClick={()=>openModal('addToDep')}>加入部门</Button></WithPermission>,
-            memberGroupId !== 'disable' &&<WithPermission key="blockedPermission" access="system.organization.member.block"><Button className="mr-btnbase" disabled={selectedRowKeys.length === 0 || memberGroupId === 'unknown'} key="blocked" onClick={()=>openModal('blocked')}>禁用成员</Button></WithPermission>,
-             <WithPermission key="activatePermission" access="system.organization.member.block"><Button className="mr-btnbase" disabled={selectedRowKeys.length === 0} key="activate" onClick={()=>openModal('activate')}>启用成员</Button></WithPermission>,
-           <WithPermission key="deletePermission" access="system.organization.member.delete"><Button className="mr-btnbase" disabled={selectedRowKeys.length === 0} key="delete" onClick={()=>openModal('delete')}>删除成员</Button></WithPermission>,
-        ]}
-        onSearchWordChange={(e) => {
-            setSearchWord(e.target.value)
-        }}
-        onChange={() => {
-            setTableHttpReload(false)
-        }}
-    />)
+    return (
+        <>
+            <PageList
+            id="global_member"
+            ref={pageListRef}
+            columns={[...columns, ...operation]}
+            request={()=>getMemberList()}
+            addNewBtnTitle={(!memberGroupId ||['unknown','disable'].indexOf(memberGroupId?.toString()) === -1)?"添加账号" : ""}
+            searchPlaceholder="输入用户名、邮箱查找成员"
+            onAddNewBtnClick={() => {
+            openModal('addMember')
+            }}
+            addNewBtnAccess="system.organization.member.add"
+            rowSelection={{
+                // selections: [Table.SELECTION_ALL, Table.SELECTION_INVERT],
+                selectedRowKeys,
+                columnWidth: 40,
+                onChange:handleSelectChange,
+                getCheckboxProps: (record: MemberTableListItem) => ({
+                disabled: record.id === 'admin', // Column configuration not to be checked
+                name: record.name,
+                }),
+            }}
+            onRowClick={handleRowClick}
+            tableClickAccess="system.organization.member.edit"
+            afterNewBtn={[
+                memberGroupId &&<WithPermission key="removeFromDepPermission" access="system.organization.member.edit"><Button className="mr-btnbase" disabled={selectedRowKeys.length === 0} key="removeFromDep" onClick={()=>openModal('removeFromDep')}>移出当前部门</Button></WithPermission>,
+                memberGroupId &&<WithPermission key="addToDepPermission" access="system.organization.member.edit"><Button className="mr-btnbase" disabled={selectedRowKeys.length === 0} key="addToDep" onClick={()=>openModal('addToDep')}>加入部门</Button></WithPermission>,
+                memberGroupId !== 'disable' &&<WithPermission key="blockedPermission" access="system.organization.member.block"><Button className="mr-btnbase" disabled={selectedRowKeys.length === 0 || memberGroupId === 'unknown'} key="blocked" onClick={()=>openModal('blocked')}>禁用成员</Button></WithPermission>,
+                <WithPermission key="activatePermission" access="system.organization.member.block"><Button className="mr-btnbase" disabled={selectedRowKeys.length === 0} key="activate" onClick={()=>openModal('activate')}>启用成员</Button></WithPermission>,
+            <WithPermission key="deletePermission" access="system.organization.member.delete"><Button className="mr-btnbase" disabled={selectedRowKeys.length === 0} key="delete" onClick={()=>openModal('delete')}>删除成员</Button></WithPermission>,
+            ]}
+            onSearchWordChange={(e) => {
+                setSearchWord(e.target.value)
+            }}
+            onChange={() => {
+                setTableHttpReload(false)
+            }}
+        />
+        </> )
 
 }
 export default MemberList;

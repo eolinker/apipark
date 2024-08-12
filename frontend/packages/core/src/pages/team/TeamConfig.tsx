@@ -1,6 +1,6 @@
 import  { forwardRef, useEffect, useImperativeHandle, useState} from "react";
 import {App, Button, Divider, Form, Input, Row, Select} from "antd";
-import {Link, useLocation, useParams} from "react-router-dom";
+import {Link, useLocation, useNavigate, useParams} from "react-router-dom";
 import {RouterParams} from "@core/components/aoplatform/RenderRoutes.tsx";
 import { v4 as uuidv4 } from 'uuid'
 import {BasicResponse, STATUS_CODE} from "@common/const/const.ts";
@@ -36,6 +36,7 @@ const TeamConfig= forwardRef<TeamConfigHandle,TeamConfigProps>((props,ref) => {
     const {checkPermission} = useGlobalContext()
     const pageType= checkPermission('system.organization.team.view') ? 'manage' : 'myteam'
     const [canDelete, setCanDelete] = useState<boolean>(false)
+    const navigateTo = useNavigate()
     useImperativeHandle(ref, () => ({
         save:onFinish
     }));
@@ -91,12 +92,14 @@ const TeamConfig= forwardRef<TeamConfigHandle,TeamConfigProps>((props,ref) => {
         })
     }
     
-    const deleteTeam = (entity:TeamConfigFieldType)=>{
+    const deleteTeam = ()=>{
         return new Promise((resolve, reject)=>{
-            fetchData<BasicResponse<null>>(`manager/team`,{method:'DELETE',eoParams:{id:entity.id}}).then(response=>{
+            fetchData<BasicResponse<null>>(`manager/team`,{method:'DELETE',eoParams:{id:form.getFieldValue('id')}}).then(response=>{
                 const {code,msg} = response
                 if(code === STATUS_CODE.SUCCESS){
                     message.success(msg || '操作成功！')
+                    navigateTo('/team/list')
+
                     resolve(true)
                 }else{
                     message.error(msg || '操作失败')
@@ -128,14 +131,14 @@ const TeamConfig= forwardRef<TeamConfigHandle,TeamConfigProps>((props,ref) => {
 
     return (
         <>
-            <div className='overflow-auto h-full w-full min-w-[560px]'>
+            <div className='overflow-auto h-full w-full'>
                 <WithPermission access={onEdit ?(currentUrl.split('/')[1] === 'myteam'? 'team.team.team.edit':'system.organization.team.edit') : 'system.organization.team.add'}>
                     <Form
-            layout='vertical'
-            labelAlign='left'
-            scrollToFirstError
+                        layout='vertical'
+                        labelAlign='left'
+                        scrollToFirstError
                         form={form}
-                        className={`mx-auto `}
+                        className={`mx-auto`}
                         name="teamConfig"
                         // labelCol={{ offset:1, span: 4 }}
                         // wrapperCol={{ span: 19}}
@@ -188,13 +191,16 @@ const TeamConfig= forwardRef<TeamConfigHandle,TeamConfigProps>((props,ref) => {
                     </Row>
                 }
                   {onEdit &&
-                    <div>
-                        <Divider />
-                        <p className="text-center"><span className="font-bold">删除团队：</span>删除操作不可恢复，请谨慎操作！</p>
-                        <div className="text-center">
-                            <WithPermission access="system.organization.team.delete" disabled={!canDelete}  tooltip={canDelete ? '':'服务数据清除后，方可删除'}><Button className="m-auto mt-[16px] mb-[20px]" type="default"  onClick={()=>deleteTeam(entity!)}>删除</Button></WithPermission>
+                    <>
+                        <div className="bg-[rgb(255_120_117_/_5%)] rounded-[10px] mt-[50px] p-btnrbase pb-0">
+                        <p className="text-left"><span className="font-bold">删除团队：</span>删除操作不可恢复，请谨慎操作！</p>
+                            <div className="text-left">
+                            <WithPermission access="system.organization.team.delete" disabled={!canDelete}  tooltip={canDelete ? '':'服务数据清除后，方可删除'}>
+                                <Button className="m-auto mt-[16px] mb-[20px]" type="default" danger onClick={()=>deleteTeam(entity!)}>删除</Button></WithPermission>
+
+                            </div>
                         </div>
-                    </div>
+                    </>
                     }
                     </Form>
                 </WithPermission>

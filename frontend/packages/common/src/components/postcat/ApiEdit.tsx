@@ -32,7 +32,7 @@ interface ApiNameHandle{
 export const theme = createTheme({
     palette: {
       primary: {
-        main: '#7371fc', // 自定义主色调
+        main: '#3D46F2', // 自定义主色调
       },
       text: {
         primary: '#333', // 主要文字颜色
@@ -58,11 +58,11 @@ export const theme = createTheme({
                   color: '#BBB', // 设置 placeholder 的颜色
                 },
                 '&:hover:not(.Mui-disabled):not(.Mui-focused):not(.Mui-error)': {
-                  borderColor: '#7371fc', // 设置 hover 时的边框颜色
+                  borderColor: '#3D46F2', // 设置 hover 时的边框颜色
                   borderWidth: '1px', // 设置边框粗细
                 },
                 '&.Mui-focused': {
-                  borderColor: '#7371fc', // 设置选中时的边框颜色
+                  borderColor: '#3D46F2', // 设置选中时的边框颜色
                   borderWidth: '1px', // 设置边框粗细
                 },
             },
@@ -75,7 +75,7 @@ export const theme = createTheme({
                   color: '#BBB', // 设置 placeholder 的颜色
                 },
                 '&:hover  .MuiOutlinedInput-notchedOutline':{
-                    borderColor: '#7371fc', // 设置选中时的边框颜色
+                    borderColor: '#3D46F2', // 设置选中时的边框颜色
                     borderWidth: '1px', // 设置边框粗细
                 }
               },
@@ -109,19 +109,19 @@ export const theme = createTheme({
             styleOverrides: {
               root: {
                 '&:hover:not(.Mui-disabled):not(.Mui-focused):not(.Mui-error)': {
-                  borderColor: '#7371fc',
+                  borderColor: '#3D46F2',
                   borderWidth: '1px',
                 },
                 '&:hover:not(.Mui-disabled):not(.Mui-focused):not(.Mui-error) .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#7371fc',
+                  borderColor: '#3D46F2',
                   borderWidth: '1px',
                 },
                 '&.Mui-focused': {
-                  borderColor: '#7371fc',
+                  borderColor: '#3D46F2',
                   borderWidth: '1px',
                 },
                 '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#7371fc',
+                  borderColor: '#3D46F2',
                   borderWidth: '1px',
                 },
               },

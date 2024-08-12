@@ -67,7 +67,7 @@ const ServiceHubApiDocument = ({service}:{service:ServiceDetailType})=>{
                         <Descriptions className="bg-bar-theme p-[16px] rounded service-hub-description" title="" items={getBasicInfo} column={4} labelStyle={{width:'80px',justifyContent:'flex-end',fontWeight:'bold'}}  contentStyle={{color:'#333'}}/>
                     </div> */}
                     <div  className='bg-[#fff] rounded p-btnbase  pl-0  flex justify-between'>
-                        <div className="w-[calc(100%-224px)]" >
+                        <div className="w-[calc(100%-220px)]" >
                         <p className="font-bold text-[20px] leading-[32px] mb-[12px] h-[32px]" id="apiDocument-list">API 列表</p>
                             <div className="">
                                 {apiDocs?.map((apiDetail)=>(

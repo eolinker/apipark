@@ -2,7 +2,7 @@
 import Tree, {DataNode} from "antd/es/tree";
 import {Outlet, useNavigate, useParams } from "react-router-dom";
 import  {Key, useEffect, useMemo, useRef, useState} from "react";
-import {App, Button, Input } from "antd";
+import {App, Button, Divider, Input } from "antd";
 import {debounce} from "lodash-es";
 import {DownOutlined, SearchOutlined} from "@ant-design/icons";
 import TreeWithMore from "@common/components/aoplatform/TreeWithMore.tsx";
@@ -244,8 +244,15 @@ const MemberPage = ()=>{
         },[memberGroupId])
 
         return (
-            <div className="flex flex-1 h-full">
-                <div className="w-[200px] border-0 border-solid border-r-[1px] border-r-BORDER">
+            
+            <div className="flex flex-1  h-full flex-col ">
+                <div className="pb-[30px] border-0 border-b-[1px] border-solid border-BORDER">
+                        <p className="text-theme text-[26px] mb-[20px]">成员</p>
+                        <p>设置成员和对应的角色，成员只能够看到权限范围内的功能和数据。</p>
+                </div>
+                
+            <div className="flex flex-1">
+                  <div className="w-[200px] border-0 border-solid border-r-[1px] border-r-BORDER">
                 <div className="px-btnbase pb-[0px]">
                     <Input className=" my-btnybase" onChange={(e) => debounce(onSearchWordChange, 100)(e.target.value)}
                            allowClear placeholder="搜索部门"
@@ -283,9 +290,10 @@ const MemberPage = ()=>{
                         </div>
                     </div>
                 </div>
-                <div className="w-[calc(100%-200px)]">
+                <div className="w-[calc(100%-200px)] pl-btnbase pt-btnbase">
                     <Outlet context={{refreshMemberCount, selectedDepartmentIds,refreshGroup:()=>getDepartmentList()}}/>
                 </div>
+            </div>
             </div>);
 }
 export default MemberPage;

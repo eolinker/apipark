@@ -165,16 +165,16 @@ export const Codebox =  memo((props: CodeboxProps) => {
         >
         {extraContent}
 
-          <IconButton name="code" onClick={formatCode} sx={{color:'#333',transition:'none','&.MuiButtonBase-root:hover':{background:'transparent',color:'#7371fc',transition:'none'}}}>
+          <IconButton name="code" onClick={formatCode} sx={{color:'#333',transition:'none','&.MuiButtonBase-root:hover':{background:'transparent',color:'#3D46F2',transition:'none'}}}>
             格式化
           </IconButton>
-          <IconButton name="copy" onClick={copyCode}  sx={{color:'#333',transition:'none','&.MuiButtonBase-root:hover':{background:'transparent',color:'#7371fc',transition:'none'}}}>
+          <IconButton name="copy" onClick={copyCode}  sx={{color:'#333',transition:'none','&.MuiButtonBase-root:hover':{background:'transparent',color:'#3D46F2',transition:'none'}}}>
            复制
           </IconButton>
-          <IconButton name="search" onClick={searchInCode}  sx={{color:'#333',transition:'none','&.MuiButtonBase-root:hover':{background:'transparent',color:'#7371fc',transition:'none'}}}>
+          <IconButton name="search" onClick={searchInCode}  sx={{color:'#333',transition:'none','&.MuiButtonBase-root:hover':{background:'transparent',color:'#3D46F2',transition:'none'}}}>
             搜索
           </IconButton>
-          {!readOnly &&<IconButton name="file-text" onClick={replaceInCode}  sx={{color:'#333',transition:'none','&.MuiButtonBase-root:hover':{background:'transparent',color:'#7371fc',transition:'none'}}}>
+          {!readOnly &&<IconButton name="file-text" onClick={replaceInCode}  sx={{color:'#333',transition:'none','&.MuiButtonBase-root:hover':{background:'transparent',color:'#3D46F2',transition:'none'}}}>
            替代
           </IconButton>}
         </Box></>

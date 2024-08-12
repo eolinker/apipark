@@ -97,13 +97,13 @@ const TeamInsidePage:FC = ()=> {
                 backUrl="/team/list">
                 <div className="flex h-full">
                     <Menu
-                        style={{ width: 182 }}
+                        style={{ width: 220 }}
                         mode="inline"
                         items={menuData}
                         onClick={onMenuClick}
                         selectedKeys={[activeMenu || '']}
                     />
-                    <div className={`flex flex-1 flex-col h-full overflow-auto bg-MAIN_BG ${activeMenu === 'setting' ? 'pt-[20px] pl-[10px] pr-btnrbase ':''}`}>
+                    <div className={`flex flex-1 flex-col h-full overflow-auto bg-MAIN_BG pb-[20px] pt-[20px] pl-[10px]  ${activeMenu === 'setting' ? ' pr-btnrbase ':''}`}>
                         <Outlet  />
                     </div>
                 </div>

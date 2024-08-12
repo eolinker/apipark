@@ -67,7 +67,7 @@ const ServiceInsideDocument = ()=>{
     }, []);
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full border-[1px] rounded-[10px] border-BORDER border-solid">
             <Editor
                 tinymceScriptSrc={'/tinymce/tinymce.min.js'}
                 initialValue={initDoc}

@@ -6,7 +6,7 @@ import {RouterParams} from "@core/components/aoplatform/RenderRoutes.tsx";
 import {BasicResponse, STATUS_CODE} from "@common/const/const.ts";
 import {useFetch} from "@common/hooks/http.ts";
 import {DefaultOptionType} from "antd/es/cascader";
-import { MemberItem, SimpleTeamItem} from "@common/const/type.ts";
+import { EntityItem, MemberItem, SimpleTeamItem} from "@common/const/type.ts";
 import { v4 as uuidv4 } from 'uuid'
 import { SystemConfigFieldType, SystemConfigHandle } from "../../const/system/type.ts";
 import { validateUrlSlash } from "@common/utils/validate.ts";
@@ -117,6 +117,7 @@ const SystemConfig = forwardRef<SystemConfigHandle>((_,ref) => {
                         ...data.service,
                         team:data.service.team.id,
                         catalogue:data.service.catalogue?.id,
+                        tags:data.service.tags?.map((x:EntityItem)=>x.id),
                          logoFile:[
                             {
                                 uid: '-1', // 文件唯一标识
@@ -244,7 +245,7 @@ const SystemConfig = forwardRef<SystemConfigHandle>((_,ref) => {
                     labelAlign='left'
                     scrollToFirstError
                     form={form}
-                    className="mx-auto  flex flex-col justify-between h-full"
+                    className="mx-auto pb-[20px] "
                     name="systemConfig"
                     onFinish={onFinish}
                     autoComplete="off"
@@ -375,12 +376,11 @@ const SystemConfig = forwardRef<SystemConfigHandle>((_,ref) => {
                         </Row></>}
                     </div>
                     {onEdit && <>
-                        <div>
-                            <Divider />
-                            <p className="text-center">删除服务之后将无法找回，请谨慎操作！</p>
-                            <div className="text-center">
+                        <div className="bg-[rgb(255_120_117_/_5%)] rounded-[10px] mt-[50px] p-btnrbase pb-0">
+                        <p className="text-left"><span className="font-bold">删除服务：</span>删除操作不可恢复，请谨慎操作！</p>
+                            <div className="text-left">
                                 <WithPermission access="team.service.service.delete">
-                                    <Button className="m-auto mt-[16px] mb-[20px]" type="default" danger={true} onClick={deleteSystemModal}>删除服务</Button>
+                                    <Button className="m-auto mt-[16px] mb-[20px]" type="default"  danger={true} onClick={deleteSystemModal}>删除服务</Button>
                                     </WithPermission>
                             </div>
                         </div>

@@ -116,11 +116,15 @@ const RoleList = ()=>{
     }, []);
 
     return (<>
-        <div className="flex flex-col">
-        <h3 className="pl-btnbase  my-0">系统级别角色</h3>
+        <div className="flex flex-col pb-[20px]">
+            <div className="pb-[30px] ">
+                <p className="text-theme text-[26px] mb-[20px]">角色</p>
+                <p>设置角色的权限范围。</p>
+            </div>
+        <h3 className="p ">系统级别角色</h3>
             <PageList
                 id="global_role"
-                tableClass="role_table pl-btnbase mb-btnrbase"
+                tableClass="role_table  mb-btnrbase"
                 ref={pageListRef}
                 columns={[...ROLE_TABLE_COLUMNS as ProColumns<RoleTableListItem, "text">[], ...operation('system')]}
                 request={()=>getRoleList('system')}
@@ -134,11 +138,11 @@ const RoleList = ()=>{
                 onRowClick={(row:RoleTableListItem)=>  navigateTo(`/role/system/config/${row.id}`)}
                 tableClickAccess="system.organization.role.system.edit"
             />
-        <h3 className="pl-btnbase pt-btnbase mb-0">团队级别角色</h3>
+        <h3 className=" pt-btnbase ">团队级别角色</h3>
         <PageList
             id="global_role"
             ref={pageListRef}
-            tableClass="role_table pl-btnbase"
+            tableClass="role_table "
             columns={[...ROLE_TABLE_COLUMNS as ProColumns<RoleTableListItem, "text">[], ...operation('team')]}
             request={()=>getRoleList('team')}
             showPagination={false}

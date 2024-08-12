@@ -61,17 +61,18 @@ const LogSettings = ()=>{
           <Skeleton className='m-btnbase w-[calc(100%-20px)]' active loading={loading}>
                 <InsidePage 
                     pageTitle='日志配置'
+                    description="APIPark 提供详尽的 API 调用日志，帮助企业监控、分析和审计 API 的运行状况。"
                     >
                     <div className="flex h-full">
                         <Menu
                             className="h-full overflow-y-auto"
                             selectedKeys={[activeMenu || '']}
                             onClick={onMenuClick}
-                            style={{ width: 182 }}
+                            style={{ width: 220 }}
                             mode="inline"
                             items={menuItems}
                         />
-                        <div className={`w-full flex flex-1 flex-col h-full overflow-auto bg-MAIN_BG`}>
+                        <div className={`w-full flex flex-1 flex-col h-full overflow-auto bg-MAIN_BG pt-btnbase pl-btnbase`}>
                             <Outlet  context={{accessPrefix:'system.devops.log_configuration'}}/>
                         </div>
                     </div>

@@ -1,9 +1,8 @@
 import PageList from "@common/components/aoplatform/PageList.tsx"
 import {ActionType} from "@ant-design/pro-components";
 import  {FC, useEffect, useMemo, useRef, useState} from "react";
-import {useNavigate, useParams} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import { App} from "antd";
-import {RouterParams} from "@core/components/aoplatform/RenderRoutes.tsx";
 import {useBreadcrumb} from "@common/contexts/BreadcrumbContext.tsx";
 import {BasicResponse, STATUS_CODE} from "@common/const/const.ts";
 import {useFetch} from "@common/hooks/http.ts";
@@ -125,6 +124,7 @@ const SystemList:FC = ()=>{
     return (
         // <Skeleton  className='m-btnbase w-[calc(100%-20px)]' loading={loading} active>
           <div className="h-full w-full">
+            
             <PageList
                 id="global_system"
                 ref={pageListRef}

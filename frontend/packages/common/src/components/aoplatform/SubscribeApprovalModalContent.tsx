@@ -112,7 +112,7 @@ export const SubscribeApprovalModalContent = forwardRef<SubscribeApprovalModalHa
                     label="申请原因"
                     name="reason"
                 >
-                    <Input.TextArea className="w-INPUT_NORMAL" disabled={true} placeholder="请输入"  />
+                    <Input.TextArea className="w-INPUT_NORMAL" disabled={true} placeholder=" "  />
                 </Form.Item>
                 <Form.Item<FieldType>
                     label="审核意见"

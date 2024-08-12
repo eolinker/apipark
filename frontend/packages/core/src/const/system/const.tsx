@@ -107,14 +107,6 @@ export const SYSTEM_TABLE_COLUMNS: ProColumns<SystemTableListItem>[] = [
         },
     },
     {
-        title: '服务数量',
-        dataIndex: 'serviceNum',
-        ellipsis:true,
-        sorter: (a,b)=> {
-            return a.serviceNum - b.serviceNum
-        },
-    },
-    {
         title: '描述',
         dataIndex: 'description',
         ellipsis:true,
@@ -885,7 +877,7 @@ export const SYSTEM_TOPOLOGY_NODE_TYPE_COLOR_MAP = {
       name:'调用系统名称'
     },
     subscriberService:{
-      stroke:'#7371FC',
+      stroke:'#3D46F2',
       fill: '#7371FC33',
       name:'调用服务名称'
     },
@@ -895,7 +887,7 @@ export const SYSTEM_TOPOLOGY_NODE_TYPE_COLOR_MAP = {
       name:'当前系统名称'
     },
     invokeService:{
-      stroke:'#7371FC',
+      stroke:'#3D46F2',
       fill: '#7371FC33',
       name:'被调用服务名称'
     },

@@ -73,20 +73,22 @@ useEffect(()=>{
     return (<>
         <Spin className="h-full" wrapperClassName="h-full"  indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} spinning={loading}>
         <div className="flex flex-1 h-full">
-            <div className="w-[224px] border-0 border-solid border-r-[1px] border-r-BORDER">
-            <div className="text-[18px] leading-[25px] pl-[12px] py-[12px]"><Button type="text" onClick={()=>navigateTo(`/tenantManagement/list/${teamId}`)}><ArrowLeftOutlined />返回</Button></div>
+            <div className="w-[220px] border-0 border-solid border-r-[1px] border-r-BORDER">
+            <div className="text-[18px] leading-[25px] pl-[12px] py-[12px]">
+                <Button type="text" onClick={()=>navigateTo(`/tenantManagement/list/${teamId}`)}><ArrowLeftOutlined className="max-h-[14px]" />返回</Button>
+            </div>
             <Menu
                 onClick={onMenuClick}
                 openKeys={openKeys}
                 onOpenChange={(e)=>{setOpenKeys(e)}}
                 className="h-[calc(100%-59px)] overflow-auto"
-                style={{ width: 224, paddingLeft:'8px', paddingRight:'8px' }}
+                style={{ width: 220}}
                 selectedKeys={[activeMenu!]}
                 mode="inline"
                 items={menuData as unknown as ItemType<MenuItemType>[] } 
                 />
         </div>
-        <div className="w-[calc(100%-224px)] p-btnbase overflow-auto">
+        <div className="w-[calc(100%-220px)] p-[20px] overflow-auto">
             <Outlet context={{refreshGroup:()=>{}}}></Outlet>
         </div>
     </div>

@@ -246,9 +246,10 @@ export default function ServiceCategory(){
     },[])
 
     return (
-        <div className="w-[70%] mx-auto h-full">
-            <div className="flex items-center justify-between w-full mt-[32px] ml-[10px] text-[18px] leading-[25px] pb-[18px]" >
-                <span className="font-bold">服务分类管理</span>
+        <div className=" mx-auto h-full">
+            <div className="pb-[30px] pt-0">
+                <p className="text-theme text-[26px] mb-[20px]">服务分类管理</p>
+                <p>设置服务可选择的分类，方便团队成员快速找到API。</p>
             </div>
             <div className="max-h-[calc(100%-75px)] border border-solid border-BORDER p-[20px] rounded-[10px]">
                 <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} spinning={loading} className=''>

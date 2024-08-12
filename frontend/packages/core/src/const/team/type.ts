@@ -5,7 +5,7 @@ export type TeamTableListItem = {
     id:string;
     name: string;
     description:string;
-    systemNum:number;
+    serviceNum:number;
     creator:EntityItem;
     createTime:string;
     canDelete:boolean

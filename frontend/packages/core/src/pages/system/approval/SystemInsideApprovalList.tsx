@@ -171,7 +171,7 @@ const SystemInsideApprovalList:FC = ()=>{
     },[pageStatus,memberValueEnum])
 
     return (
-        <div className="h-full">
+        <div className="h-full not-top-padding-table">
             <PageList
                 id="global_system_approval"
                 ref={pageListRef}

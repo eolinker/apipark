@@ -10,8 +10,8 @@ import useInitializeMonaco from "@common/hooks/useInitializeMonaco";
 const antdComponentThemeToken = {
   token: {
     // Seed Token，影响范围大
-    colorPrimary: '#7371fc',
-    colorLink:'#7371fc',
+    colorPrimary: '#3D46F2',
+    colorLink:'#3D46F2',
     colorBorder:'#ededed',
     colorText:'#333',
     borderRadius: 4,
@@ -55,7 +55,7 @@ const antdComponentThemeToken = {
         headerBorderRadius:0,
         headerSplitColor:'#ededed',
         borderColor:'#ededed',
-        cellPaddingBlockMD:'10px',
+        cellPaddingBlockMD:'15px',
         cellPaddingInlineMD:'12px',
         cellPaddingBlockSM:'8px',
         cellPaddingInlineSM:'12px',
@@ -63,7 +63,7 @@ const antdComponentThemeToken = {
         headerSortActiveBg:'#F7F8FA',
         headerSortHoverBg:'#F7F8FA',
         fixedHeaderSortActiveBg:'#F7F8FA',
-        headerBg:'#F7F8FA',
+        headerBg:'#FAFAFA',
         rowHoverBg:'#EBEEF2'
       
     },

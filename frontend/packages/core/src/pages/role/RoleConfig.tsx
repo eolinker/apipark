@@ -5,7 +5,7 @@ import {BasicResponse, STATUS_CODE} from "@common/const/const.ts";
 import WithPermission from "@common/components/aoplatform/WithPermission.tsx";
 import { useNavigate, useParams } from "react-router-dom";
 import { RouterParams } from "@core/components/aoplatform/RenderRoutes.tsx";
-import { LeftOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, LeftOutlined } from "@ant-design/icons";
 
 type PermissionItem = {
     name:string 
@@ -164,7 +164,6 @@ const RoleConfig = ()=>{
         fetchData<BasicResponse<{role:PermissionInfo}>>(`${roleType}/role`,{method:'GET',eoParams:{role:roleId}}).then(response=>{
             const {code,data,msg} = response
             if(code === STATUS_CODE.SUCCESS){
-                message.success(msg || '操作成功！')
                 form.setFieldsValue({name:data.role.name,permits:data.role.permit})
                 return Promise.resolve(true)
             }else{
@@ -198,7 +197,9 @@ const RoleConfig = ()=>{
     };
 
     return  (<div className="h-full flex flex-col overflow-hidden">
-     <a className="m-btnbase block" onClick={()=>navigateTo(-1)}> <LeftOutlined />返回</a>
+                <div className="text-[18px] leading-[25px] pb-[12px]">
+                        <Button className="flex items-center" type="text" onClick={()=>navigateTo(-1)}><ArrowLeftOutlined className="max-h-[14px]" /><span>返回</span></Button>
+                </div>
             <WithPermission access={roleId !== undefined  ? `system.organization.role.${roleType}.edit`: `system.organization.role.${roleType}.add`}>
                 <Form
                     id="permission"

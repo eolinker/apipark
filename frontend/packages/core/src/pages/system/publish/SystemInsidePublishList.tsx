@@ -444,6 +444,7 @@ const SystemInsidePublicList:FC = ()=>{
                 onChange={() => {
                     setTableHttpReload(false)
                 }}
+                besidesTableHeight={58}
                 onRowClick={(row:PublishTableListItem|PublishVersionTableListItem)=>openDrawer('view',row)}
                 tableClickAccess="team.service.release.view"
             />

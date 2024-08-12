@@ -79,7 +79,7 @@
   --border-color: #ededed;
 
   --TITLE_TEXT: #666666;
-  --primary-color: #7371fc;
+  --primary-color: #3D46F2;
   --LABEL_COLOR: #5a5a5a;
   --scrollbar-thumb-background-color: #EBEEF2;
   --bar-background-color: #f7f8fa;
@@ -128,7 +128,7 @@
   --button-danger-active-background-color: #fff;
   --button-danger-shadow-color: var(--button-shadow-color);
   --tabs-badge-color: var(--primary-color);
-  --tabs-active-badge-color: #7371fc;
+  --tabs-active-badge-color: #3D46F2;
   --tabs-background-color: var(--background-color);
   --tabs-text-color: var(--text-color);
   --tabs-active-color: var(--primary-color);
@@ -787,7 +787,7 @@ p{
   .ant-table-pagination.ant-pagination {
       margin: 1px 10px 0 !important;
       padding:  10px 0;
-      box-shadow: 0 -2px 2px -2px var(--border-color);
+      /* box-shadow: 0 -2px 2px -2px var(--border-color); */
   }
   .ant-table.ant-table-middle{
       .ant-table-thead>tr>th,
@@ -846,7 +846,7 @@ p{
   }
 }
 
-.ant-dropdown .ant-dropdown-menu{
+/* .ant-dropdown .ant-dropdown-menu{
   border-radius: 10px;
   padding: 10px;
   li.ant-dropdown-menu-item{
@@ -857,10 +857,9 @@ p{
       height:32px !important;
     }
     >span.ant-dropdown-menu-title-content{
-      width:100%;
       padding:0px !important;
       min-width: 80px;
-      /* padding:0px 12px !important; */
+      /* padding:0px 12px !important; 
       height:32px !important;
       line-height: 32px !important;
       .ant-btn{
@@ -873,7 +872,7 @@ p{
     }
   }
 
-}
+} */
 .ant-dropdown-button{
   .ant-btn-link{
     color:var(--text-color)  !important;
@@ -1050,10 +1049,6 @@ p{
   width: 16px !important;
   justify-content:center;
 }
-
-.ant-table-wrapper .ant-table-thead >tr>th{
-  font-weight: normal !important;
-}
 .ant-table-wrapper .ant-table{
   scrollbar-color: none !important;
 }
@@ -1160,7 +1155,7 @@ p{
 .ant-drawer .ant-drawer-mask,
 .ant-modal-root .ant-modal-mask{
   background-attachment: var(--modal-mask-background-color);
-  backdrop-filter: blur(2px);
+  /* backdrop-filter: blur(2px); */
 }
 
 .ant-btn{

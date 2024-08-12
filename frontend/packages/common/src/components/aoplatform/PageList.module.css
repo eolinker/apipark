@@ -19,7 +19,7 @@
     .ant-table-pagination.ant-pagination {
         margin: 1px 10px 0 !important;
         padding:  10px 0;
-        box-shadow: 0 -2px 2px -2px var(--border-color);
+        /* box-shadow: 0 -2px 2px -2px var(--border-color); */
     }
     .ant-table.ant-table-middle{
         .ant-table-thead>tr>th,
@@ -34,10 +34,6 @@
         }
 
 
-        .ant-table-tbody>tr>td,
-        .ant-table-cell{
-            padding:9px 10px 8px;
-        }
         .ant-table-thead>tr>th{
             color:#666666;
             font-weight:normal;
