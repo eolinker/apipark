@@ -60,7 +60,7 @@ export const TEAM_TABLE_COLUMNS: ProColumns<TeamTableListItem>[] = [
         title: '创建时间',
         dataIndex: 'createTime',
         ellipsis:true,
-        width:176,
+        width:182,
         sorter: (a,b)=> {
             return a.createTime.localeCompare(b.createTime)
         },

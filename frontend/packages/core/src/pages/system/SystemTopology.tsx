@@ -1,7 +1,7 @@
 /*
  * @Date: 2024-03-27 16:26:36
  * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-06 15:11:37
+ * @LastEditTime: 2024-07-12 14:56:02
  * @FilePath: \frontend\packages\core\src\pages\system\SystemTopology.tsx
  */
 
@@ -133,6 +133,7 @@ export default function SystemTopology() {
       graphRef.current = graph;
   
       graph.fitCenter();
+      handleWindowResize()
       // 添加窗口大小变化的监听器
       window.addEventListener('resize', handleWindowResize);
   

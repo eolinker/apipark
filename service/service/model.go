@@ -7,113 +7,94 @@ import (
 )
 
 const (
-	StatusOn  = "on"
-	StatusOff = "off"
+	InnerService   ServiceType = "inner"
+	PublicService  ServiceType = "public"
+	UnknownService ServiceType = "unknown"
 )
 
+type ServiceType string
+
+func (s ServiceType) String() string {
+	return string(s)
+}
+
+func (s ServiceType) Int() int {
+	switch s {
+	case InnerService:
+		return 1
+	case PublicService:
+		return 2
+	default:
+		return 0
+	}
+}
+
+func ToServiceType(s int) ServiceType {
+
+	switch s {
+	case 1:
+		return InnerService
+	case 2:
+		return PublicService
+	default:
+		return UnknownService
+	}
+}
+
 type Service struct {
-	Id           string
-	Name         string
-	Description  string
-	Logo         string
-	ServiceType  string
-	Project      string
-	Team         string
-	Organization string
-	Catalogue    string
-	Status       string
-	CreateTime   time.Time
-	UpdateTime   time.Time
+	Id          string
+	Name        string
+	Description string
+	Team        string
+	Prefix      string
+	Logo        string
+	ServiceType ServiceType
+	Catalogue   string
+	AsServer    bool
+	AsApp       bool
+	CreateTime  time.Time
+	UpdateTime  time.Time
 }
 
 func FromEntity(e *service.Service) *Service {
 	return &Service{
-		Id:           e.UUID,
-		Name:         e.Name,
-		Description:  e.Description,
-		Logo:         e.Logo,
-		ServiceType:  e.ServiceType,
-		Project:      e.Project,
-		Team:         e.Team,
-		Organization: e.Organization,
-		Catalogue:    e.Catalogue,
-		Status:       e.Status,
-		CreateTime:   e.CreateAt,
-		UpdateTime:   e.UpdateAt,
+		Id:          e.UUID,
+		Name:        e.Name,
+		Description: e.Description,
+		Team:        e.Team,
+		Prefix:      e.Prefix,
+		Logo:        e.Logo,
+		ServiceType: ToServiceType(e.ServiceType),
+		Catalogue:   e.Catalogue,
+		AsServer:    e.AsServer,
+		AsApp:       e.AsApp,
+		CreateTime:  e.CreateAt,
+		UpdateTime:  e.UpdateAt,
 	}
 }
 
-type CreateService struct {
-	Uuid         string
-	Name         string
-	Description  string
-	Logo         string
-	ServiceType  string
-	Project      string
-	Team         string
-	Organization string
-	Catalogue    string
-	Status       string
-	Tag          string
+type Create struct {
+	Id          string
+	Name        string
+	Description string
+	Team        string
+	Prefix      string
+	Logo        string
+	ServiceType ServiceType
+	Catalogue   string
+	AsServer    bool
+	AsApp       bool
 }
 
-type EditService struct {
-	Uuid        string
+type Edit struct {
 	Name        *string
 	Description *string
-	Logo        *string
-	ServiceType *string
+	ServiceType *ServiceType
 	Catalogue   *string
-	Status      *string
-	Tag         *string
-}
-
-type SearchServicePage struct {
-	Keyword   string
-	Page      int
-	Size      int
-	Catalogue []string
-	Uuids     []string
+	Logo        *string
 }
 
 type CreateTag struct {
-	Tid string
-	Sid string
-}
-
-type CreatePartition struct {
-	Pid string
-	Sid string
-}
-
-type Partition struct {
-	Pid string
-	Sid string
-}
-
-type Doc struct {
-	ID         int64
-	DocID      string
-	Name       string
-	Creator    string
-	Updater    string
-	Doc        string
-	UpdateTime time.Time
-	CreateTime time.Time
-}
-
-type SaveDoc struct {
-	Sid string
-	Doc string
-}
-
-type Api struct {
-	Sid  string
-	Aid  string
-	Sort int
-}
-
-type Tag struct {
 	Tid string
 	Sid string
 }

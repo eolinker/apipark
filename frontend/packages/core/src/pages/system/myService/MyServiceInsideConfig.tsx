@@ -401,7 +401,7 @@ const normFile = (e: unknown) => {
                         </Form.Item>
 
                         <Form.Item<MyServiceFieldType>
-                            label="可访问分区"
+                            label="可访问环境"
                             name="partition"
                             rules={[{required: true, message: '必填项'}]}
                         >

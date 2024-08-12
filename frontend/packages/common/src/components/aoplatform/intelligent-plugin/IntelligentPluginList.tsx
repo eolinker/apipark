@@ -76,7 +76,7 @@ export default function IntelligentPluginList(){
     const { modal,message } = App.useApp()
     const [searchWord, setSearchWord] = useState<string>('')
     const { moduleId }  = useParams<RouterParams>();
-    const [pluginName,setPluginName] = useState<string>()
+    const [pluginName,setPluginName] = useState<string>('-')
     const [partitionOptions, setPartitionOption] = useState<DefaultOptionType[]>([])
     const { setBreadcrumb } = useBreadcrumb()
     // const [confirmLoading, setConfirmLoading] = useState(false);
@@ -373,7 +373,7 @@ export default function IntelligentPluginList(){
         })
     }
 
-    // 渲染配置页时需要用到分区数据，在此合并数据
+    // 渲染配置页时需要用到环境数据，在此合并数据
     const getFinalRender = ()=>{
         Promise.all([getRender(),getPartitionList()]).then(([render, partitions])=>{
             if(!partitions || partitions.length === 0) return
@@ -414,7 +414,7 @@ export default function IntelligentPluginList(){
                                         mode="multiple"
                                         allowClear
                                         style={{ width: '100%' }}
-                                        placeholder="所有分区"
+                                        placeholder="所有环境"
                                         value={partition}
                                         onChange={handleClusterChange}
                                         options={partitionOptions}
@@ -427,7 +427,7 @@ export default function IntelligentPluginList(){
             onSearchWordChange={(e)=>{setSearchWord(e.target.value);setTableHttpReload(true);setTableHttpReload(true)}}
         />
         
-        <DrawerWithFooter title={`${drawerType === 'add' ? '添加' : '编辑'}${pluginName}`} open={drawerOpen} onClose={()=>{setCurDetail(undefined);setDrawerOpen(false)}} onSubmit={()=>drawerFormRef.current?.save()?.then((res)=>{res && manualReloadTable();return res})}  submitAccess='system.partition.self.edit'>
+        <DrawerWithFooter title={`${drawerType === 'add' ? '添加' : '编辑'}${pluginName }`} open={drawerOpen} onClose={()=>{setCurDetail(undefined);setDrawerOpen(false)}} onSubmit={()=>drawerFormRef.current?.save()?.then((res)=>{res && manualReloadTable();return res})}  submitAccess='system.partition.self.edit'>
             <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin/>} spinning={drawerLoading}>
                 <IntelligentPluginConfig 
                     ref={drawerFormRef!} 

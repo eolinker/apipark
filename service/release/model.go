@@ -1,13 +1,14 @@
 package release
 
 import (
-	"github.com/eolinker/apipark/stores/release"
 	"time"
+
+	"github.com/eolinker/apipark/stores/release"
 )
 
 type Release struct {
 	UUID     string
-	Project  string
+	Service  string
 	Version  string
 	Remark   string
 	Creator  string
@@ -17,7 +18,7 @@ type Release struct {
 func FromEntity(e *release.Release) *Release {
 	return &Release{
 		UUID:     e.UUID,
-		Project:  e.Project,
+		Service:  e.Service,
 		Version:  e.Name,
 		Remark:   e.Remark,
 		Creator:  e.Creator,
@@ -63,7 +64,7 @@ type ProjectCommits struct {
 //
 //type UpstreamDiff struct {
 //	UpstreamCommit  string                  `json:"upstream,omitempty"`
-//	Partition string                  `json:"partition,omitempty"`
+//	Cluster string                  `json:"partition,omitempty"`
 //	Commit    string                  `json:"commit,omitempty"`
 //	Change    project_diff.ChangeType `json:"change,omitempty"`
 //}

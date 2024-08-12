@@ -1,7 +1,7 @@
 /*
  * @Date: 2024-01-31 15:00:39
  * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-07 17:04:41
+ * @LastEditTime: 2024-07-12 19:44:49
  * @FilePath: \frontend\packages\core\vite.config.ts
  */
 import { defineConfig } from 'vite'
@@ -10,8 +10,6 @@ import path from 'path'
 import dynamicImportVars from '@rollup/plugin-dynamic-import-vars';
 import tailwindcss from 'tailwindcss';
 import autoprefixer from 'autoprefixer';
-// import {visualizer} from 'rollup-plugin-visualizer';
-// import MillionLint from '@million/lint'
 
 export default defineConfig({
   cacheDir: './node_modules/.vite',
@@ -57,15 +55,6 @@ export default defineConfig({
         exclude:[],
         warnOnError:false
        }),
-      //  MillionLint.vite()
-      //  visualizer({
-      //    filename: 'stats.html', // 生成的可视化报告文件名
-      //    sourcemap: true, // 使用 sourcemap，以便更准确地显示原始源文件
-      //   //  gzip: true, // 显示 gzip 压缩后的大小
-      //    brotliSize: false, // 显示 brotli 压缩后的大小
-      //    open: true, // 自动生成报告后自动打开浏览器
-      //    // 其他可视化选项...
-      //  }),
     ],
   resolve: {
     alias: [

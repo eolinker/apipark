@@ -1,4 +1,3 @@
-
 {
   "name": "frontend",
   "version": "1.0.0",
@@ -9,12 +8,15 @@
   "description": "",
   "scripts": {
     "test": "jest",
-    "build:all": "set NODE_OPTIONS=--max-old-space-size=16384 && lerna run build --stream",
-    "build": "set NODE_OPTIONS=--max-old-space-size=4096  &&  node -e \"console.log(v8.getHeapStatistics().heap_size_limit / 1024 / 1024)\"&& lerna run build --scope=core --stream  --verbose ",
+    "build:all": "set NODE_OPTIONS=--max-old-space-size=16384 && lerna run build --scope=core --scope=market  --stream",
+    "build:pro:all": "set NODE_OPTIONS=--max-old-space-size=16384 && lerna run build --scope=businessEntry --scope=market --stream",
+    "build": "set NODE_OPTIONS=--max-old-space-size=4096  && lerna run build --scope=core --stream  --verbose ",
+    "build:pro": "set NODE_OPTIONS=--max-old-space-size=4096 && lerna run build --scope=business-entry --stream  --verbose ",
     "build:tenant": "set NODE_OPTIONS=--max-old-space-size=16384 && lerna run build --scope=market --stream",
     "serve": "lerna run preview --parallel",
     "serve:remotes": "lerna run serve --scope=remote --parallel",
     "dev": "lerna run dev --scope=core --stream",
+    "dev:pro": "lerna run dev --scope=business-entry --stream",
     "dev:tenant": "lerna run dev --scope=market --stream",
     "stop": "kill-port --port 5000,5001"
   },
@@ -34,13 +36,15 @@
     "js-base64": "^3.7.5",
     "moment": "^2.29.4",
     "postcss": "^8.4.31",
+    "postcss-import": "^16.1.0",
     "postcss-nesting": "^12.1.5",
     "react": "^18.2.0",
     "react-ace": "^10.1.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.0",
     "tailwindcss": "^3.3.5",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "vite-tsconfig-paths": "^4.3.2"
   },
   "devDependencies": {
     "@ant-design/cssinjs": "^1.18.2",

@@ -1,7 +1,5 @@
 package dto
 
-import (
-	"github.com/eolinker/apipark/module/project_diff"
-)
+import service_diff "github.com/eolinker/apipark/module/service-diff"
 
-type DiffOut = project_diff.DiffOut
+type DiffOut = service_diff.DiffOut

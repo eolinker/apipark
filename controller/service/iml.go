@@ -1,78 +1,91 @@
 package service
 
 import (
-	"encoding/json"
-	"github.com/gin-gonic/gin"
-
 	"github.com/eolinker/apipark/module/service"
 	service_dto "github.com/eolinker/apipark/module/service/dto"
+	"github.com/gin-gonic/gin"
 )
 
 var (
 	_ IServiceController = (*imlServiceController)(nil)
+	_ IAppController     = (*imlAppController)(nil)
 )
 
 type imlServiceController struct {
 	module service.IServiceModule `autowired:""`
 }
 
-func (i *imlServiceController) SimpleList(ctx *gin.Context, pid string) ([]*service_dto.SimpleItem, error) {
-	return i.module.SimpleList(ctx, pid)
+func (i *imlServiceController) SearchMyServices(ctx *gin.Context, teamId string, keyword string) ([]*service_dto.ServiceItem, error) {
+	return i.module.SearchMyServices(ctx, teamId, keyword)
 }
 
-func (i *imlServiceController) ServiceApis(ctx *gin.Context, pid string, sid string) ([]*service_dto.ServiceApi, error) {
-	return i.module.ServiceApis(ctx, pid, sid)
+func (i *imlServiceController) Simple(ctx *gin.Context, keyword string) ([]*service_dto.SimpleServiceItem, error) {
+	return i.module.Simple(ctx, keyword)
 }
 
-func (i *imlServiceController) BindServiceApi(ctx *gin.Context, pid string, sid string, apis *service_dto.BindApis) error {
-	return i.module.BindServiceApi(ctx, pid, sid, apis)
+func (i *imlServiceController) MySimple(ctx *gin.Context, keyword string) ([]*service_dto.SimpleServiceItem, error) {
+	return i.module.MySimple(ctx, keyword)
 }
 
-func (i *imlServiceController) UnbindServiceApi(ctx *gin.Context, pid string, sid string, api string) error {
-	apis := make([]string, 0)
-	err := json.Unmarshal([]byte(api), &apis)
-	if err != nil {
-		return err
-	}
-	return i.module.UnbindServiceApi(ctx, pid, sid, apis)
+func (i *imlServiceController) Get(ctx *gin.Context, id string) (*service_dto.Service, error) {
+	return i.module.Get(ctx, id)
 }
 
-func (i *imlServiceController) SortApis(ctx *gin.Context, pid string, sid string, apis *service_dto.BindApis) error {
-	return i.module.SortApis(ctx, pid, sid, apis)
+func (i *imlServiceController) Search(ctx *gin.Context, teamID string, keyword string) ([]*service_dto.ServiceItem, error) {
+	return i.module.Search(ctx, teamID, keyword)
 }
 
-func (i *imlServiceController) ServiceDoc(ctx *gin.Context, pid string, sid string) (*service_dto.ServiceDoc, error) {
-	return i.module.ServiceDoc(ctx, pid, sid)
+func (i *imlServiceController) Create(ctx *gin.Context, teamID string, input *service_dto.CreateService) (*service_dto.Service, error) {
+	return i.module.Create(ctx, teamID, input)
 }
 
-func (i *imlServiceController) SaveServiceDoc(ctx *gin.Context, pid string, sid string, input *service_dto.SaveServiceDoc) error {
-	return i.module.SaveServiceDoc(ctx, pid, sid, input)
+func (i *imlServiceController) Edit(ctx *gin.Context, id string, input *service_dto.EditService) (*service_dto.Service, error) {
+	return i.module.Edit(ctx, id, input)
 }
 
-func (i *imlServiceController) Get(ctx *gin.Context, pid string, sid string) (*service_dto.Service, error) {
-	return i.module.Get(ctx, pid, sid)
+func (i *imlServiceController) Delete(ctx *gin.Context, id string) error {
+	return i.module.Delete(ctx, id)
 }
 
-func (i *imlServiceController) Search(ctx *gin.Context, keyword string, pid string) ([]*service_dto.ServiceItem, error) {
-	return i.module.Search(ctx, keyword, pid)
+func (i *imlServiceController) ServiceDoc(ctx *gin.Context, id string) (*service_dto.ServiceDoc, error) {
+	return i.module.ServiceDoc(ctx, id)
 }
 
-func (i *imlServiceController) Create(ctx *gin.Context, pid string, input *service_dto.CreateService) (*service_dto.Service, error) {
-	return i.module.Create(ctx, pid, input)
+func (i *imlServiceController) SaveServiceDoc(ctx *gin.Context, id string, input *service_dto.SaveServiceDoc) error {
+	return i.module.SaveServiceDoc(ctx, id, input)
 }
 
-func (i *imlServiceController) Edit(ctx *gin.Context, pid string, sid string, input *service_dto.EditService) (*service_dto.Service, error) {
-	return i.module.Edit(ctx, pid, sid, input)
+type imlAppController struct {
+	module service.IAppModule `autowired:""`
 }
 
-func (i *imlServiceController) Delete(ctx *gin.Context, pid string, sid string) error {
-	return i.module.Delete(ctx, pid, sid)
+func (i *imlAppController) Search(ctx *gin.Context, teamId string, keyword string) ([]*service_dto.AppItem, error) {
+	return i.module.Search(ctx, teamId, keyword)
 }
 
-func (i *imlServiceController) Enable(ctx *gin.Context, pid string, sid string) error {
-	return i.module.Enable(ctx, pid, sid)
+func (i *imlAppController) CreateApp(ctx *gin.Context, teamID string, input *service_dto.CreateApp) (*service_dto.App, error) {
+	return i.module.CreateApp(ctx, teamID, input)
+}
+func (i *imlAppController) UpdateApp(ctx *gin.Context, appId string, input *service_dto.UpdateApp) (*service_dto.App, error) {
+	return i.module.UpdateApp(ctx, appId, input)
 }
 
-func (i *imlServiceController) Disable(ctx *gin.Context, pid string, sid string) error {
-	return i.module.Disable(ctx, pid, sid)
+func (i *imlAppController) SearchMyApps(ctx *gin.Context, teamId string, keyword string) ([]*service_dto.AppItem, error) {
+	return i.module.SearchMyApps(ctx, teamId, keyword)
+}
+
+func (i *imlAppController) SimpleApps(ctx *gin.Context, keyword string) ([]*service_dto.SimpleAppItem, error) {
+	return i.module.SimpleApps(ctx, keyword)
+}
+
+func (i *imlAppController) MySimpleApps(ctx *gin.Context, keyword string) ([]*service_dto.SimpleAppItem, error) {
+	return i.module.MySimpleApps(ctx, keyword)
+}
+
+func (i *imlAppController) GetApp(ctx *gin.Context, appId string) (*service_dto.App, error) {
+	return i.module.GetApp(ctx, appId)
+}
+
+func (i *imlAppController) DeleteApp(ctx *gin.Context, appId string) error {
+	return i.module.DeleteApp(ctx, appId)
 }

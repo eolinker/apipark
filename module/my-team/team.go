@@ -26,6 +26,9 @@ type ITeamModule interface {
 	Members(ctx context.Context, id string, keyword string) ([]*team_dto.Member, error)
 	// SimpleMembers 获取团队成员简易列表
 	SimpleMembers(ctx context.Context, id string, keyword string) ([]*team_dto.SimpleMember, error)
+
+	// UpdateMemberRole 更新成员角色
+	UpdateMemberRole(ctx context.Context, id string, input *team_dto.UpdateMemberRole) error
 }
 
 func init() {

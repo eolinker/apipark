@@ -101,22 +101,12 @@ const TeamInsideMember:FC = ()=>{
       }
       
     const getMemberList = ()=>{
-        // if(!tableHttpReload){
-        //     setTableHttpReload(true)
-        //     return Promise.resolve({
-        //         data: tableListDataSource,
-        //         success: true,
-        //     });
-        // }
         return fetchData<BasicResponse<{members:TeamMemberTableListItem}>>('team/members',{method:'GET',eoParams:{keyword:searchWord, team:teamId},eoTransformKeys:['user_group','attach_time','user_id','can_delete']}).then(response=>{
             const {code,data,msg} = response
             if(code === STATUS_CODE.SUCCESS){
                 if(!searchWord){
                     setAllMemberIds(data.members?.map((x:TeamMemberTableListItem)=>x.userId) || [])
                 }
-                // setTableListDataSource(data.apps)
-                // tableHttpReload && data.apps.sort((a:TableListItem,b:TableListItem)=>frontendTimeSorter(a,b,'updateTime'))
-                // setTableHttpReload(false)
                 return  {data:data.members, success: true}
             }else{
                 message.error(msg || '操作失败')

@@ -57,7 +57,7 @@ const apiColumns = [
 
 const upstreamColumns = [
     {
-        title:'分区',
+        title:'环境',
         dataIndex:['partition','name'],
         copyable: true,
         ellipsis:true

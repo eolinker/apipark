@@ -84,7 +84,7 @@ export const ApplyServiceModal = forwardRef<ApplyServiceHandle,ApplyServiceProps
                 <Col span={18}>{entity.project.name}</Col>
             </Row>
             <Form.Item<ServiceHubApplyModalFieldType>
-                label="申请的分区"
+                label="申请的环境"
                 name="partitions"
                 rules={[{ required: true, message: '必填项' }]}
             >

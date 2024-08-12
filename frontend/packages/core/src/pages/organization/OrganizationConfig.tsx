@@ -155,7 +155,7 @@ const OrganizationConfig = forwardRef<OrganizationConfigHandle,OrganizationConfi
                     <Form.Item<OrganizationFieldType>
                         label="组织请求前缀"
                         name="prefix"
-                        extra="该请求前缀将会拼接到API请求路径中，格式为：{协议}{主机地址}{组织前缀}{分区前缀}{系统前缀}{API请求路径}"
+                        extra="该请求前缀将会拼接到API请求路径中，格式为：{协议}{主机地址}{组织前缀}{环境前缀}{系统前缀}{API请求路径}"
                         rules={[
                         {
                           validator: validateUrlSlash,
@@ -165,7 +165,7 @@ const OrganizationConfig = forwardRef<OrganizationConfigHandle,OrganizationConfi
                     </Form.Item>
 
                     <Form.Item<OrganizationFieldType>
-                        label="分区权限"
+                        label="环境权限"
                         name="partitions"
                         rules={[{ required: true, message: '必填项' }]}
                     >

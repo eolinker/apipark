@@ -138,7 +138,7 @@ const globalConfigNodesRule: FormItemProps['rules'] = [
                         >
 
                         <Form.Item<ServiceUpstreamFieldType>
-                            label="分区 ID"
+                            label="环境 ID"
                             name="partition"
                             hidden
                             rules={[{ required: true, message: '必填项',whitespace:true  }]}

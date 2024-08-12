@@ -1,7 +1,7 @@
 /*
  * @Date: 2023-11-27 18:13:40
  * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-07 11:01:44
+ * @LastEditTime: 2024-07-12 15:04:13
  * @FilePath: \frontend\packages\common\src\components\aoplatform\BasicLayout.tsx
  */
 import { Button, Layout } from 'antd';
@@ -48,7 +48,7 @@ const { Header, Sider, Content } = Layout;
             <Header className="border-0 border-b border-solid border-b-BORDER flex items-center px-[20px]">
                 <div className="w-[175px] flex items-center">
                   <img
-                    className="h-[28px]"
+                    className="h-[20px]"
                     src={Logo}
                   />
                 </div>

@@ -11,7 +11,6 @@ type Cluster struct {
 	Name       string
 	Resume     string
 	Creator    string
-	Partition  string
 	Updater    string
 	Status     int
 	CreateTime time.Time
@@ -23,7 +22,6 @@ func FromEntity(entity *cluster.Cluster) *Cluster {
 		Uuid:       entity.UUID,
 		Name:       entity.Name,
 		Resume:     entity.Resume,
-		Partition:  entity.Partition,
 		Creator:    entity.Creator,
 		Updater:    entity.Updater,
 		CreateTime: entity.CreateAt,

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/eolinker/apipark/service/project_diff"
+	"github.com/eolinker/apipark/service/service_diff"
 	"github.com/eolinker/apipark/stores/publish"
 	"github.com/eolinker/go-common/utils"
 	"gorm.io/gorm"
@@ -26,12 +26,11 @@ type imlPublishService struct {
 
 func (s *imlPublishService) SetPublishStatus(ctx context.Context, status *Status) error {
 	return s.statusStore.Save(ctx, &publish.Status{
-		Publish:   status.Publish,
-		Cluster:   status.Cluster,
-		Partition: status.Partition,
-		Status:    int(status.Status),
-		Error:     status.Error,
-		UpdateAt:  time.Now(),
+		Publish:  status.Publish,
+		Cluster:  status.Cluster,
+		Status:   int(status.Status),
+		Error:    status.Error,
+		UpdateAt: time.Now(),
 	})
 }
 
@@ -43,25 +42,24 @@ func (s *imlPublishService) GetPublishStatus(ctx context.Context, id string) ([]
 
 	return utils.SliceToSlice(list, func(s *publish.Status) *Status {
 		return &Status{
-			Publish:   s.Publish,
-			Cluster:   s.Cluster,
-			Partition: s.Partition,
-			Status:    StatusType(s.Status),
-			Error:     s.Error,
-			UpdateAt:  s.UpdateAt,
+			Publish:  s.Publish,
+			Cluster:  s.Cluster,
+			Status:   StatusType(s.Status),
+			Error:    s.Error,
+			UpdateAt: s.UpdateAt,
 		}
 	}), nil
 }
 
-func (s *imlPublishService) setAction(ctx context.Context, project, id string, status StatusType, comments string) error {
+func (s *imlPublishService) setAction(ctx context.Context, service, id string, status StatusType, comments string) error {
 	operator := utils.UserId(ctx)
 	return s.store.Transaction(ctx, func(ctx context.Context) error {
 		ev, err := s.store.GetByUUID(ctx, id)
 		if err != nil {
 			return err
 		}
-		if ev.Project != project {
-			return errors.New("project not match")
+		if ev.Service != service {
+			return errors.New("service not match")
 		}
 		ev.Status = int(status)
 		ev.Comments = comments
@@ -71,12 +69,12 @@ func (s *imlPublishService) setAction(ctx context.Context, project, id string, s
 		return err
 	})
 }
-func (s *imlPublishService) Refuse(ctx context.Context, project, id string, comments string) error {
-	return s.setAction(ctx, project, id, StatusRefuse, comments)
+func (s *imlPublishService) Refuse(ctx context.Context, service, id string, comments string) error {
+	return s.setAction(ctx, service, id, StatusRefuse, comments)
 }
 
-func (s *imlPublishService) Accept(ctx context.Context, project, id string, comments string) error {
-	return s.setAction(ctx, project, id, StatusAccept, comments)
+func (s *imlPublishService) Accept(ctx context.Context, service, id string, comments string) error {
+	return s.setAction(ctx, service, id, StatusAccept, comments)
 
 }
 
@@ -159,12 +157,12 @@ func (s *imlPublishService) Get(ctx context.Context, id string) (*Publish, error
 	return FromEntity(env), nil
 }
 
-func (s *imlPublishService) GetDiff(ctx context.Context, id string) (*project_diff.Diff, error) {
+func (s *imlPublishService) GetDiff(ctx context.Context, id string) (*service_diff.Diff, error) {
 	ev, err := s.diffStore.GetByUUID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	df := new(project_diff.Diff)
+	df := new(service_diff.Diff)
 	err = json.Unmarshal(ev.Data, df)
 	if err != nil {
 		return nil, err
@@ -172,29 +170,29 @@ func (s *imlPublishService) GetDiff(ctx context.Context, id string) (*project_di
 	return df, nil
 }
 
-func (s *imlPublishService) ListProject(ctx context.Context, project string) ([]*Publish, error) {
-	flows, err := s.store.ListQuery(ctx, "project = ?", []interface{}{project}, "apply_time desc")
+func (s *imlPublishService) ListProject(ctx context.Context, service string) ([]*Publish, error) {
+	flows, err := s.store.ListQuery(ctx, "service = ?", []interface{}{service}, "apply_time desc")
 	if err != nil {
 		return nil, err
 	}
 	return utils.SliceToSlice(flows, FromEntity), nil
 }
 
-func (s *imlPublishService) ListProjectPage(ctx context.Context, project string, page int, pageSize int) ([]*Publish, int64, error) {
-	flows, total, err := s.store.ListPage(ctx, "project = ?", page, pageSize, []interface{}{project}, "apply_time desc")
+func (s *imlPublishService) ListProjectPage(ctx context.Context, service string, page int, pageSize int) ([]*Publish, int64, error) {
+	flows, total, err := s.store.ListPage(ctx, "service = ?", page, pageSize, []interface{}{service}, "apply_time desc")
 	if err != nil {
 		return nil, 0, err
 	}
 	return utils.SliceToSlice(flows, FromEntity), total, nil
 }
 
-func (s *imlPublishService) ListForStatus(ctx context.Context, project string, status ...StatusType) ([]*Publish, error) {
+func (s *imlPublishService) ListForStatus(ctx context.Context, service string, status ...StatusType) ([]*Publish, error) {
 
 	wheres := make([]string, 0, 2)
 	args := make([]interface{}, 0, 2)
-	if project != "" {
-		wheres = append(wheres, "project = ?")
-		args = append(args, project)
+	if service != "" {
+		wheres = append(wheres, "service = ?")
+		args = append(args, service)
 	}
 	if len(status) == 1 {
 		wheres = append(wheres, "status = ?")
@@ -232,7 +230,7 @@ func (s *imlPublishService) ListForStatusPage(ctx context.Context, page int, pag
 	return utils.SliceToSlice(flows, FromEntity), total, nil
 }
 
-func (s *imlPublishService) Create(ctx context.Context, uuid, project, release, previous, version, remark string, df *project_diff.Diff) error {
+func (s *imlPublishService) Create(ctx context.Context, uuid, service, release, previous, version, remark string, df *service_diff.Diff) error {
 	operator := utils.UserId(ctx)
 	data, err := json.Marshal(df)
 	if err != nil {
@@ -242,7 +240,7 @@ func (s *imlPublishService) Create(ctx context.Context, uuid, project, release, 
 		nv := &publish.Publish{
 			Id:          0,
 			UUID:        uuid,
-			Project:     project,
+			Service:     service,
 			Release:     release,
 			Previous:    previous,
 			Version:     version,
@@ -279,14 +277,14 @@ func (s *imlPublishService) Create(ctx context.Context, uuid, project, release, 
 	return nil
 }
 
-func (s *imlPublishService) SetStatus(ctx context.Context, project, id string, status StatusType) error {
+func (s *imlPublishService) SetStatus(ctx context.Context, service, id string, status StatusType) error {
 	return s.store.Transaction(ctx, func(ctx context.Context) error {
 		ev, err := s.store.GetByUUID(ctx, id)
 		if err != nil {
 			return err
 		}
-		if ev.Project != project {
-			return errors.New("project not match")
+		if ev.Service != service {
+			return errors.New("service not match")
 		}
 		ev.Status = int(status)
 		_, err = s.store.Update(ctx, ev)

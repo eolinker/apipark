@@ -71,7 +71,6 @@ const Login:FC = ()=> {
                     }
                 }else{
                     dispatch({type:'LOGOUT'})
-                    //console.log(msg)
                     message.error(msg)
                 }
 
@@ -100,14 +99,14 @@ const Login:FC = ()=> {
                     </span>
                  </div>
 
-                 <section className="block w-[410px] mx-auto mt-[46px] bg-MAIN_BG px-[30px] pt-[30px] box-border rounded-[10px] shadow-[0_5px_20px_0_rgba(0,0,0,5%)]">
+                 <section className="block w-[410px] mx-auto mt-[46px] bg-MAIN_BG p-[30px] box-border rounded-[10px] shadow-[0_5px_20px_0_rgba(0,0,0,5%)]">
                      <div className="h-full">
                          <div>
                              <div className="flex justify-center items-center">
                                  <span className="text-[24px] text-[#101010]">登录</span>
                              </div>
 
-                             <Form onFinish={login} className="w-[350px] pt-[28px] pb-[8px]"
+                             <Form onFinish={login} className="w-[350px] pt-[28px]"
                                    ref={formRef}>
                                  <Form.Item
                                      className="p-0 bg-transparent rounded border-none"
@@ -136,7 +135,7 @@ const Login:FC = ()=> {
 
                                  <div className=" justify-center">
                                      <Form.Item
-                                     className="p-0 bg-transparent rounded border-none"
+                                     className="p-0 bg-transparent rounded border-none mb-0"
                                      >
                                          <Button loading={loading} className="h-[40px] mt-mbase w-full inline-flex justify-center items-center" type="primary" htmlType="submit">
                                              登录

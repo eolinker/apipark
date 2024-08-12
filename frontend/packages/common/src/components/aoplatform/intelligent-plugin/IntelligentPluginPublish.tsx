@@ -34,7 +34,7 @@ export const IntelligentPluginPublish = forwardRef<IntelligentPluginPublishHandl
     const [startCheckClusterNum,setStartCCN] = useState<boolean>(false)
     const apiColumns = [
         {
-            title:'分区',
+            title:'环境',
             dataIndex:'title',
             copyable: true,
             ellipsis:true
@@ -54,7 +54,7 @@ export const IntelligentPluginPublish = forwardRef<IntelligentPluginPublishHandl
         {
             title:'更新时间',
             dataIndex:'updateTime',
-            width:176,
+            width:182,
         }
     ]
 

@@ -1,8 +1,9 @@
 package subscribe
 
 import (
-	"github.com/gin-gonic/gin"
 	"reflect"
+
+	"github.com/gin-gonic/gin"
 
 	subscribe_dto "github.com/eolinker/apipark/module/subscribe/dto"
 
@@ -17,14 +18,14 @@ type ISubscribeController interface {
 	// Search 关键字获取订阅者列表
 	Search(ctx *gin.Context, project string, keyword string) ([]*subscribe_dto.Subscriber, error)
 	// SearchSubscriptions 关键字获取订阅服务列表
-	SearchSubscriptions(ctx *gin.Context, partitionId string, projectId string, keyword string) ([]*subscribe_dto.SubscriptionItem, error)
+	SearchSubscriptions(ctx *gin.Context, appId string, keyword string) ([]*subscribe_dto.SubscriptionItem, error)
 	// RevokeSubscription 取消订阅
 	RevokeSubscription(ctx *gin.Context, project string, uuid string) error
 	// DeleteSubscription 删除订阅
 	DeleteSubscription(ctx *gin.Context, project string, uuid string) error
 	// RevokeApply 取消申请
 	RevokeApply(ctx *gin.Context, project string, uuid string) error
-	PartitionServices(ctx *gin.Context, app string) ([]*subscribe_dto.PartitionServiceItem, error)
+	//PartitionServices(ctx *gin.Context, app string) ([]*subscribe_dto.PartitionServiceItem, error)
 }
 
 type ISubscribeApprovalController interface {

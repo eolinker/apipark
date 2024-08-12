@@ -13,7 +13,7 @@ type Publish struct {
 	Comments      string             `json:"comments,omitempty"`
 	Release       auto.Label         `json:"release,omitempty" aolabel:"release"`
 	Previous      *auto.Label        `json:"previous,omitempty" aolabel:"release"`
-	Project       auto.Label         `json:"project" aolabel:"project"`
+	Service       auto.Label         `json:"service" aolabel:"service"`
 	Applicant     auto.Label         `json:"applicant" aolabel:"user"`
 	Approver      *auto.Label        `json:"approver,omitempty" aolabel:"user"`
 	Status        publish.StatusType `json:"status,omitempty" `
@@ -29,7 +29,7 @@ func FromModel(m *publish.Publish, versionRemark string) *Publish {
 		Remark:        m.Remark,
 		VersionRemark: versionRemark,
 		Comments:      m.Comments,
-		Project:       auto.UUID(m.Project),
+		Service:       auto.UUID(m.Service),
 		Applicant:     auto.UUID(m.Applicant),
 		Release:       auto.UUID(m.Release),
 
@@ -53,8 +53,8 @@ type PublishDetail struct {
 }
 
 type PublishStatus struct {
-	Partition auto.Label `json:"partition" aolabel:"partition"`
-	Cluster   auto.Label `json:"cluster" aolabel:"cluster"`
-	Status    string     `json:"status"`
-	Error     string     `json:"error"`
+	//Partition auto.Label `json:"partition" aolabel:"partition"`
+	//Cluster auto.Label `json:"cluster" aolabel:"cluster"`
+	Status string `json:"status"`
+	Error  string `json:"error"`
 }

@@ -1,7 +1,7 @@
 /*
  * @Date: 2024-01-31 15:00:11
  * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 13:43:10
+ * @LastEditTime: 2024-07-12 10:13:56
  * @FilePath: \frontend\packages\core\src\pages\team\TeamList.tsx
  */
 import PageList from "@common/components/aoplatform/PageList.tsx"
@@ -11,10 +11,10 @@ import {useLocation, useNavigate} from "react-router-dom";
 import {useBreadcrumb} from "@common/contexts/BreadcrumbContext.tsx";
 import {App, Divider, Modal} from "antd";
 import {BasicResponse, STATUS_CODE} from "@common/const/const.ts";
+import { SimpleMemberItem } from "@common/const/type.ts";
 import {useFetch} from "@common/hooks/http.ts";
 import { TEAM_TABLE_COLUMNS } from "../../const/team/const.tsx";
 import { TeamConfigFieldType, TeamConfigHandle, TeamTableListItem } from "../../const/team/type.ts";
-import { SimpleMemberItem } from "../../const/system/type.ts";
 import TableBtnWithPermission from "@common/components/aoplatform/TableBtnWithPermission.tsx";
 import { useGlobalContext } from "@common/contexts/GlobalStateContext.tsx";
 import { checkAccess } from "@common/utils/permission.ts";

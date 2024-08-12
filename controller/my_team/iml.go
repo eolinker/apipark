@@ -14,6 +14,10 @@ type imlTeamController struct {
 	module my_team.ITeamModule `autowired:""`
 }
 
+func (c *imlTeamController) UpdateMemberRole(ctx *gin.Context, id string, input *team_dto.UpdateMemberRole) error {
+	return c.module.UpdateMemberRole(ctx, id, input)
+}
+
 func (c *imlTeamController) GetTeam(ctx *gin.Context, id string) (*team_dto.Team, error) {
 	return c.module.GetTeam(ctx, id)
 }

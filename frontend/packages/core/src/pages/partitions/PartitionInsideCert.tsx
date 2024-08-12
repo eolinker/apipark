@@ -11,7 +11,7 @@ import { Base64 } from 'js-base64';
 import { PARTITION_CERT_TABLE_COLUMNS } from "../../const/partitions/const.tsx";
 import { PartitionCertConfigHandle, PartitionCertConfigProps, PartitionCertTableListItem } from "../../const/partitions/types.ts";
 import WithPermission from "@common/components/aoplatform/WithPermission.tsx";
-import { SimpleMemberItem } from "../../const/system/type.ts";
+import { SimpleMemberItem } from "@common/const/type.ts";
 import TableBtnWithPermission from "@common/components/aoplatform/TableBtnWithPermission.tsx";
 import { useGlobalContext } from "@common/contexts/GlobalStateContext.tsx";
 import { checkAccess } from "@common/utils/permission.ts";

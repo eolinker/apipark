@@ -13,7 +13,6 @@ type ServiceItem struct {
 	Name          string       `json:"name"`
 	Tags          []auto.Label `json:"tags" aolabel:"tag"`
 	Catalogue     auto.Label   `json:"catalogue" aolabel:"catalogue"`
-	Partition     []auto.Label `json:"partition" aolabel:"partition"`
 	Description   string       `json:"description"`
 	Logo          string       `json:"logo"`
 	ApiNum        int64        `json:"api_num"`
@@ -21,21 +20,22 @@ type ServiceItem struct {
 }
 
 type ServiceDetail struct {
-	Name        string             `json:"name"`
-	Description string             `json:"description"`
-	Document    string             `json:"document"`
-	Basic       *ServiceBasic      `json:"basic"`
-	Apis        []*ServiceApi      `json:"apis"`
-	DisableApis []*ServiceApiBasic `json:"disable_apis"`
-	Partition   []*Partition       `json:"partition"`
+	Name        string        `json:"name"`
+	Description string        `json:"description"`
+	Document    string        `json:"document"`
+	Basic       *ServiceBasic `json:"basic"`
+	Apis        []*ServiceApi `json:"apis"`
 }
 
 type ServiceBasic struct {
-	Organization  auto.Label `json:"organization" aolabel:"organization"`
-	Project       auto.Label `json:"project" aolabel:"project"`
-	Team          auto.Label `json:"team" aolabel:"team"`
-	ApiNum        int        `json:"api_num"`
-	SubscriberNum int        `json:"subscriber_num"`
+	Team       auto.Label     `json:"team" aolabel:"team"`
+	ApiNum     int            `json:"api_num"`
+	AppNum     int            `json:"app_num"`
+	Tags       []auto.Label   `json:"tags" aolabel:"tag"`
+	Catalogue  auto.Label     `json:"catalogue" aolabel:"catalogue"`
+	Version    string         `json:"version"`
+	UpdateTime auto.TimeLabel `json:"update_time"`
+	Logo       string         `json:"logo"`
 }
 
 type ServiceApiBasic struct {

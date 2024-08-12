@@ -10,7 +10,7 @@ export const SUBSCRIBE_APPROVAL_TABLE_COLUMN : ProColumns<ApprovalTableListItem>
         title: '申请时间',
         dataIndex: 'applyTime',
         ellipsis:true,
-        width:176,
+        width:182,
         fixed:'left',
         sorter: (a,b)=> {
             return a.applyTime.localeCompare(b.applyTime)
@@ -62,7 +62,7 @@ export const SUBSCRIBE_APPROVAL_TABLE_COLUMN : ProColumns<ApprovalTableListItem>
         dataIndex: 'approvalTime',
         ellipsis: true,
         // sorter: true,,
-        width:176,
+        width:182,
         sorter: (a,b)=> {
             return a.approvalTime.localeCompare(b.approvalTime)
         },
@@ -76,7 +76,7 @@ export const SUBSCRIBE_APPROVAL_INNER_TODO_TABLE_COLUMN : ProColumns<SubscribeAp
         // sorter: true,
         copyable: true,
         ellipsis:true,
-        width:176,
+        width:182,
         fixed:'left',
         sorter: (a,b)=> {
             return a.applyTime.localeCompare(b.applyTime)
@@ -114,7 +114,7 @@ export const SUBSCRIBE_APPROVAL_INNER_DONE_TABLE_COLUMN : ProColumns<SubscribeAp
         // sorter: true,
         copyable: true,
         ellipsis:true,
-        width:176,
+        width:182,
         fixed:'left',
         sorter: (a,b)=> {
             return a.applyTime.localeCompare(b.applyTime)
@@ -169,7 +169,7 @@ export const SUBSCRIBE_APPROVAL_INNER_DONE_TABLE_COLUMN : ProColumns<SubscribeAp
         dataIndex: 'approvalTime',
         ellipsis: true,
         // sorter: true,,
-        width:176,
+        width:182,
         sorter: (a,b)=> {
             return a.approvalTime.localeCompare(b.approvalTime)
         },
@@ -290,7 +290,7 @@ export const PUBLISH_APPROVAL_RECORD_INNER_TABLE_COLUMN : ProColumns<PublishTabl
         dataIndex: 'applyTime',
         copyable: true,
         ellipsis:true,
-        width:176,
+        width:182,
         fixed:'left',
     },
     {
@@ -298,7 +298,7 @@ export const PUBLISH_APPROVAL_RECORD_INNER_TABLE_COLUMN : ProColumns<PublishTabl
         dataIndex: 'approveTime',
         copyable: true,
         ellipsis:true,
-        width:176,
+        width:182,
     },
     {
         title: '版本号',
@@ -360,7 +360,7 @@ export const PUBLISH_APPROVAL_TABLE_COLUMN : ProColumns<ApprovalTableListItem>[]
         dataIndex: 'applyTime',
         copyable: true,
         ellipsis:true,
-        width:176,
+        width:182,
         fixed:'left',
         sorter: (a,b)=> {
             return a.applyTime.localeCompare(b.applyTime)
@@ -414,7 +414,7 @@ export const PUBLISH_APPROVAL_TABLE_COLUMN : ProColumns<ApprovalTableListItem>[]
         // sorter: true,
         ellipsis:true,
         hideInSearch: true,
-        width:176,
+        width:182,
         sorter: (a,b)=> {
             return a.approvalTime.localeCompare(b.approvalTime)
         },

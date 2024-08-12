@@ -1,9 +1,9 @@
 package release
 
 import (
-	"github.com/eolinker/apipark/module/project_diff"
 	"github.com/eolinker/apipark/module/release"
 	"github.com/eolinker/apipark/module/release/dto"
+	service_diff "github.com/eolinker/apipark/module/service-diff"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,7 +13,7 @@ var (
 
 type imlReleaseController struct {
 	module     release.IReleaseModule          `autowired:""`
-	diffModule project_diff.IProjectDiffModule `autowired:""`
+	diffModule service_diff.IServiceDiffModule `autowired:""`
 }
 
 func (c *imlReleaseController) Create(ctx *gin.Context, project string, input *dto.CreateInput) error {
@@ -30,7 +30,7 @@ func (c *imlReleaseController) Detail(ctx *gin.Context, project string, id strin
 func (c *imlReleaseController) List(ctx *gin.Context, project string) ([]*dto.Release, error) {
 	return c.module.List(ctx, project)
 }
-func (c *imlReleaseController) Preview(ctx *gin.Context, project string) (*dto.Release, *project_diff.DiffOut, bool, error) {
+func (c *imlReleaseController) Preview(ctx *gin.Context, project string) (*dto.Release, *service_diff.DiffOut, bool, error) {
 	releaseInfo, diff, complete, err := c.module.Preview(ctx, project)
 	if err != nil {
 		return nil, nil, false, err

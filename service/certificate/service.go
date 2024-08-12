@@ -27,8 +27,8 @@ func init() {
 
 type ICertificateService interface {
 	Get(ctx context.Context, id string) (*Certificate, *File, error)
-	List(ctx context.Context, partitionID string) ([]*Certificate, error)
-	Save(ctx context.Context, id string, partition string, key, cert []byte) (*Certificate, error)
+	List(ctx context.Context, clusterId string) ([]*Certificate, error)
+	Save(ctx context.Context, id, clusterId string, key, cert []byte) (*Certificate, error)
 	Delete(ctx context.Context, id string) error
 }
 
@@ -67,7 +67,7 @@ func (s *imlCertificateService) Get(ctx context.Context, id string) (*Certificat
 	}
 	return &Certificate{
 			ID:         ce.UUID,
-			Partition:  ce.Partition,
+			Cluster:    ce.Cluster,
 			UpdateTime: ce.UpdateTime,
 			Name:       ce.Name,
 			Domains:    ce.Domains,
@@ -82,8 +82,8 @@ func (s *imlCertificateService) Get(ctx context.Context, id string) (*Certificat
 
 }
 
-func (s *imlCertificateService) List(ctx context.Context, partitionID string) ([]*Certificate, error) {
-	list, err := s.store.List(ctx, map[string]interface{}{"partition": partitionID})
+func (s *imlCertificateService) List(ctx context.Context, clusterId string) ([]*Certificate, error) {
+	list, err := s.store.List(ctx, map[string]interface{}{"cluster": clusterId})
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func (s *imlCertificateService) List(ctx context.Context, partitionID string) ([
 			ID:         i.UUID,
 			Name:       i.Name,
 			Domains:    i.Domains,
-			Partition:  i.Partition,
+			Cluster:    i.Cluster,
 			NotAfter:   i.NotAfter,
 			NotBefore:  i.NotBefore,
 			Updater:    i.Updater,
@@ -101,7 +101,7 @@ func (s *imlCertificateService) List(ctx context.Context, partitionID string) ([
 	}), nil
 }
 
-func (s *imlCertificateService) Save(ctx context.Context, id string, partition string, key, cert []byte) (*Certificate, error) {
+func (s *imlCertificateService) Save(ctx context.Context, id, clusterId string, key, cert []byte) (*Certificate, error) {
 	if id == "" {
 		id = uuid.NewString()
 	}
@@ -122,7 +122,7 @@ func (s *imlCertificateService) Save(ctx context.Context, id string, partition s
 	}
 	ce := &certificate.Certificate{
 		UUID:       id,
-		Partition:  partition,
+		Cluster:    clusterId,
 		Name:       certDERBlock.Leaf.Subject.CommonName,
 		Domains:    dnsNames,
 		Updater:    operator,
@@ -152,7 +152,7 @@ func (s *imlCertificateService) Save(ctx context.Context, id string, partition s
 		ID:         ce.UUID,
 		Name:       ce.Name,
 		Domains:    ce.Domains,
-		Partition:  ce.Partition,
+		Cluster:    ce.Cluster,
 		NotAfter:   ce.NotAfter,
 		NotBefore:  ce.NotBefore,
 		Updater:    ce.Updater,

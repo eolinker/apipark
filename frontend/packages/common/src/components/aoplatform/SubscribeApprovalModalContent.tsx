@@ -112,7 +112,7 @@ export const SubscribeApprovalModalContent = forwardRef<SubscribeApprovalModalHa
             >
 
                 <Form.Item<FieldType>
-                    label="申请的分区"
+                    label="申请的环境"
                     name="partition"
                     rules={[{ required: true, message: '必填项'  }]}
                 >

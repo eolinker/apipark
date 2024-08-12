@@ -139,7 +139,7 @@ const PartitionConfig = forwardRef<PartitionConfigHandle,PartitionConfigProps>((
         if (partitionId !== undefined) {
             setBreadcrumb([
                 {title:<Link to="/partition/list">部署管理</Link>},
-                {title:'分区设置'}
+                {title:'环境设置'}
             ])
             setOnEdit(true);
             getPartitionInfo();
@@ -170,34 +170,35 @@ const PartitionConfig = forwardRef<PartitionConfigHandle,PartitionConfigProps>((
                     >
                         <div>
                             <Form.Item<PartitionConfigFieldType>
-                                label="分区名称"
+                                label="环境名称"
                                 name="name"
                                 rules={[{ required: true, message: '必填项' }]}
                             >
-                                <Input className="w-INPUT_NORMAL" placeholder="请输入分区名称"/>
+                                <Input className="w-INPUT_NORMAL" placeholder="请输入环境名称"/>
                             </Form.Item>
 
                             <Form.Item<PartitionConfigFieldType>
-                                label="分区 ID"
+                                label="环境 ID"
                                 name="id"
-                                extra="分区 ID（partition_id）可用于检索分区，一旦保存无法修改。"
+                                extra="环境 ID（partition_id）可用于检索环境，一旦保存无法修改。"
                                 rules={[{ required: true, message: '必填项' }]}
                             >
-                                <Input className="w-INPUT_NORMAL" disabled={onEdit} placeholder="请输入分区标识"/>
+                                <Input className="w-INPUT_NORMAL" disabled={onEdit} placeholder="请输入环境标识"/>
                             </Form.Item>
 
                             <Form.Item<PartitionConfigFieldType>
-                                label="分区请求前缀"
+                                label="环境请求前缀"
                                 name="prefix"
-                                extra="该请求前缀将会拼接到API请求路径中，格式为：{协议}{主机地址}{组织前缀}{分区前缀}{服务前缀}{API请求路径}"
+                                extra="该请求前缀将会拼接到API请求路径中，格式为：{协议}{主机地址}{组织前缀}{环境前缀}{服务前缀}{API请求路径}"
                                 rules={[
                                 {
                                 validator: validateUrlSlash,
                                 }]}
                             >
-                                <Input  prefix={onEdit ? '' : "/"} className="w-INPUT_NORMAL" disabled={onEdit} placeholder="请输入分区请求前缀"/>
+                                <Input  prefix={onEdit ? '' : "/"} className="w-INPUT_NORMAL" disabled={onEdit} placeholder="请输入环境请求前缀"/>
                             </Form.Item>
 
+                    {!onEdit && 
                             <Form.Item<PartitionConfigFieldType>
                                 label="集群地址"
                                 name="managerAddress"
@@ -207,7 +208,7 @@ const PartitionConfig = forwardRef<PartitionConfigHandle,PartitionConfigProps>((
                                 <Input className="w-INPUT_NORMAL" placeholder="请输入"/>
                                 {/* <Button type='primary' htmlType='submit'>测试</Button> */}
                             {/* </Space> */}
-                            </Form.Item>
+                            </Form.Item>}
 
                             <Form.Item<PartitionConfigFieldType>
                                 label="描述"
@@ -231,9 +232,9 @@ const PartitionConfig = forwardRef<PartitionConfigHandle,PartitionConfigProps>((
                         <div>
                             <Divider />
                             
-                            <p className="text-center">删除分区：删除操作不可恢复，请谨慎操作！</p>
+                            <p className="text-center">删除环境：删除操作不可恢复，请谨慎操作！</p>
                             <div className="text-center">
-                                <WithPermission access="system.partition.self.delete" disabled={!canDelete}  tooltip={canDelete ? '':'分区已被使用，不可删除'}><Button className="m-auto mt-[16px] mb-[20px]" type="default" onClick={deletePartitionModal}>删除</Button></WithPermission>
+                                <WithPermission access="system.partition.self.delete" disabled={!canDelete}  tooltip={canDelete ? '':'环境已被使用，不可删除'}><Button className="m-auto mt-[16px] mb-[20px]" type="default" onClick={deletePartitionModal}>删除</Button></WithPermission>
                             </div>
                         </div>
                         }

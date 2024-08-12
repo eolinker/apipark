@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/eolinker/eosc/log"
 	"strings"
 	"time"
+
+	"github.com/eolinker/eosc/log"
 
 	"github.com/eolinker/apipark/gateway"
 
@@ -18,13 +19,9 @@ import (
 
 	"github.com/eolinker/go-common/utils"
 
-	"github.com/eolinker/go-common/auto"
-
 	"github.com/google/uuid"
 
 	"github.com/eolinker/apipark/module/dynamic-module/driver"
-
-	"github.com/eolinker/apipark/service/partition"
 
 	dynamic_module_dto "github.com/eolinker/apipark/module/dynamic-module/dto"
 	dynamic_module "github.com/eolinker/apipark/service/dynamic-module"
@@ -33,7 +30,6 @@ import (
 var _ IDynamicModuleModule = (*imlDynamicModule)(nil)
 
 type imlDynamicModule struct {
-	partitionService            partition.IPartitionService                 `autowired:""`
 	clusterService              cluster.IClusterService                     `autowired:""`
 	dynamicModuleService        dynamic_module.IDynamicModuleService        `autowired:""`
 	dynamicModulePublishService dynamic_module.IDynamicModulePublishService `autowired:""`
@@ -41,66 +37,56 @@ type imlDynamicModule struct {
 	transaction                 store.ITransaction                          `autowired:""`
 }
 
-func (i *imlDynamicModule) initGateway(ctx context.Context, partitionId string, clientDriver gateway.IClientDriver) error {
+func (i *imlDynamicModule) initGateway(ctx context.Context, clusterId string, clientDriver gateway.IClientDriver) error {
+	// TODO: 初始化集群操作
 	return nil
 }
 
-func (i *imlDynamicModule) Online(ctx context.Context, module string, id string, partitionInput *dynamic_module_dto.PartitionInput) error {
+func (i *imlDynamicModule) Online(ctx context.Context, module string, id string, clusterInput *dynamic_module_dto.ClusterInput) error {
 	_, has := driver.Get(module)
 	if !has {
 		return fmt.Errorf("模块【%s】不存在", module)
 	}
-	if len(partitionInput.Partitions) == 0 {
-		return fmt.Errorf("上线分区失败，分区为空")
-	}
-	partitions, err := i.partitionService.List(ctx, partitionInput.Partitions...)
-	if err != nil {
-		return err
-	}
-	if len(partitions) == 0 {
-		return fmt.Errorf("上线分区失败，可用分区为空")
-	}
+	//if len(clusterInput.Clusters) == 0 {
+	//	return fmt.Errorf("上线分区失败，分区为空")
+	//}
 
 	id = strings.ToLower(fmt.Sprintf("%s_%s", id, module))
 	info, err := i.dynamicModuleService.Get(ctx, id)
 	if err != nil {
 		return fmt.Errorf("上线失败，配置不存在")
 	}
+	clusters, err := i.clusterService.List(ctx, clusterInput.Clusters...)
+	if err != nil || len(clusters) == 0 {
+		return fmt.Errorf("上线失败，集群不存在")
+	}
 
 	return i.transaction.Transaction(ctx, func(ctx context.Context) error {
-		cfg := make(map[string]*gateway.DynamicRelease)
-		err = json.Unmarshal([]byte(info.Config), &cfg)
-		if err != nil {
-			return err
-		}
-		for _, p := range partitions {
-			pCfg, ok := cfg[p.UUID]
-			if !ok {
-				continue
-			}
+		for _, c := range clusters {
+
 			// 插入发布历史
 			err = i.dynamicModulePublishService.Create(ctx, &dynamic_module.CreateDynamicModulePublish{
 				ID:            uuid.New().String(),
 				DynamicModule: id,
 				Module:        module,
-				Partition:     p.UUID,
-				Cluster:       p.Cluster,
+				Cluster:       c.Uuid,
 				Version:       info.Version,
 			})
 			if err != nil {
 				return err
 			}
-			err := i.dynamicClient(ctx, p.Cluster, module, func(dynamicClient gateway.IDynamicClient) error {
+			err = i.dynamicClient(ctx, c.Uuid, module, func(dynamicClient gateway.IDynamicClient) error {
+				cfg := &gateway.DynamicRelease{}
 				err = json.Unmarshal([]byte(info.Config), &cfg)
 				if err != nil {
 					return err
 				}
-				pCfg.ID = id
-				pCfg.Version = info.Version
-				pCfg.MatchLabels = map[string]string{
+				cfg.ID = id
+				cfg.Version = info.Version
+				cfg.MatchLabels = map[string]string{
 					"module": module,
 				}
-				err = dynamicClient.Online(ctx, pCfg)
+				err = dynamicClient.Online(ctx, cfg)
 				if err != nil {
 					return err
 				}
@@ -116,26 +102,29 @@ func (i *imlDynamicModule) Online(ctx context.Context, module string, id string,
 	})
 }
 
-func (i *imlDynamicModule) Offline(ctx context.Context, module string, id string, partitionInput *dynamic_module_dto.PartitionInput) error {
+func (i *imlDynamicModule) Offline(ctx context.Context, module string, id string, clusterInput *dynamic_module_dto.ClusterInput) error {
 	_, has := driver.Get(module)
 	if !has {
 		return fmt.Errorf("模块【%s】不存在", module)
 	}
-	if len(partitionInput.Partitions) == 0 {
-		return fmt.Errorf("下线分区失败，分区为空")
-	}
-	partitions, err := i.partitionService.List(ctx, partitionInput.Partitions...)
-	if err != nil {
-		return err
-	}
-	if len(partitions) == 0 {
-		return fmt.Errorf("下线分区失败，可用分区为空")
-	}
+	//if len(clusterInput.Clusters) == 0 {
+	//	return fmt.Errorf("下线分区失败，分区为空")
+	//}
 
 	return i.transaction.Transaction(ctx, func(ctx context.Context) error {
 		id = strings.ToLower(fmt.Sprintf("%s_%s", id, module))
-		for _, p := range partitions {
-			err := i.dynamicClient(ctx, p.Cluster, module, func(dynamicClient gateway.IDynamicClient) error {
+		if len(clusterInput.Clusters) == 0 {
+			clusters, err := i.clusterService.List(ctx)
+			if err != nil {
+				return err
+			}
+			clusterInput.Clusters = make([]string, 0)
+			for _, c := range clusters {
+				clusterInput.Clusters = append(clusterInput.Clusters, c.Uuid)
+			}
+		}
+		for _, clusterId := range clusterInput.Clusters {
+			err := i.dynamicClient(ctx, clusterId, module, func(dynamicClient gateway.IDynamicClient) error {
 				return dynamicClient.Offline(ctx, &gateway.DynamicRelease{
 					BasicItem: &gateway.BasicItem{
 						ID: id,
@@ -151,54 +140,55 @@ func (i *imlDynamicModule) Offline(ctx context.Context, module string, id string
 	})
 }
 
-func (i *imlDynamicModule) PartitionStatuses(ctx context.Context, module string, keyword string, page int, pageSize int) (map[string]map[string]string, error) {
-	_, has := driver.Get(module)
-	if !has {
-		return nil, fmt.Errorf("模块【%s】不存在", module)
-	}
-	list, _, err := i.dynamicModuleService.SearchByPage(ctx, keyword, map[string]interface{}{
-		"module": module,
-	}, page, pageSize, "update_at desc")
-	if err != nil {
-		return nil, err
-	}
-	partitions, err := i.partitionService.List(ctx)
-	if err != nil {
-		return nil, err
-	}
-	out := make(map[string]map[string]string)
-	for _, c := range partitions {
-		err := i.dynamicClient(ctx, c.Cluster, module, func(dynamicClient gateway.IDynamicClient) error {
-			versions, err := dynamicClient.Versions(ctx, map[string]string{
-				"module": module,
-			})
-			if err != nil {
-				return err
-			}
-			for _, l := range list {
-				id := strings.TrimSuffix(l.ID, fmt.Sprintf("_%s", module))
-				if _, ok := out[id]; !ok {
-					out[id] = make(map[string]string)
-				}
-
-				out[id][c.UUID] = "未发布"
-				if v, ok := versions[strings.ToLower(l.ID)]; ok {
-					if v == l.Version {
-						out[id][c.UUID] = "已发布"
-					} else {
-						out[id][c.UUID] = "待发布"
-					}
-				}
-			}
-			return nil
-		})
-		if err != nil {
-			return nil, err
-		}
-
-	}
-	return out, nil
-}
+//
+//func (i *imlDynamicModule) PartitionStatuses(ctx context.Context, module string, keyword string, page int, pageSize int) (map[string]map[string]string, error) {
+//	_, has := driver.Get(module)
+//	if !has {
+//		return nil, fmt.Errorf("模块【%s】不存在", module)
+//	}
+//	list, _, err := i.dynamicModuleService.SearchByPage(ctx, keyword, map[string]interface{}{
+//		"module": module,
+//	}, page, pageSize, "update_at desc")
+//	if err != nil {
+//		return nil, err
+//	}
+//	partitions, err := i.partitionService.List(ctx)
+//	if err != nil {
+//		return nil, err
+//	}
+//	out := make(map[string]map[string]string)
+//	for _, c := range partitions {
+//		err := i.dynamicClient(ctx, c.Cluster, module, func(dynamicClient gateway.IDynamicClient) error {
+//			versions, err := dynamicClient.Versions(ctx, map[string]string{
+//				"module": module,
+//			})
+//			if err != nil {
+//				return err
+//			}
+//			for _, l := range list {
+//				id := strings.TrimSuffix(l.ID, fmt.Sprintf("_%s", module))
+//				if _, ok := out[id]; !ok {
+//					out[id] = make(map[string]string)
+//				}
+//
+//				out[id][c.UUID] = "未发布"
+//				if v, ok := versions[strings.ToLower(l.ID)]; ok {
+//					if v == l.Version {
+//						out[id][c.UUID] = "已发布"
+//					} else {
+//						out[id][c.UUID] = "待发布"
+//					}
+//				}
+//			}
+//			return nil
+//		})
+//		if err != nil {
+//			return nil, err
+//		}
+//
+//	}
+//	return out, nil
+//}
 
 func (i *imlDynamicModule) dynamicClient(ctx context.Context, clusterId string, resource string, h func(gateway.IDynamicClient) error) error {
 	client, err := i.clusterService.GatewayClient(ctx, clusterId)
@@ -219,72 +209,73 @@ func (i *imlDynamicModule) dynamicClient(ctx context.Context, clusterId string, 
 	return h(dynamic)
 }
 
-func (i *imlDynamicModule) PartitionStatus(ctx context.Context, module string, id string) (*dynamic_module_dto.OnlineInfo, error) {
-	_, has := driver.Get(module)
-
-	if !has {
-		return nil, fmt.Errorf("模块【%s】不存在", module)
-	}
-	partitions, err := i.partitionService.List(ctx)
-	if err != nil {
-		return nil, err
-	}
-	partitionIds := utils.SliceToSlice(partitions, func(s *partition.Partition) string {
-		return s.UUID
-	})
-	suffix := fmt.Sprintf("_%s", module)
-	id = id + suffix
-	info, err := i.dynamicModuleService.Get(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	publishMap, err := i.dynamicModulePublishService.Latest(ctx, id, partitionIds)
-	if err != nil {
-		return nil, err
-	}
-
-	partitionInfos := make([]*dynamic_module_dto.PartitionInfo, 0, len(partitionIds))
-	for _, c := range partitions {
-		err := i.dynamicClient(ctx, c.Cluster, module, func(dynamicClient gateway.IDynamicClient) error {
-			version, err := dynamicClient.Version(ctx, id)
-			if err != nil {
-				return err
-			}
-			updater := ""
-			updateTime := time.Time{}
-			publishInfo, ok := publishMap[c.UUID]
-			if ok {
-				updater = publishInfo.Creator
-				updateTime = publishInfo.CreateAt
-			}
-			cInfo := &dynamic_module_dto.PartitionInfo{
-				Name:       c.UUID,
-				Title:      c.Name,
-				Status:     "未发布",
-				Updater:    auto.UUID(updater),
-				UpdateTime: auto.TimeLabel(updateTime),
-			}
-			if version == info.Version {
-				cInfo.Status = "已发布"
-			} else if version != "" {
-				cInfo.Status = "待发布"
-			}
-			partitionInfos = append(partitionInfos, cInfo)
-			return nil
-		})
-		if err != nil {
-			return nil, err
-		}
-
-	}
-	return &dynamic_module_dto.OnlineInfo{
-		Id:          strings.TrimSuffix(info.ID, suffix),
-		Name:        strings.TrimSuffix(info.ID, suffix),
-		Title:       info.Name,
-		Description: info.Description,
-		Partitions:  partitionInfos,
-	}, nil
-}
+//
+//func (i *imlDynamicModule) PartitionStatus(ctx context.Context, module string, id string) (*dynamic_module_dto.OnlineInfo, error) {
+//	_, has := driver.Get(module)
+//
+//	if !has {
+//		return nil, fmt.Errorf("模块【%s】不存在", module)
+//	}
+//	partitions, err := i.partitionService.List(ctx)
+//	if err != nil {
+//		return nil, err
+//	}
+//	partitionIds := utils.SliceToSlice(partitions, func(s *partition.Partition) string {
+//		return s.UUID
+//	})
+//	suffix := fmt.Sprintf("_%s", module)
+//	id = id + suffix
+//	info, err := i.dynamicModuleService.Get(ctx, id)
+//	if err != nil {
+//		return nil, err
+//	}
+//	publishMap, err := i.dynamicModulePublishService.Latest(ctx, id, partitionIds)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	partitionInfos := make([]*dynamic_module_dto.PartitionInfo, 0, len(partitionIds))
+//	for _, c := range partitions {
+//		err := i.dynamicClient(ctx, c.Cluster, module, func(dynamicClient gateway.IDynamicClient) error {
+//			version, err := dynamicClient.Version(ctx, id)
+//			if err != nil {
+//				return err
+//			}
+//			updater := ""
+//			updateTime := time.Time{}
+//			publishInfo, ok := publishMap[c.UUID]
+//			if ok {
+//				updater = publishInfo.Creator
+//				updateTime = publishInfo.CreateAt
+//			}
+//			cInfo := &dynamic_module_dto.PartitionInfo{
+//				Name:       c.UUID,
+//				Title:      c.Name,
+//				Status:     "未发布",
+//				Updater:    auto.UUID(updater),
+//				UpdateTime: auto.TimeLabel(updateTime),
+//			}
+//			if version == info.Version {
+//				cInfo.Status = "已发布"
+//			} else if version != "" {
+//				cInfo.Status = "待发布"
+//			}
+//			partitionInfos = append(partitionInfos, cInfo)
+//			return nil
+//		})
+//		if err != nil {
+//			return nil, err
+//		}
+//
+//	}
+//	return &dynamic_module_dto.OnlineInfo{
+//		Id:          strings.TrimSuffix(info.ID, suffix),
+//		Name:        strings.TrimSuffix(info.ID, suffix),
+//		Title:       info.Name,
+//		Description: info.Description,
+//		Clusters:  partitionInfos,
+//	}, nil
+//}
 
 func (i *imlDynamicModule) ModuleDrivers(ctx context.Context, group string) ([]*dynamic_module_dto.ModuleDriver, error) {
 	ds := driver.List(group)
@@ -306,28 +297,24 @@ func (i *imlDynamicModule) Render(ctx context.Context, module string) (map[strin
 	return d.Define().Render(), nil
 }
 
-func (i *imlDynamicModule) PluginInfo(ctx context.Context, module string, partitionIds ...string) (*dynamic_module_dto.PluginInfo, error) {
+func (i *imlDynamicModule) PluginInfo(ctx context.Context, module string, clusterIds ...string) (*dynamic_module_dto.PluginInfo, error) {
 	d, has := driver.Get(module)
 	if !has {
 		return nil, fmt.Errorf("module %s not found", module)
 	}
-	partitions, err := i.partitionService.List(ctx, partitionIds...)
-	if err != nil {
-		return nil, err
-	}
-	fields := make([]*driver.Field, 0, len(partitionIds))
-	for _, c := range partitions {
-		fields = append(fields, &driver.Field{
-			Name:  c.UUID,
-			Title: fmt.Sprintf("状态：%s", c.Name),
-			Attr:  "status",
-			Enum: []string{
-				"已发布",
-				"待发布",
-				"未发布",
-			},
-		})
-	}
+
+	fields := make([]*driver.Field, 0, 1)
+
+	fields = append(fields, &driver.Field{
+		Name:  "status",
+		Title: fmt.Sprintf("状态"),
+		Attr:  "status",
+		Enum: []string{
+			"已发布",
+			"待发布",
+			"未发布",
+		},
+	})
 	return &dynamic_module_dto.PluginInfo{
 		PluginBasic: &dynamic_module_dto.PluginBasic{
 			Id:    d.ID(),
@@ -438,7 +425,7 @@ func (i *imlDynamicModule) Get(ctx context.Context, module string, id string) (*
 	if err != nil {
 		return nil, err
 	}
-	cfg := make(map[string]dynamic_module_dto.PartitionConfig)
+	cfg := make(map[string]interface{})
 	err = json.Unmarshal([]byte(info.Config), &cfg)
 	if err != nil {
 		return nil, err
@@ -479,31 +466,65 @@ func (i *imlDynamicModule) List(ctx context.Context, module string, keyword stri
 	userIDs := utils.SliceToSlice(list, func(s *dynamic_module.DynamicModule) string {
 		return s.Updater
 	})
+	clusters, err := i.clusterService.List(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
 	userMap := i.userService.GetLabels(ctx, userIDs...)
 	items := make([]map[string]interface{}, 0, len(list))
 	suffix := fmt.Sprintf("_%s", module)
-	for _, l := range list {
-		item := map[string]interface{}{
-			"id":          strings.TrimSuffix(l.ID, suffix),
-			"title":       l.Name,
-			"driver":      l.Driver,
-			"description": l.Description,
-			"updater":     userMap[l.Updater],
-			"update_time": l.UpdateAt.Format("2006-01-02 15:04:05"),
-		}
-
-		tmp := make(map[string]interface{})
-		err = json.Unmarshal([]byte(l.Config), &tmp)
-		if err == nil {
-			for _, column := range d.Define().Columns() {
-				if _, ok := item[column]; ok {
-					continue
-				}
-				item[column] = tmp[column]
-
+	for _, c := range clusters {
+		err = i.dynamicClient(ctx, c.Uuid, module, func(dynamicClient gateway.IDynamicClient) error {
+			versions, err := dynamicClient.Versions(ctx, map[string]string{
+				"module": module,
+			})
+			if err != nil {
+				log.Error("get versions error", err)
 			}
+			for _, l := range list {
+				status := "未发布"
+				id := strings.TrimSuffix(l.ID, suffix)
+
+				item := map[string]interface{}{
+					"id":          id,
+					"title":       l.Name,
+					"driver":      l.Driver,
+					"description": l.Description,
+					"updater":     userMap[l.Updater],
+					"update_time": l.UpdateAt.Format("2006-01-02 15:04:05"),
+				}
+
+				tmp := make(map[string]interface{})
+				err = json.Unmarshal([]byte(l.Config), &tmp)
+				if err == nil {
+					for _, column := range d.Define().Columns() {
+						if _, ok := item[column]; ok {
+							continue
+						}
+						item[column] = tmp[column]
+
+					}
+				}
+				if versions != nil {
+					if v, ok := versions[strings.ToLower(l.ID)]; ok {
+						if v == l.Version {
+							status = "已发布"
+						} else {
+							status = "待发布"
+						}
+					}
+				}
+				item["status"] = status
+				items = append(items, item)
+			}
+			return nil
+		})
+		if err != nil {
+			return nil, 0, err
 		}
-		items = append(items, item)
+
 	}
+
 	return items, total, nil
 }

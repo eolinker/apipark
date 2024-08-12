@@ -24,8 +24,7 @@ import {
 } from "@common/components/aoplatform/SubscribeApprovalModalContent.tsx";
 import {useSystemContext} from "../../../contexts/SystemContext.tsx";
 import WithPermission from "@common/components/aoplatform/WithPermission.tsx";
-import { EntityItem } from "@common/const/type.ts";
-import { SimpleMemberItem } from "../../../const/system/type.ts";
+import { EntityItem,SimpleMemberItem } from "@common/const/type.ts";
 import TableBtnWithPermission from "@common/components/aoplatform/TableBtnWithPermission.tsx";
 import { useGlobalContext } from "@common/contexts/GlobalStateContext.tsx";
 import { checkAccess } from "@common/utils/permission.ts";

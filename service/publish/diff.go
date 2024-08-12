@@ -1,7 +1,5 @@
 package publish
 
-import (
-	"github.com/eolinker/apipark/service/project_diff"
-)
+import "github.com/eolinker/apipark/service/service_diff"
 
-type Diff = project_diff.Diff
+type Diff = service_diff.Diff

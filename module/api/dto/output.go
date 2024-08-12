@@ -2,6 +2,7 @@ package api_dto
 
 import (
 	"encoding/json"
+
 	"github.com/eolinker/go-common/utils"
 
 	"github.com/eolinker/apipark/service/api"
@@ -33,7 +34,7 @@ type ApiDetail struct {
 	Doc   map[string]interface{} `json:"doc"`
 }
 
-func GenApiSimpleDetail(api *api.APIInfo) *ApiSimpleDetail {
+func GenApiSimpleDetail(api *api.Info) *ApiSimpleDetail {
 	match := make([]Match, 0)
 	if api.Match == "" {
 		api.Match = "[]"

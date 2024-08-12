@@ -5,11 +5,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/eolinker/go-common/utils"
+	"github.com/eolinker/apipark/service/cluster"
+	"github.com/eolinker/apipark/service/service"
 
 	"gorm.io/gorm"
-
-	"github.com/eolinker/apipark/service/project"
 
 	"github.com/eolinker/apipark/service/upstream"
 
@@ -19,78 +18,58 @@ import (
 )
 
 var (
-	_                     IUpstreamModule = (*imlUpstreamModule)(nil)
-	projectRuleMustServer                 = map[string]bool{
+	_        IUpstreamModule = (*imlUpstreamModule)(nil)
+	asServer                 = map[string]bool{
 		"as_server": true,
 	}
 )
 
 type imlUpstreamModule struct {
-	projectService          project.IProjectService           `autowired:""`
-	projectPartitionService project.IProjectPartitionsService `autowired:""`
-	upstreamService         upstream.IUpstreamService         `autowired:""`
-	transaction             store.ITransaction                `autowired:""`
+	projectService  service.IServiceService   `autowired:""`
+	upstreamService upstream.IUpstreamService `autowired:""`
+	transaction     store.ITransaction        `autowired:""`
 }
 
 func (i *imlUpstreamModule) Get(ctx context.Context, pid string) (upstream_dto.UpstreamConfig, error) {
-	_, err := i.projectService.CheckProject(ctx, pid, projectRuleMustServer)
+	_, err := i.projectService.Check(ctx, pid, asServer)
 	if err != nil {
 		return nil, err
 	}
-	item, err := i.upstreamService.Get(ctx, pid)
+	_, err = i.upstreamService.Get(ctx, pid)
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, err
 		}
 		return nil, nil
 	}
-	result := make(map[string]*upstream_dto.Upstream)
-	for _, partitionId := range item.Partitions {
-		commit, err := i.upstreamService.LatestCommit(ctx, pid, partitionId)
-		if err != nil {
-			if !errors.Is(err, gorm.ErrRecordNotFound) {
-				return nil, err
-			}
-			continue
+	commit, err := i.upstreamService.LatestCommit(ctx, pid, cluster.DefaultClusterID)
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, err
 		}
-		result[partitionId] = upstream_dto.FromClusterConfig(commit.Data)
+		return nil, nil
 	}
 
-	return result, nil
+	return upstream_dto.FromClusterConfig(commit.Data), nil
 }
 
 func (i *imlUpstreamModule) Save(ctx context.Context, pid string, upstreamConfig upstream_dto.UpstreamConfig) (upstream_dto.UpstreamConfig, error) {
-	pInfo, err := i.projectService.CheckProject(ctx, pid, projectRuleMustServer)
-	if err != nil {
-		return nil, err
-	}
-	projectPartitions, err := i.projectPartitionService.ListByProject(ctx, pid)
+	pInfo, err := i.projectService.Check(ctx, pid, asServer)
 	if err != nil {
 		return nil, err
 	}
 
-	projectPartitionMap := utils.SliceToMap(projectPartitions, func(p *project.Partition) string {
-		return p.Partition
-	})
 	err = i.transaction.Transaction(ctx, func(ctx context.Context) error {
-		partitionIds := make([]string, 0, len(upstreamConfig))
-		for id, cfg := range upstreamConfig {
-			if _, ok := projectPartitionMap[id]; !ok {
-				continue
-			}
-			err = i.upstreamService.SaveCommit(ctx, pid, id, upstream_dto.ConvertUpstream(cfg))
-			if err != nil {
-				return err
-			}
-
-			partitionIds = append(partitionIds, id)
+		err = i.upstreamService.SaveCommit(ctx, pid, cluster.DefaultClusterID, upstream_dto.ConvertUpstream(upstreamConfig))
+		if err != nil {
+			return err
 		}
+
 		return i.upstreamService.Save(ctx, &upstream.SaveUpstream{
-			UUID:       pid,
-			Name:       fmt.Sprintf("upstream-%s", pid),
-			Project:    pid,
-			Team:       pInfo.Team,
-			Partitions: partitionIds,
+			UUID:    pid,
+			Name:    fmt.Sprintf("upstream-%s", pid),
+			Project: pid,
+			Team:    pInfo.Team,
 		})
 
 	})

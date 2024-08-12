@@ -19,6 +19,11 @@ export const PERMISSION_DEFINITION = [
           "anyOf": [{ "backend": ["system.user_manager"] }]
         }
       },
+      "system.member.member.remove": {
+        "granted": {
+          "anyOf": [{ "backend": ["system.user_manager"] }]
+        }
+      },
       "system.member.member.delete": {
         "granted": {
           "anyOf": [{ "backend": ["system.user_manager"] }]

@@ -1,6 +1,6 @@
 package upstream_dto
 
-type UpstreamConfig map[string]*Upstream
+type UpstreamConfig *Upstream
 
 type Upstream struct {
 	Type            string          `json:"driver"`

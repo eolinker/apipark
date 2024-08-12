@@ -5,8 +5,8 @@ import "time"
 type Certificate struct {
 	Id         int64     `gorm:"column:id;type:BIGINT(20);AUTO_INCREMENT;NOT NULL;comment:id;primary_key;comment:主键ID;"`
 	UUID       string    `gorm:"type:varchar(36);not null;column:uuid;uniqueIndex:uuid;comment:UUID;"`
-	Partition  string    `gorm:"size:36;not null;column:partition;comment:分区;index:partition"` // 分区id
 	Name       string    `gorm:"type:varchar(100);not null;column:name;comment:name"`
+	Cluster    string    `gorm:"type:varchar(36);not null;column:cluster;comment:集群;index:cluster"`
 	Domains    []string  `gorm:"type:text;not null;column:domains;comment:域名;serializer:json"`
 	NotBefore  time.Time `gorm:"type:timestamp;NOT NULL;DEFAULT:CURRENT_TIMESTAMP;column:not_before;comment:生效时间"`
 	NotAfter   time.Time `gorm:"type:timestamp;NOT NULL;DEFAULT:CURRENT_TIMESTAMP;column:not_after;comment:失效时间"`

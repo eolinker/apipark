@@ -40,85 +40,90 @@ type imlAPIService struct {
 	universally.IServiceDelete
 }
 
-func (i *imlAPIService) ListInfoForProject(ctx context.Context, project string) ([]*APIInfo, error) {
+func (i *imlAPIService) CountMapByService(ctx context.Context, service ...string) (map[string]int64, error) {
+	w := map[string]interface{}{}
+	if len(service) > 0 {
+		w["service"] = service
+	}
+	return i.store.CountByGroup(ctx, "", w, "service")
+}
+
+func (i *imlAPIService) ListInfoForService(ctx context.Context, serviceId string) ([]*Info, error) {
 	apis, err := i.store.List(ctx, map[string]interface{}{
-		"project": project,
+		"service": serviceId,
 	})
 	aids := utils.SliceToSlice(apis, func(a *api.Api) int64 {
 		return a.Id
 	})
 	list, err := i.apiInfoStore.List(ctx, map[string]interface{}{
-		"project": project,
+		"service": serviceId,
 		"id":      aids,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return utils.SliceToSlice(list, func(info *api.Info) *APIInfo {
-		return &APIInfo{
+	return utils.SliceToSlice(list, func(info *api.Info) *Info {
+		return &Info{
 			UUID:        info.UUID,
 			Name:        info.Name,
 			Description: info.Description,
 			CreateAt:    info.CreateAt,
 			UpdateAt:    info.UpdateAt,
-			Project:     info.Project,
+			Service:     info.Service,
 			Team:        info.Team,
 			Creator:     info.Creator,
 			Updater:     info.Updater,
-			//Upstream:    info.Upstream,
-			Method: info.Method,
-			Path:   info.Path,
-			Match:  info.Match,
+			Method:      info.Method,
+			Path:        info.Path,
+			Match:       info.Match,
 		}
 	}), nil
 }
 
-func (i *imlAPIService) ListInfo(ctx context.Context, aids ...string) ([]*APIInfo, error) {
+func (i *imlAPIService) ListInfo(ctx context.Context, aids ...string) ([]*Info, error) {
 	list, err := i.apiInfoStore.List(ctx, map[string]interface{}{
 		"uuid": aids,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return utils.SliceToSlice(list, func(info *api.Info) *APIInfo {
-		return &APIInfo{
+	return utils.SliceToSlice(list, func(info *api.Info) *Info {
+		return &Info{
 			UUID:        info.UUID,
 			Name:        info.Name,
 			Description: info.Description,
 			CreateAt:    info.CreateAt,
 			UpdateAt:    info.UpdateAt,
-			Project:     info.Project,
+			Service:     info.Service,
 			Team:        info.Team,
 			Creator:     info.Creator,
 			Updater:     info.Updater,
-			//Upstream:    info.Upstream,
-			Method: info.Method,
-			Path:   info.Path,
-			Match:  info.Match,
+			Method:      info.Method,
+			Path:        info.Path,
+			Match:       info.Match,
 		}
 	}), nil
 }
 
-func (i *imlAPIService) GetInfo(ctx context.Context, aid string) (*APIInfo, error) {
+func (i *imlAPIService) GetInfo(ctx context.Context, aid string) (*Info, error) {
 
 	info, err := i.apiInfoStore.GetByUUID(ctx, aid)
 	if err != nil {
 		return nil, err
 	}
-	return &APIInfo{
+	return &Info{
 		UUID:        info.UUID,
 		Name:        info.Name,
 		Description: info.Description,
 		CreateAt:    info.CreateAt,
 		UpdateAt:    info.UpdateAt,
-		Project:     info.Project,
+		Service:     info.Service,
 		Team:        info.Team,
 		Creator:     info.Creator,
 		Updater:     info.Updater,
-		//Upstream:    info.Upstream,
-		Method: info.Method,
-		Path:   info.Path,
-		Match:  info.Match,
+		Method:      info.Method,
+		Path:        info.Path,
+		Match:       info.Match,
 	}, nil
 }
 
@@ -150,7 +155,7 @@ func (i *imlAPIService) Save(ctx context.Context, id string, model *EditAPI) err
 }
 func getLabels(input *api.Info, appends ...string) []string {
 	labels := make([]string, 0, len(appends)+9)
-	labels = append(labels, input.UUID, input.Name, input.Description, input.Method, input.Path, input.Project, input.Team, input.Updater)
+	labels = append(labels, input.UUID, input.Name, input.Description, input.Method, input.Path, input.Service, input.Team, input.Updater)
 	labels = append(labels, appends...)
 	return labels
 }
@@ -186,7 +191,7 @@ func (i *imlAPIService) Create(ctx context.Context, input *CreateAPI) (err error
 		ne := api.Api{
 			Id:       0,
 			UUID:     input.UUID,
-			Project:  input.Project,
+			Service:  input.Service,
 			Team:     input.Team,
 			Creator:  operater,
 			CreateAt: time.Now(),
@@ -211,7 +216,7 @@ func (i *imlAPIService) Create(ctx context.Context, input *CreateAPI) (err error
 			Method:  input.Method,
 			Path:    input.Path,
 			Match:   input.Match,
-			Project: input.Project,
+			Service: input.Service,
 			Team:    input.Team,
 		}
 		err = i.apiInfoStore.Save(ctx, ev)
@@ -234,9 +239,9 @@ func (i *imlAPIService) ListDocumentCommit(ctx context.Context, commitId ...stri
 	return i.documentCommitService.List(ctx, commitId...)
 }
 
-func (i *imlAPIService) CountByProject(ctx context.Context, project string) (int64, error) {
+func (i *imlAPIService) CountByService(ctx context.Context, service string) (int64, error) {
 	return i.store.CountWhere(ctx, map[string]interface{}{
-		"project": project,
+		"service": service,
 	})
 }
 
@@ -257,15 +262,15 @@ func (i *imlAPIService) Exist(ctx context.Context, aid string, a *ExistAPI) erro
 	return nil
 }
 
-func (i *imlAPIService) ListForProject(ctx context.Context, project string) ([]*API, error) {
-	list, err := i.listForProject(ctx, project, false)
+func (i *imlAPIService) ListForService(ctx context.Context, serviceId string) ([]*API, error) {
+	list, err := i.listForService(ctx, serviceId, false)
 	if err != nil {
 		return nil, err
 	}
 	return utils.SliceToSlice(list, FromEntity), nil
 }
-func (i *imlAPIService) listForProject(ctx context.Context, project string, isDelete bool) ([]*api.Api, error) {
-	return i.store.ListQuery(ctx, "project=? and is_delete=?", []interface{}{project, isDelete}, "id")
+func (i *imlAPIService) listForService(ctx context.Context, serviceId string, isDelete bool) ([]*api.Api, error) {
+	return i.store.ListQuery(ctx, "service=? and is_delete=?", []interface{}{serviceId, isDelete}, "id")
 }
 func (i *imlAPIService) ListLatestCommitProxy(ctx context.Context, apiUUID ...string) ([]*commit.Commit[Proxy], error) {
 

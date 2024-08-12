@@ -13,7 +13,6 @@ type Item struct {
 	Creator    string
 	Updater    string
 	Remark     string
-	Partitions []string
 	CreateTime time.Time
 	UpdateTime time.Time
 }
@@ -28,8 +27,7 @@ type SaveUpstream struct {
 	Project string
 	Team    string
 	//Type       string
-	Remark     string
-	Partitions []string
+	Remark string
 }
 
 type ProxyHeader struct {

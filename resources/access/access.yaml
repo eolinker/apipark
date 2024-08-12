@@ -1,96 +1,368 @@
 system:
-  - name: user_manager
-    cname: '成员管理'
-    desc: '成员管理'
-  - name: user_group
-    cname: '用户组管理'
-    desc: '用户组管理'
-  - name: team_manager
-    cname: '团队管理'
-    desc: '团队管理'
-  - name: organization_manager
+  - name: organization
     cname: '组织管理'
-    desc: '组织管理'
-  - name: role_manager
-    cname: '角色管理'
-    desc: '角色管理'
-  - name: system_permission_setting
-    cname: '系统权限设置'
-    desc: '系统权限设置'
+    value: 'organization'
+    children:
+      - name: member
+        cname: '成员'
+        value: 'member'
+        children:
+          - name: view
+            cname: '查看'
+            value: 'view'
+            apis:
+              - "GET:/api/v1/user/accounts"
+              - "GET:/api/v1/user/departments"
+          - name: manager
+            cname: '管理'
+            value: 'manager'
+            apis:
+              - "POST:/api/v1/user/account"
+              - "PUT:/api/v1/user/account"
+              - "DELETE:/api/v1/user/account"
+              - "POST:/api/v1/user/account/enable"
+              - "POST:/api/v1/user/account/disable"
+              - "POST:/api/v1/user/department"
+              - "PUT:/api/v1/user/department"
+              - "DELETE:/api/v1/user/department"
+              - "POST:/api/v1/user/department/member"
+              - "DELETE:/api/v1/user/department/member"
+              - "POST:/api/v1/user/department/member/remove"
+              - "POST:/api/v1/account/role"
+            dependents:
+              - system.organization.member.view
+      - name: team
+        cname: '团队'
+        value: 'team'
+        children:
+          - name: view
+            cname: '查看'
+            value: 'view'
+            apis:
+              - "GET:/api/v1/manager/teams"
+              - "GET:/api/v1/manager/team"
+          - name: manager
+            cname: '管理'
+            value: 'manager'
+            apis:
+              - "POST:/api/v1/manager/team"
+              - "PUT:/api/v1/manager/team"
+              - "DELETE:/api/v1/manager/team"
+            dependents:
+              - system.organization.team.view
+      - name: role
+        cname: '角色'
+        value: 'role'
+        children:
+          - name: view system role
+            cname: '查看系统角色'
+            value: 'view_system_role'
+            apis:
+              - "GET:/api/v1/system/roles"
+              - "GET:/api/v1/system/role"
+          - name: view team role
+            cname: '查看团队角色'
+            value: 'view_team_role'
+            apis:
+              - "GET:/api/v1/team/roles"
+              - "GET:/api/v1/team/role"
+  - name: API Market
+    cname: 'API市场'
+    value: 'api_market'
+    children:
+      - name: service classification
+        cname: '服务分类'
+        value: 'service_classification'
+        children:
+          - name: view
+            cname: '查看'
+            value: 'view'
+#            apis:
+#              - "GET:/api/v1/catalogues"
+          - name: manager
+            cname: '管理'
+            value: 'manager'
+            apis:
+              - "POST:/api/v1/catalogue"
+              - "PUT:/api/v1/catalogue"
+              - "DELETE:/api/v1/catalogue"
+              - "PUT:/api/v1/catalogue/sort"
+            dependents:
+              - system.api_market.service_classification.view
   - name: devops
-    cname: '运维管理'
-    desc: '运维管理'
-  - name: environs_setting
-    cname: '环境管理'
-    desc: '环境管理'
-  - name: service_categories_setting
-    cname: '服务类目管理'
-    desc: '管理服务广场内的服务类目'
+    cname: 运维
+    value: 'devops'
+    children:
+      - name: cluster
+        cname: 集群
+        value: 'cluster'
+        children:
+          - name: view
+            cname: 查看
+            value: 'view'
+            apis:
+              - "GET:/api/v1/cluster/nodes"
+          - name: manager
+            cname: 管理
+            value: 'manager'
+            apis:
+              - "PUT:/api/v1/cluster/reset"
+              - "POST:/api/v1/cluster/check"
+      - name: ssl certificate
+        cname: 证书
+        value: 'ssl_certificate'
+        children:
+          - name: view
+            cname: 查看
+            value: 'view'
+            apis:
+              - "GET:/api/v1/certificates"
+              - "GET:/api/v1/certificate"
+          - name: manager
+            cname: 管理
+            value: 'manager'
+            apis:
+              - "POST:/api/v1/certificate"
+              - "PUT:/api/v1/certificate"
+              - "DELETE:/api/v1/certificate"
+
+      - name: log configuration
+        cname: 日志
+        value: 'log_configuration'
+        children:
+          - name: view
+            cname: 查看
+            value: 'view'
+            apis:
+              - "GET:/api/v1/dynamic/{name}/info"
+              - "GET:/api/v1/dynamic/{name}/list"
+              - "GET:/api/v1/dynamic/{name}/render"
+          - name: manager
+            cname: 管理
+            value: 'manager'
+            apis:
+              - "POST:/api/v1/dynamic/{name}"
+              - "PUT:/api/v1/dynamic/{name}/config"
+              - "DELETE:/api/v1/dynamic/{name}/batch"
+              - "PUT:/api/v1/dynamic/{name}/online"
+              - "PUT:/api/v1/dynamic/{name}/offline"
+  - name: workspace
+    cname: 工作空间
+    value: 'workspace'
+    children:
+      - name: application
+        cname: 应用
+        value: 'application'
+        children:
+          - name: view all
+            cname: 查看所有应用
+            value: 'view_all'
+            apis:
+              - "GET:/api/v1/apps"
+      - name: service
+        cname: 服务
+        value: 'service'
+        children:
+          - name: view all
+            cname: 查看所有服务
+            value: 'view_all'
+            apis:
+              - "GET:/api/v1/services"
+      - name: team
+        cname: 团队
+        value: 'team'
+        children:
+          - name: view all
+            cname: 查看所有团队
+            value: 'view_all'
+            apis:
+              - "GET:/api/v1/manager/teams"
+      - name: api market
+        cname: API市场
+        value: 'api_market'
+        children:
+          - name: view
+            cname: 查看
+            value: 'view'
+            apis:
+              - "GET:/api/v1/catalogue/services"
+              - "GET:/api/v1/catalogue/service"
 team:
-  - name: project_manager
-    cname: '项目管理'
-    desc: '项目管理'
-  - name: project_view
-    cname: '项目查看'
-    desc: '项目查看'
-  - name: team_permission_setting
-    cname: '团队权限管理'
-    desc: '团队权限管理'
-  - name: team_setting
-    cname: '团队设置'
-    desc: '团队设置'
-  - name: member_setting
-    cname: '成员管理'
-    desc: '成员管理'
-project:
-  - name: project_setting
-    cname: '系统设置'
-    desc: '管理系统设置'
-  - name: member_setting
-    cname: '成员管理'
-    desc: '成员管理'
-  - name: api_manager
-    cname: 'API管理'
-    desc: 'API管理'
-  - name: api_view
-    cname: 'API查看'
-    desc: 'API查看'
-  - name: upstream_manager
-    cname: '上游管理'
-    desc: '上游管理'
-  - name: upstream_view
-    cname: '上游查看'
-    desc: '上游查看'
-  - name: service_manager
-    cname: '服务管理'
-    desc: '服务管理'
-  - name: service_view
-    cname: '服务查看'
-    desc: '服务查看'
-  - name: subscribe_view
-    cname: '订阅查看'
-    desc: '查看订阅的第三方服务'
-  - name: subscribe_apply
-    cname: '申请订阅'
-    desc: '申请订阅第三方服务'
-  - name: subscribers_manager
-    cname: '订阅方管理'
-    desc: '管理订阅的第三方服务, 新增，删除订阅方'
-  - name: subscribe_approval
-    cname: '订阅审批'
-    desc: '审批订阅申请'
-  - name: authentication_view
-    cname: '查看鉴权'
-    desc: '查看鉴权配置'
-  - name: authentication_manager
-    cname: '鉴权管理'
-    desc: '新增/编辑/删除鉴权信息'
-  - name: publish_manager
-    cname: '发布管理'
-    desc: '申请\执行发布, 删除版本'
-  - name: publish_approve
-    cname: '发布审批'
-    desc: '审批发布申请'
-  - name: permission_manager
-    cname: '权限管理'
-    desc: '权限管理'
+  - name: service
+    cname: 服务
+    value: 'service'
+    children:
+      - name: api
+        cname: API
+        value: 'api'
+        children:
+          - name: view
+            cname: 查看
+            value: 'view'
+            apis:
+              - "GET:/api/v1/service/apis"
+              - "GET:/api/v1/service/api/detail"
+              - "GET:/api/v1/service/api/detail/simple"
+              - "GET:/api/v1/service/api/define"
+              - "GET:/api/v1/service/apis/simple"
+          - name: manager
+            cname: 管理
+            value: 'manager'
+            apis:
+              - "POST:/api/v1/service/api"
+              - "PUT:/api/v1/service/api"
+              - "DELETE:/api/v1/service/api"
+              - "POST:/api/v1/service/api/copy"
+      - name: upstream
+        cname: 上游
+        value: 'upstream'
+        children:
+          - name: view
+            cname: 查看
+            value: 'view'
+            apis:
+              - "GET:/api/v1/service/upstream"
+          - name: manager
+            cname: 管理
+            value: 'manager'
+            apis:
+              - "PUT:/api/v1/service/upstream"
+      - name: release
+        cname: 发布
+        value: 'release'
+        children:
+          - name: view
+            cname: 查看
+            value: 'view'
+            apis:
+              - "GET:/api/v1/service/releases"
+              - "GET:/api/v1/service/release"
+              - "GET:/api/v1/service/publishs"
+              - "GET:/api/v1/service/publish/check"
+              - "GET:/api/v1/service/release/preview"
+              - "GET:/api/v1/service/publish/status"
+          - name: manager
+            cname: 管理
+            value: 'manager'
+            apis:
+              - "POST:/api/v1/service/publish/release/do"
+              - "PUT:/api/v1/service/publish/execute"
+              - "DELETE:/api/v1/service/release"
+      - name: subscription management
+        cname: 订阅方管理
+        value: 'subscription'
+        children:
+          - name: view
+            cname: 查看
+            value: 'view'
+            apis:
+              - "GET:/api/v1/service/approval/subscribes"
+              - "GET:/api/v1/service/approval/subscribe"
+              - "GET:/api/v1/service/subscribers"
+          - name: manager
+            cname: 管理
+            value: 'manager'
+            apis:
+              - "POST:/api/v1/service/approval/subscribe"
+              - "POST:/api/v1/service/subscriber"
+              - "DELETE:/api/v1/service/subscriber"
+      - name: service
+        cname: 服务管理
+        value: 'service'
+        children:
+          - name: manager
+            cname: 管理
+            value: 'manager'
+            apis:
+              - "GET:/api/v1/service/info"
+              - "PUT:/api/v1/service/info"
+              - "POST:/api/v1/team/service"
+              - "DELETE:/api/v1/team/service"
+  - name: application
+    cname: 应用
+    value: 'application'
+    children:
+      - name: subscription Service
+        cname: 订阅服务
+        value: 'subscription'
+        children:
+          - name: view
+            cname: 查看
+            value: 'view'
+            apis:
+              - "GET:/api/v1/application/subscriptions"
+          - name: manager
+            cname: 管理
+            value: 'manager'
+            apis:
+              - "POST:/api/v1/catalogue/service/subscribe"
+              - "POST:/api/v1/application/subscription/cancel"
+              - "POST:/api/v1/application/subscription/cancel_apply"
+      - name: authorization
+        cname: 访问授权
+        value: 'authorization'
+        children:
+          - name: view
+            cname: 查看
+            value: 'view'
+            apis:
+              - "GET:/api/v1/app/authorization"
+              - "GET:/api/v1/app/authorizations"
+              - "GET:/api/v1/app/authorization/details"
+          - name: manager
+            cname: 管理
+            value: 'manager'
+            apis:
+              - "POST:/api/v1/app/authorization"
+              - "PUT:/api/v1/app/authorization"
+              - "DELETE:/api/v1/app/authorization"
+      - name: application
+        cname: 应用
+        value: 'application'
+        children:
+          - name: manager
+            cname: 管理
+            value: 'manager'
+            apis:
+              - "GET:/api/v1/app/info"
+              - "PUT:/api/v1/app/info"
+              - "POST:/api/v1/team/app"
+              - "DELETE:/api/v1/app"
+  - name: team
+    cname: 团队
+    value: 'team'
+    children:
+      - name: member
+        cname: 成员
+        value: 'member'
+        children:
+          - name: view
+            cname: 查看
+            value: 'view'
+            apis:
+              - "GET:/api/v1/team/members"
+              - "GET:/api/v1/team/members/toadd"
+          - name: manager
+            cname: 管理
+            value: 'manager'
+            apis:
+              - "POST:/api/v1/team/member"
+              - "DELETE:/api/v1/team/member"
+              - "PUT:/api/v1/team/member/role"
+      - name: team
+        cname: 团队管理
+        value: 'team'
+        children:
+          - name: view
+            cname: '查看'
+            value: 'view'
+            apis:
+              - "GET:/api/v1/manager/teams"
+              - "GET:/api/v1/manager/team"
+          - name: manager
+            cname: '管理'
+            value: 'manager'
+            apis:
+              - "POST:/api/v1/manager/team"
+              - "PUT:/api/v1/manager/team"
+              - "DELETE:/api/v1/manager/team"

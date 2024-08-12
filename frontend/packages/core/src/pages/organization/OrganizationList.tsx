@@ -7,7 +7,7 @@ import {BasicResponse, STATUS_CODE} from "@common/const/const.ts";
 import {useFetch} from "@common/hooks/http.ts";
 import { OrganizationFieldType, OrganizationTableListItem } from "../../const/organization/type.ts";
 import { ORGANIZATION_TABLE_COLUMNS } from "../../const/organization/const.tsx";
-import { SimpleMemberItem } from "../../const/system/type.ts";
+import { SimpleMemberItem } from "@common/const/type.ts";
 import TableBtnWithPermission from "@common/components/aoplatform/TableBtnWithPermission.tsx";
 import { useGlobalContext } from "@common/contexts/GlobalStateContext.tsx";
 import { checkAccess } from "@common/utils/permission.ts";

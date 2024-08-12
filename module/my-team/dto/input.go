@@ -9,3 +9,8 @@ type EditTeam struct {
 type UserIDs struct {
 	Users []string `json:"users"`
 }
+
+type UpdateMemberRole struct {
+	Roles []string `json:"roles" aocheck:"role"`
+	Users []string `json:"users" aocheck:"user"`
+}

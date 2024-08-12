@@ -77,7 +77,6 @@ const SystemInsideMyService:FC = ()=>{
                 setOriginTableListDataSource(data.services)
                 setTableListDataSource(selectedPartition.length > 0 ? data.services.filter((x:MyServiceTableListItem)=>x.partition.filter((x:EntityItem)=>selectedPartition.includes(x.id)).length > 0):data.services)
                 setInit((prev)=>prev ? false : prev)
-                // tableHttpReload && data.apps.sort((a:MyServiceTableListItem,b:MyServiceTableListItem)=>frontendTimeSorter(a,b,'updateTime'))
                 setTableHttpReload(false)
                 return  {data:data.services, success: true}
             }else{

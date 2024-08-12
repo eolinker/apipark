@@ -1,6 +1,7 @@
 import { cloneDeep } from 'lodash-es'
 import { parseFormData, parseFileValue, parseFileType, parseHeaders, parseRequestBodyToString, parseUri, payloadStr, goCodeParseFormData } from './transform'
 // import { getJson } from '../.@common/utils/';
+import { ApiBodyType } from '@common/const/api-detail';
 
 function sameNameToParams(params: unknown) {
   params = cloneDeep(params)
@@ -54,6 +55,9 @@ export function generateCode(
   multipart: boolean,
   { protocol, URL, headers, params, method, requestType, apiRequestParamJsonType, raw }: unknown,
 ) {
+  console.log(type, multipart,protocol, URL, headers, params, method, requestType, apiRequestParamJsonType, raw)
+  requestType=ApiBodyType[requestType]
+  console.log(requestType)
   let code: string = ''
   const indent = '    '
   let urlObj: unknown = {}
@@ -77,6 +81,8 @@ export function generateCode(
     apiRequestParamJsonType,
     raw
   })
+
+  console.log('requestParam', requestParam)
   const langTmp: unknown = {
     headerStr: '',
     paramsStr: ''
@@ -130,7 +136,7 @@ export function generateCode(
             urlObj.search || ''
           } HTTP/1.1\r\n` +
           `Host: ${nullHost ? '' : urlObj.host || ''}\r\n` +
-          `${langTmp.headerStr}\r\n` +
+          `${langTmp.headerStr ? langTmp.headerStr + '\r\n' : ''}` +
           `${langTmp.paramsStr}\r\n`
       }
       break
@@ -237,7 +243,7 @@ export function generateCode(
         `${indent}"url":"${urlObj.href || ''}",\r\n` +
         `${indent}"method": "${method}",\r\n` +
         `${indent}"headers": {\r\n` +
-        `${langTmp.headerStr}\r\n` +
+        `${langTmp.headerStr ? `${langTmp.headerStr}\r\n` : ''}` +
         `${indent}},\r\n` +
         `${
           multipart ? `${indent}"processData": false,\r\n${indent}"contentType": false,\r\n` : ''
@@ -341,7 +347,7 @@ export function generateCode(
               : ''
           }` +
           `${indent}"headers": {\r\n` +
-          `${langTmp.headerStr},\r\n` +
+          `${langTmp.headerStr ? `${langTmp.headerStr},\r\n` : ''}` +
           '        ...form.getHeaders()\r\n' +
           '   }\r\n' +
           '};\r\n\r\n' +
@@ -378,7 +384,7 @@ export function generateCode(
               : ''
           }` +
           `${indent}"headers": {\r\n` +
-          `${langTmp.headerStr}\r\n` +
+          `${langTmp.headerStr ? `${langTmp.headerStr}\r\n` : ''}` +
           '   }\r\n' +
           '};\r\n\r\n' +
           'var req = http.request(requestInfo, function (res) {\r\n' +
@@ -445,7 +451,7 @@ export function generateCode(
         `   method: "${method}",\r\n` +
         `   url: "${urlObj.href}",\r\n` +
         '   headers: {\r\n' +
-        `${langTmp.headerStr}\r\n` +
+        `${langTmp.headerStr ? `${langTmp.headerStr}\r\n` : ''}` +
         '   },\r\n' +
         `${langTmp.paramsStr}` +
         '\r\n};\r\n\r\n' +
@@ -530,7 +536,7 @@ export function generateCode(
           '$request->setBody($body);\r\n\r\n' +
           `$request->getBody()->${langTmp.paramsStr}\r\n\r\n` +
           '$request->setHeaders(array(\r\n' +
-          `${langTmp.headerStr}\r\n` +
+        `${langTmp.headerStr ?  `${langTmp.headerStr}\r\n` : ''}` +
           '  "Content-Type":"multipart/form-data"\r\n' +
           '));\r\n\r\n' +
           '$client->enqueue($request)->send();\r\n' +
@@ -548,7 +554,7 @@ export function generateCode(
           '$request->setBody($body);\r\n\r\n' +
           `${langTmp.queryStr ? `${langTmp.queryStr}\r\n\r\n` : ''}` +
           '$request->setHeaders(array(\r\n' +
-          `${langTmp.headerStr}\r\n` +
+          `${langTmp.headerStr ?  `${langTmp.headerStr}\r\n` : ''}` +
           '));\r\n\r\n' +
           '$client->enqueue($request)->send();\r\n' +
           '$response = $client->getResponse();\r\n\r\n' +
@@ -610,7 +616,7 @@ export function generateCode(
           `  CURLOPT_CUSTOMREQUEST => "${method}",\r\n` +
           `  CURLOPT_POSTFIELDS => ${langTmp.paramsStr},\r\n` +
           '  CURLOPT_HTTPHEADER => array(\r\n' +
-          `${langTmp.headerStr},\r\n` +
+          `${langTmp.headerStr ?  `${langTmp.headerStr},\r\n` : ''}` +
           '    "Content-Type:multipart/form-data"' +
           '\r\n  ),\r\n' +
           '));\r\n\r\n' +
@@ -843,7 +849,7 @@ export function generateCode(
         `request = Net::HTTP::${method.toLowerCase().replace(/^\S/, (s: string) => {
           return s?.toUpperCase()
         })}.new(url)\r\n` +
-        `${langTmp.headerStr}\r\n` +
+        `${langTmp.headerStr ?  `${langTmp.headerStr}\r\n` : ''}` +
         `request.body = ${langTmp.paramsStr}\r\n\r\n` +
         'response = http.request(request)\r\n' +
         'puts response.read_body'
@@ -1020,7 +1026,7 @@ export function generateCode(
               '    if err != nil {\r\n' +
               '      return nil, err\r\n' +
               '    }\r\n' +
-              `${langTmp.headerStr}\r\n` +
+              `${langTmp.headerStr ?  `${langTmp.headerStr}\r\n` : ''}` +
               '    req.Header.Add("Content-Type", writer.FormDataContentType())\r\n\r\n' +
               '    client := &http.Client{}\r\n' +
               '    resp, err := client.Do(req)\r\n' +
@@ -1112,7 +1118,7 @@ export function generateCode(
         map: stringifyHeaders
       })
       let mediaType = 'application/octet-stream'
-      switch (requestType || 'FORMDATA') {
+      switch ( (requestType || 'FORMDATA').toUpperCase()) {
         case 'FORMDATA': {
           if (multipart) {
             mediaType = 'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW'
@@ -1158,10 +1164,10 @@ export function generateCode(
           `RequestBody fileBody = RequestBody.create(MediaType.parse("${langTmp.fileType}"), file); \r\n\r\n` +
           'MultipartBody.Builder builder = new MultipartBody.Builder()\r\n' +
           '  .setType(MultipartBody.FORM)\r\n' +
-          `${langTmp.paramsStr} \r\n` +
+          `${langTmp.paramsStr ? `${langTmp.paramsStr}\r\n` : ''}` +
           'Request request = new Request.Builder()\r\n' +
           `  .url("${urlObj.href}")\r\n` +
-          `${langTmp.headerStr}\r\n` +
+          `${langTmp.headerStr ? `${langTmp.headerStr}\r\n` : ''}` +
           '  .post(builder.build())\r\n' +
           '  .build();\r\n\r\n' +
           'Response response = client.newCall(request).execute();\r\n' +
@@ -1179,7 +1185,7 @@ export function generateCode(
           'Request request = new Request.Builder()\r\n' +
           `  .url("${urlObj.href}")\r\n` +
           `  .method("${method}",${method === 'GET' ? 'null' : 'body'})\r\n` +
-          `${langTmp.headerStr}\r\n` +
+          `${langTmp.headerStr ? `${langTmp.headerStr}\r\n` : ''}` +
           '  .build();\r\n\r\n' +
           'Response response = client.newCall(request).execute();\r\n' +
           'System.out.println(response.body().string());\r\n'

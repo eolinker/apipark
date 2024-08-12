@@ -19,19 +19,52 @@ type imlPublishController struct {
 	releaseModule release.IReleaseModule `autowired:""`
 }
 
-func (c *imlPublishController) PublishStatuses(ctx *gin.Context, project string, id string) ([]*dto.PublishStatus, error) {
-	return c.publishModule.PublishStatuses(ctx, project, id)
-}
-
-func (c *imlPublishController) ApplyOnRelease(ctx *gin.Context, project string, input *dto.ApplyOnReleaseInput) (*dto.Publish, error) {
-	newReleaseId, err := c.releaseModule.Create(ctx, project, &dto2.CreateInput{
+func (c *imlPublishController) ReleaseDo(ctx *gin.Context, serviceId string, input *dto.ApplyOnReleaseInput) (*dto.Publish, error) {
+	newReleaseId, err := c.releaseModule.Create(ctx, serviceId, &dto2.CreateInput{
 		Version: input.Version,
 		Remark:  input.VersionRemark,
 	})
 	if err != nil {
 		return nil, err
 	}
-	apply, err := c.publishModule.Apply(ctx, project, &dto.ApplyInput{
+	apply, err := c.publishModule.Apply(ctx, serviceId, &dto.ApplyInput{
+		Release: newReleaseId,
+		Remark:  input.PublishRemark,
+	})
+	if err != nil {
+		return nil, err
+	}
+	err = c.publishModule.Accept(ctx, serviceId, apply.Id, "")
+	if err != nil {
+		c.releaseModule.Delete(ctx, serviceId, newReleaseId)
+		return nil, err
+	}
+	err = c.publishModule.Publish(ctx, serviceId, apply.Id)
+	if err != nil {
+		c.releaseModule.Delete(ctx, serviceId, newReleaseId)
+		return nil, err
+	}
+	err = c.publishModule.Publish(ctx, serviceId, apply.Id)
+	if err != nil {
+		c.releaseModule.Delete(ctx, serviceId, newReleaseId)
+		return nil, err
+	}
+	return apply, err
+}
+
+func (c *imlPublishController) PublishStatuses(ctx *gin.Context, serviceId string, id string) ([]*dto.PublishStatus, error) {
+	return c.publishModule.PublishStatuses(ctx, serviceId, id)
+}
+
+func (c *imlPublishController) ApplyOnRelease(ctx *gin.Context, serviceId string, input *dto.ApplyOnReleaseInput) (*dto.Publish, error) {
+	newReleaseId, err := c.releaseModule.Create(ctx, serviceId, &dto2.CreateInput{
+		Version: input.Version,
+		Remark:  input.VersionRemark,
+	})
+	if err != nil {
+		return nil, err
+	}
+	apply, err := c.publishModule.Apply(ctx, serviceId, &dto.ApplyInput{
 		Release: newReleaseId,
 		Remark:  input.PublishRemark,
 	})
@@ -41,43 +74,43 @@ func (c *imlPublishController) ApplyOnRelease(ctx *gin.Context, project string, 
 	return apply, nil
 }
 
-func (c *imlPublishController) Apply(ctx *gin.Context, project string, input *dto.ApplyInput) (*dto.Publish, error) {
-	apply, err := c.publishModule.Apply(ctx, project, input)
+func (c *imlPublishController) Apply(ctx *gin.Context, serviceId string, input *dto.ApplyInput) (*dto.Publish, error) {
+	apply, err := c.publishModule.Apply(ctx, serviceId, input)
 	if err != nil {
 		return nil, err
 	}
 	return apply, nil
 }
 
-func (c *imlPublishController) CheckPublish(ctx *gin.Context, project string, releaseId string) (*dto.DiffOut, error) {
-	return c.publishModule.CheckPublish(ctx, project, releaseId)
+func (c *imlPublishController) CheckPublish(ctx *gin.Context, serviceId string, releaseId string) (*dto.DiffOut, error) {
+	return c.publishModule.CheckPublish(ctx, serviceId, releaseId)
 }
 
-func (c *imlPublishController) Close(ctx *gin.Context, project string, id string) error {
-	err := c.publishModule.Stop(ctx, project, id)
+func (c *imlPublishController) Close(ctx *gin.Context, serviceId string, id string) error {
+	err := c.publishModule.Stop(ctx, serviceId, id)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (c *imlPublishController) Stop(ctx *gin.Context, project string, id string) error {
-	return c.publishModule.Stop(ctx, project, id)
+func (c *imlPublishController) Stop(ctx *gin.Context, serviceId string, id string) error {
+	return c.publishModule.Stop(ctx, serviceId, id)
 }
 
-func (c *imlPublishController) Refuse(ctx *gin.Context, project string, id string, input *dto.Comments) error {
-	return c.publishModule.Refuse(ctx, project, id, input.Comments)
+func (c *imlPublishController) Refuse(ctx *gin.Context, serviceId string, id string, input *dto.Comments) error {
+	return c.publishModule.Refuse(ctx, serviceId, id, input.Comments)
 }
 
-func (c *imlPublishController) Accept(ctx *gin.Context, project string, id string, input *dto.Comments) error {
-	return c.publishModule.Accept(ctx, project, id, input.Comments)
+func (c *imlPublishController) Accept(ctx *gin.Context, serviceId string, id string, input *dto.Comments) error {
+	return c.publishModule.Accept(ctx, serviceId, id, input.Comments)
 }
 
-func (c *imlPublishController) Publish(ctx *gin.Context, project string, id string) error {
-	return c.publishModule.Publish(ctx, project, id)
+func (c *imlPublishController) Publish(ctx *gin.Context, serviceId string, id string) error {
+	return c.publishModule.Publish(ctx, serviceId, id)
 }
 
-func (c *imlPublishController) ListPage(ctx *gin.Context, project string, page, pageSize string) ([]*dto.Publish, int, int, int64, error) {
+func (c *imlPublishController) ListPage(ctx *gin.Context, serviceId string, page, pageSize string) ([]*dto.Publish, int, int, int64, error) {
 	pageNum, _ := strconv.Atoi(page)
 	pageSizeNum, _ := strconv.Atoi(pageSize)
 	if pageNum < 1 {
@@ -86,7 +119,7 @@ func (c *imlPublishController) ListPage(ctx *gin.Context, project string, page, 
 	if pageSizeNum <= 0 {
 		pageSizeNum = 50
 	}
-	list, total, err := c.publishModule.List(ctx, project, pageNum, pageSizeNum)
+	list, total, err := c.publishModule.List(ctx, serviceId, pageNum, pageSizeNum)
 	if err != nil {
 		return nil, 0, 0, 0, err
 	}
@@ -94,6 +127,6 @@ func (c *imlPublishController) ListPage(ctx *gin.Context, project string, page, 
 	return list, pageNum, pageSizeNum, total, nil
 }
 
-func (c *imlPublishController) Detail(ctx *gin.Context, project string, id string) (*dto.PublishDetail, error) {
-	return c.publishModule.Detail(ctx, project, id)
+func (c *imlPublishController) Detail(ctx *gin.Context, serviceId string, id string) (*dto.PublishDetail, error) {
+	return c.publishModule.Detail(ctx, serviceId, id)
 }

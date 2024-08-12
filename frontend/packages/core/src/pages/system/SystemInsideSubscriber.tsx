@@ -10,8 +10,8 @@ import PageList from "@common/components/aoplatform/PageList.tsx";
 import {useSystemContext} from "../../contexts/SystemContext.tsx";
 import {DefaultOptionType} from "antd/es/cascader";
 import { SYSTEM_SUBSCRIBER_TABLE_COLUMNS } from "../../const/system/const.tsx";
-import { SystemSubscriberTableListItem, SimpleMemberItem, SystemSubscriberConfigFieldType, SystemSubscriberConfigHandle, SystemSubscriberConfigProps, SimpleSystemItem } from "../../const/system/type.ts";
-import { EntityItem, SimpleTeamItem } from "@common/const/type.ts";
+import { SystemSubscriberTableListItem, SystemSubscriberConfigFieldType, SystemSubscriberConfigHandle, SystemSubscriberConfigProps, SimpleSystemItem } from "../../const/system/type.ts";
+import { EntityItem, SimpleMemberItem } from "@common/const/type.ts";
 import WithPermission from "@common/components/aoplatform/WithPermission.tsx";
 import TableBtnWithPermission from "@common/components/aoplatform/TableBtnWithPermission.tsx";
 import { useGlobalContext } from "@common/contexts/GlobalStateContext.tsx";
@@ -337,7 +337,7 @@ export const SystemSubscriberConfig = forwardRef<SystemSubscriberConfigHandle,Sy
             </Form.Item>
 
             <Form.Item
-                label="可用分区"
+                label="可用环境"
                 name="partition"
                 rules={[{ required: true, message: '必填项' }]}
             >

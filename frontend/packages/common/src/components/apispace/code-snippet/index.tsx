@@ -88,10 +88,10 @@ type CodeSnippetCompoType = {
       })
 
       result.params = []
-
+      console.log('检查请求参数类型',result.requestParams?.bodyParams?.[0]?.contentType)
       //为请求参数 中的header、reset、body、query 添加 value 和 valueQuery  的值
       switch (result.requestParams?.bodyParams?.[0]?.contentType) {
-        case 'FORMDATA': {
+        case 0: {
           result.requestParams?.bodyParams?.forEach((body: unknown, key: unknown) => {
             if ((body.checkbox || !body.hasOwnProperty('checkbox')) && body.name) {
               if (paramsJsonType[body.dataType] == 'string' && body.paramAttr.example) {
@@ -119,11 +119,11 @@ type CodeSnippetCompoType = {
           }
           break
         }
-        case 'RAW': {
+        case 1: {
           result.params = apiDoc.requestParams?.bodyParams
           break
         }
-        case 'JSON': {
+        case 2: {
           result.params = apiDoc.requestParams?.bodyParams
           if (!alreadyHadContentType) {
             result.headers.push({
@@ -134,7 +134,7 @@ type CodeSnippetCompoType = {
           }
           break
         }
-        case 'XML': {
+        case 3: {
           result.params = apiDoc.requestParams?.bodyParams
           if (!alreadyHadContentType) {
             result.headers.push({
@@ -146,7 +146,8 @@ type CodeSnippetCompoType = {
           break
         }
       }
-
+      
+      result.requestType = result.requestParams?.bodyParams?.[0]?.contentType || 0
       return result
     }
 
@@ -160,6 +161,7 @@ type CodeSnippetCompoType = {
         setCode(tempCode)
         return
       }
+      console.log(cloneDeep(api))
       tempCode = generateCode(
           language.toString(),
           isMultipart,

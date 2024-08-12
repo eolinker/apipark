@@ -1,31 +1,107 @@
 package service_dto
 
-import "github.com/eolinker/go-common/auto"
+import (
+	"github.com/eolinker/apipark/service/service"
+	"github.com/eolinker/go-common/auto"
+)
 
 type ServiceItem struct {
 	Id          string         `json:"id"`
 	Name        string         `json:"name"`
-	Partition   []auto.Label   `json:"partition" aolabel:"partition"`
-	ServiceType string         `json:"service_type"`
+	Team        auto.Label     `json:"team" aolabel:"team"`
 	ApiNum      int64          `json:"api_num"`
-	Status      string         `json:"status"`
+	Description string         `json:"description"`
 	CreateTime  auto.TimeLabel `json:"create_time"`
 	UpdateTime  auto.TimeLabel `json:"update_time"`
 	CanDelete   bool           `json:"can_delete"`
 }
 
+type AppItem struct {
+	Id                 string         `json:"id"`
+	Name               string         `json:"name"`
+	Team               auto.Label     `json:"team" aolabel:"team"`
+	SubscribeNum       int64          `json:"subscribe_num"`
+	SubscribeVerifyNum int64          `json:"subscribe_verify_num"`
+	Description        string         `json:"description"`
+	CreateTime         auto.TimeLabel `json:"create_time"`
+	UpdateTime         auto.TimeLabel `json:"update_time"`
+	CanDelete          bool           `json:"can_delete"`
+}
+
+type SimpleServiceItem struct {
+	Id          string     `json:"id"`
+	Name        string     `json:"name"`
+	Team        auto.Label `json:"team" aolabel:"team"`
+	Description string     `json:"description"`
+}
+
+type SimpleAppItem struct {
+	Id          string     `json:"id"`
+	Name        string     `json:"name"`
+	Team        auto.Label `json:"team" aolabel:"team"`
+	Description string     `json:"description"`
+}
+
 type Service struct {
-	Id          string       `json:"id"`
-	Name        string       `json:"name"`
-	Description string       `json:"description"`
-	Logo        string       `json:"logo"`
-	ServiceType string       `json:"service_type"`
-	Team        auto.Label   `json:"team" aolabel:"team"`
-	Project     auto.Label   `json:"project" aolabel:"project"`
-	Catalogue   auto.Label   `json:"group" aolabel:"catalogue"`
-	Partition   []auto.Label `json:"partition" aolabel:"partition"`
-	Tags        []auto.Label `json:"tags" aolabel:"tag"`
-	Status      string       `json:"status"`
+	Id          string         `json:"id"`
+	Name        string         `json:"name"`
+	Prefix      string         `json:"prefix,omitempty"`
+	Description string         `json:"description"`
+	Team        auto.Label     `json:"team" aolabel:"team"`
+	CreateTime  auto.TimeLabel `json:"create_time"`
+	UpdateTime  auto.TimeLabel `json:"update_time"`
+	ServiceType string         `json:"service_type"`
+	Catalogue   auto.Label     `json:"catalogue" aolabel:"catalogue"`
+	Tags        []auto.Label   `json:"tags" aolabel:"tag"`
+	Logo        string         `json:"logo"`
+	AsServer    bool           `json:"as_server"`
+	AsApp       bool           `json:"as_app"`
+}
+
+type App struct {
+	Id          string         `json:"id"`
+	Name        string         `json:"name"`
+	Description string         `json:"description"`
+	Team        auto.Label     `json:"team" aolabel:"team"`
+	CreateTime  auto.TimeLabel `json:"create_time"`
+	UpdateTime  auto.TimeLabel `json:"update_time"`
+	AsApp       bool           `json:"as_app"`
+}
+
+func ToService(model *service.Service) *Service {
+	return &Service{
+		Id:          model.Id,
+		Name:        model.Name,
+		Prefix:      model.Prefix,
+		Description: model.Description,
+		Team:        auto.UUID(model.Team),
+		ServiceType: model.ServiceType.String(),
+		Logo:        model.Logo,
+		Catalogue:   auto.UUID(model.Catalogue),
+		CreateTime:  auto.TimeLabel(model.CreateTime),
+		UpdateTime:  auto.TimeLabel(model.UpdateTime),
+		AsServer:    model.AsServer,
+		AsApp:       model.AsApp,
+	}
+}
+
+type MemberItem struct {
+	User      auto.Label   `json:"user" aolabel:"user"`
+	Email     string       `json:"email"`
+	Roles     []auto.Label `json:"roles" aolabel:"role"`
+	CanDelete bool         `json:"can_delete"`
+}
+
+type SimpleMemberItem struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type TeamMemberToAdd struct {
+	Id         string     `json:"id,omitempty"`
+	Name       string     `json:"name,omitempty"`
+	Email      string     `json:"email,omitempty"`
+	Department auto.Label `json:"department" aolabel:"department"`
 }
 
 type ServiceDoc struct {
@@ -36,21 +112,4 @@ type ServiceDoc struct {
 	CreateTime auto.TimeLabel `json:"create_time"`
 	Updater    auto.Label     `json:"updater" aolabel:"user"`
 	UpdateTime auto.TimeLabel `json:"update_time"`
-}
-
-type SaveServiceDoc struct {
-	Doc string `json:"doc"`
-}
-
-type ServiceApi struct {
-	Id          string `json:"id"`
-	Name        string `json:"name"`
-	Method      string `json:"method"`
-	Path        string `json:"path"`
-	Description string `json:"description"`
-}
-
-type SimpleItem struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
 }

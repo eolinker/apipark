@@ -17,6 +17,7 @@ export type MenuItem = Required<MenuProps>['items'][number];
 //   access:string [],
 //   children: NavigationItemType[]
 // }
+const APP_MODE = import.meta.env.VITE_APP_MODE;
 
 const routerKeyMap = new Map([
   ['assets','/assets'],
@@ -35,13 +36,14 @@ const routerKeyMap = new Map([
   ['logsettings','/logsettings'],
   ['resourcesettings','/resourcesettings']])
 
+  
 const TOTAL_MENU_ITEMS: MenuProps['items'] = [
-  getItem('仪表盘', 'mainPage', <DashboardOutlined />,[
+  APP_MODE === 'pro' ? getItem('仪表盘', 'mainPage', <DashboardOutlined />,[
     // getItem(<a >资产视图</a>, 'assets',null,undefined,undefined,''),
     getItem(<a >运行视图</a>, 'dashboard',null,undefined,undefined,''),
     getItem(<a >系统拓扑图</a>, 'systemrunning',null,undefined,undefined,''),
     // getItem((<Link to="/approval"  className="flex items-center"><span className='mr-[4px]'>审批</span><Badge size="small" count={2} /></Link>), 'approval', null),
-  ]),
+  ]):null,
 
   getItem('数据服务资产', 'dataAssets',<DeploymentUnitOutlined />, [
     getItem(<a>内部数据服务</a>, 'system',null,undefined,undefined,''),
@@ -60,9 +62,9 @@ const TOTAL_MENU_ITEMS: MenuProps['items'] = [
   getItem('运维与集成', 'maintenanceCenter', <HddOutlined />, [
     getItem(<a>部署管理</a>, 'partition',null,undefined,undefined,'system.partition.self.view'),
     getItem(<a>日志配置</a>, 'logsettings',null,undefined,undefined,'system.partition.self.view'),
-    getItem(<a>资源配置</a>, 'resourcesettings',null,undefined,undefined,'system.partition.self.view'),
+    APP_MODE === 'pro' ? getItem(<a>资源配置</a>, 'resourcesettings',null,undefined,undefined,'system.partition.self.view'):null,
     // getItem(<Link to="/email">邮箱设置</Link>, 'email'),
-    getItem(<a>Open API</a>, 'openapi',null,undefined,undefined,'system.openapi.self.view'),
+    APP_MODE === 'pro' ? getItem(<a>Open API</a>, 'openapi',null,undefined,undefined,'system.openapi.self.view'):null,
     // getItem(<Link to="/webhook">Webhook</Link>, 'webhook'),
     // getItem(<Link to="/template/httplog">HTTP 日志配置</Link>, 'httplog'),
     // getItem(<Link to="/logretrieval">日志检索</Link>, 'logretrieval',null,undefined,undefined,'system.logRetrieval.self.view'),
@@ -126,10 +128,9 @@ const Navigation: FC = () => {
   
   const menuData = useMemo(()=>{
     const filterMenu = (menu:Array<{[k:string]:unknown}>)=>{
-        return menu.filter(x=>x.access ? checkPermission(x.access as keyof typeof PERMISSION_DEFINITION[0]): true)
+        return menu.filter(x=> x && (x.access ? checkPermission(x.access as keyof typeof PERMISSION_DEFINITION[0]): true))
     }
-
-    return TOTAL_MENU_ITEMS!.map((x)=> ( x.children ? {...x, children:filterMenu(x.children)} : x))?.filter(x=> x.key === 'system' || (x.children && x.children?.length > 0))
+    return TOTAL_MENU_ITEMS!.filter(x=>x).map((x)=> ( x.children ? {...x, children:filterMenu(x.children)} : x))?.filter(x=> x.key === 'system' || (x.children && x.children?.length > 0))
 },[accessData])
 
   useEffect(() => {

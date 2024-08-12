@@ -5,13 +5,13 @@ import {Link, useParams} from "react-router-dom";
 import {useBreadcrumb} from "@common/contexts/BreadcrumbContext.tsx";
 import {App, Divider} from "antd";
 import {BasicResponse, STATUS_CODE} from "@common/const/const.ts";
+import { SimpleMemberItem} from '@common/const/type.ts'
 import {useFetch} from "@common/hooks/http.ts";
 import {RouterParams} from "@core/components/aoplatform/RenderRoutes.tsx";
-import {OpenApiConfigFieldType} from "../../openApi/OpenApiConfig.tsx";
 import SystemInsideApiCreate from "./SystemInsideApiCreate.tsx";
 import {useSystemContext} from "../../../contexts/SystemContext.tsx";
 import { SYSTEM_API_TABLE_COLUMNS } from "../../../const/system/const.tsx";
-import { SimpleMemberItem, SystemApiTableListItem, SystemInsideApiCreateHandle, SystemInsideApiDocumentHandle } from "../../../const/system/type.ts";
+import { SystemApiSimpleFieldType, SystemApiTableListItem, SystemInsideApiCreateHandle, SystemInsideApiDocumentHandle } from "../../../const/system/type.ts";
 import TableBtnWithPermission from "@common/components/aoplatform/TableBtnWithPermission.tsx";
 import { useGlobalContext } from "@common/contexts/GlobalStateContext.tsx";
 import { checkAccess } from "@common/utils/permission.ts";
@@ -89,7 +89,7 @@ const SystemInsideApiList:FC = ()=>{
             case 'copy':{
                 title='复制 API'
                 message.loading('正在加载数据')
-                const {code,data,msg} = await fetchData<BasicResponse<{api:OpenApiConfigFieldType}>>('project/api/detail/simple',{method:'GET',eoParams:{project:systemId, api:entity!.id}})
+                const {code,data,msg} = await fetchData<BasicResponse<{api:SystemApiSimpleFieldType}>>('project/api/detail/simple',{method:'GET',eoParams:{project:systemId, api:entity!.id}})
                 message.destroy()
                 if(code === STATUS_CODE.SUCCESS){
                     content=<SystemInsideApiCreate ref={copyRef} type={type} entity={{...data.api, path:(data.api.path?.startsWith('/')? data.api.path.substring(1): data.api.path),systemId:systemId}} modalApiPrefix={apiPrefix} modalPrefixForce={prefixForce}/>
@@ -112,21 +112,6 @@ const SystemInsideApiList:FC = ()=>{
                     case 'copy':
                         return copyRef.current?.copy().then(()=> {
                             manualReloadTable()
-                            // modal.confirm({
-                            //     title: '操作',
-                            //     content: '当前 API 已经创建成功。请问是否跳转到新的 API 页面？',
-                            //     onOk: () => {
-                            //         navigate!(`/system/${orgId}/${teamId}/inside/${systemId}/api/${res}/proxy`)
-                            //     },
-                            //     onCancel: () => {
-                            //         manualReloadTable()
-                            //     },
-                            //     width: 600,
-                            //     okText: '确认',
-                            //     cancelText: '取消',
-                            //     closable: true,
-                            //     icon: <></>
-                            // })
                         })
                     case 'delete':
                         return deleteApi(entity).then((res)=>{if(res === true) manualReloadTable()})
@@ -232,7 +217,6 @@ const SystemInsideApiList:FC = ()=>{
                 request={()=>getApiList()}
                 dataSource={tableListDataSource}
                 addNewBtnTitle="添加 API"
-                // afterNewBtn = {[<Button type="default" onClick={importApi}>导入</Button>]}
                 searchPlaceholder="输入名称、URL 查找 API"
                 onAddNewBtnClick={()=>{openDrawer('add')}}
                 addNewBtnAccess="project.mySystem.api.add"

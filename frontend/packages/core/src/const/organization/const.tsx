@@ -35,7 +35,7 @@ export const ORGANIZATION_TABLE_COLUMNS: ProColumns<OrganizationTableListItem>[]
         ellipsis:true
     },
     {
-        title: '分区权限',
+        title: '环境权限',
         dataIndex: 'partition',
         ellipsis:true,
         renderText:(_,entity:OrganizationTableListItem)=>(entity.partition?.map(x=>x.name).join('，') || '-')
@@ -55,7 +55,7 @@ export const ORGANIZATION_TABLE_COLUMNS: ProColumns<OrganizationTableListItem>[]
         key: 'createTime',
         dataIndex: 'createTime',
         ellipsis: true,
-        width:176,
+        width:182,
         sorter: (a,b)=> {
             return a.createTime.localeCompare(b.createTime)
         },

@@ -15,29 +15,19 @@ func RegisterInitHandleFunc(handleFunc InitHandleFunc) {
 	initHandlers = append(initHandlers, handleFunc)
 }
 
-type InitHandleFunc func(ctx context.Context, partitionId string, client IClientDriver) error
+type InitHandleFunc func(ctx context.Context, clusterId string, client IClientDriver) error
 
-func (f InitHandleFunc) Init(ctx context.Context, partitionId string, client IClientDriver) error {
-	return f(ctx, partitionId, client)
+func (f InitHandleFunc) Init(ctx context.Context, clusterId string, client IClientDriver) error {
+	return f(ctx, clusterId, client)
 }
 
 type InitHandler interface {
-	Init(ctx context.Context, partitionId string, client IClientDriver) error
+	Init(ctx context.Context, clusterId string, client IClientDriver) error
 }
 
-func InitGateway(ctx context.Context, partitionId string, client IClientDriver) (err error) {
-	//defer func() {
-	//	if err == nil {
-	//		err = client.Commit(ctx)
-	//	} else {
-	//		errRollback := client.Rollback(ctx)
-	//		if errRollback != nil {
-	//			log.Warn(err)
-	//		}
-	//	}
-	//}()
+func InitGateway(ctx context.Context, clusterId string, client IClientDriver) (err error) {
 	for _, h := range initHandlers {
-		err = h.Init(ctx, partitionId, client)
+		err = h.Init(ctx, clusterId, client)
 		if err != nil {
 			return
 		}

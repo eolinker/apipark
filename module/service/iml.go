@@ -4,467 +4,337 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/eolinker/apipark/service/partition"
-	"github.com/eolinker/apipark/service/subscribe"
-	"github.com/eolinker/eosc/log"
+	"sort"
 	"strings"
 
-	"github.com/eolinker/apipark/gateway"
+	service_tag "github.com/eolinker/apipark/service/service-tag"
 
-	"github.com/eolinker/apipark/service/cluster"
+	service_doc "github.com/eolinker/apipark/service/service-doc"
 
-	"github.com/eolinker/apipark/service/api"
-
-	"gorm.io/gorm"
-
-	"github.com/eolinker/go-common/utils"
-
-	"github.com/eolinker/go-common/auto"
+	serviceDto "github.com/eolinker/apipark/module/service/dto"
 
 	"github.com/eolinker/apipark/service/tag"
 
-	"github.com/eolinker/apipark/service/project"
+	"github.com/eolinker/apipark/service/service"
+
+	"github.com/eolinker/apipark/service/subscribe"
+	"gorm.io/gorm"
+
+	"github.com/eolinker/apipark/service/api"
+
+	"github.com/eolinker/go-common/auto"
+
+	team_member "github.com/eolinker/apipark/service/team-member"
+
+	"github.com/eolinker/go-common/store"
+
 	"github.com/google/uuid"
 
-	serviceDto "github.com/eolinker/apipark/module/service/dto"
-	"github.com/eolinker/apipark/service/service"
-	"github.com/eolinker/go-common/store"
+	"github.com/eolinker/go-common/utils"
+
+	"github.com/eolinker/apipark/service/team"
+
+	service_dto "github.com/eolinker/apipark/module/service/dto"
 )
 
 var (
-	_                     IServiceModule = (*imlServiceModule)(nil)
-	projectRuleMustServer                = map[string]bool{
-		"as_server": true,
-	}
+	_ IServiceModule = (*imlServiceModule)(nil)
 )
 
 type imlServiceModule struct {
-	projectService          project.IProjectService           `autowired:""`
-	projectPartitionService project.IProjectPartitionsService `autowired:""`
-	serviceService          service.IServiceService           `autowired:""`
-	serviceTagService       service.ITagService               `autowired:""`
-	servicePartitionService service.IPartitionsService        `autowired:""`
-	serviceDocService       service.IDocService               `autowired:""`
-	tagService              tag.ITagService                   `autowired:""`
-	serviceApiService       service.IApiService               `autowired:""`
-	apiService              api.IAPIService                   `autowired:""`
-	subscribeService        subscribe.ISubscribeService       `autowired:""`
-	partitionService        partition.IPartitionService       `autowired:""`
-	clusterService          cluster.IClusterService           `autowired:""`
-
-	transaction store.ITransaction `autowired:""`
+	serviceService    service.IServiceService        `autowired:""`
+	teamService       team.ITeamService              `autowired:""`
+	teamMemberService team_member.ITeamMemberService `autowired:""`
+	tagService        tag.ITagService                `autowired:""`
+	serviceDocService service_doc.IDocService        `autowired:""`
+	serviceTagService service_tag.ITagService        `autowired:""`
+	apiService        api.IAPIService                `autowired:""`
+	transaction       store.ITransaction             `autowired:""`
 }
 
-func (i *imlServiceModule) getServiceApis(ctx context.Context, projectIds []string) ([]*gateway.ServiceRelease, error) {
-	services, err := i.serviceService.ListByProject(ctx, projectIds...)
-	if err != nil {
-		return nil, err
-	}
-	serviceIds := utils.SliceToSlice(services, func(s *service.Service) string {
-		return s.Id
-	}, func(s *service.Service) bool {
-		return s.Status == service.StatusOn
-	})
-	apis, err := i.serviceApiService.List(ctx, serviceIds...)
-	if err != nil {
-		return nil, err
-	}
-	serviceMap := utils.SliceToMapArrayO(apis, func(s *service.Api) (string, string) {
-		return s.Sid, s.Aid
-	})
+func (i *imlServiceModule) searchMyServices(ctx context.Context, teamId string, keyword string) ([]*service.Service, error) {
 
-	return utils.MapToSlice(serviceMap, func(k string, v []string) *gateway.ServiceRelease {
-		return &gateway.ServiceRelease{
-			ID:   k,
-			Apis: v,
-		}
-	}), nil
-}
-
-func (i *imlServiceModule) initGateway(ctx context.Context, partitionId string, clientDriver gateway.IClientDriver) error {
-	projectPartitions, err := i.projectPartitionService.ListByPartition(ctx, partitionId)
-	if err != nil {
-		return err
-	}
-	projectIds := utils.SliceToSlice(projectPartitions, func(p *project.Partition) string {
-		return p.Project
-	})
-	releases, err := i.getServiceApis(ctx, projectIds)
-	if err != nil {
-		return err
-	}
-
-	return clientDriver.Service().Online(ctx, releases...)
-
-}
-
-func (i *imlServiceModule) SimpleList(ctx context.Context, pid string) ([]*serviceDto.SimpleItem, error) {
-	_, err := i.projectService.CheckProject(ctx, pid, projectRuleMustServer)
-
-	if err != nil {
-		return nil, err
-	}
-	list, err := i.serviceService.Search(ctx, "", map[string]interface{}{
-		"project": pid,
-	})
-	return utils.SliceToSlice(list, func(i *service.Service) *serviceDto.SimpleItem {
-		return &serviceDto.SimpleItem{
-			Id:   i.Id,
-			Name: i.Name,
-		}
-	}), nil
-}
-
-func (i *imlServiceModule) syncServiceApi(ctx context.Context, sid string, apiIds []string, partitionIds []string, isOnline bool) error {
-	partitions, err := i.partitionService.List(ctx, partitionIds...)
-	if err != nil {
-		return err
-	}
-
-	for _, p := range partitions {
-		err := i.syncServiceApiForCluster(ctx, p.Cluster, sid, apiIds, isOnline)
+	userID := utils.UserId(ctx)
+	condition := make(map[string]interface{})
+	condition["as_server"] = true
+	if teamId != "" {
+		_, err := i.teamService.Get(ctx, teamId)
 		if err != nil {
-			log.Warnf("sync service api for partition[%s] %s", p.UUID, err.Error())
+			return nil, err
 		}
-	}
-	return nil
-}
-func (i *imlServiceModule) syncServiceApiForCluster(ctx context.Context, clusterId string, sid string, apiIds []string, isOnline bool) error {
-	client, err := i.clusterService.GatewayClient(ctx, clusterId)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		err := client.Close(ctx)
-		if err != nil {
-			log.Warn("close apinto client:", err)
-		}
-	}()
-	if !isOnline {
-		err = client.Service().Offline(ctx, &gateway.ServiceRelease{
-			ID:   sid,
-			Apis: apiIds,
-		})
-		if err != nil {
-			return err
-		}
+		condition["team"] = teamId
+		return i.serviceService.Search(ctx, keyword, condition, "update_at desc")
 	} else {
-		err = client.Service().Online(ctx, &gateway.ServiceRelease{
-			ID:   sid,
-			Apis: apiIds,
-		})
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-func (i *imlServiceModule) BindServiceApi(ctx context.Context, pid string, sid string, apis *serviceDto.BindApis) error {
-	if len(apis.Apis) == 0 {
-		return nil
-	}
-	_, err := i.projectService.CheckProject(ctx, pid, projectRuleMustServer)
-	if err != nil {
-		return fmt.Errorf("get project(%s) error: %v", pid, err)
-	}
-	sInfo, err := i.serviceService.Get(ctx, sid)
-	if err != nil {
-		return fmt.Errorf("get service(%s) error: %v", sid, err)
-	}
-
-	partitions, err := i.servicePartitionService.List(ctx, sid)
-	if err != nil {
-		return err
-	}
-	partitionIds := utils.SliceToSlice(partitions, func(p *service.Partition) string {
-		return p.Pid
-	})
-	return i.transaction.Transaction(ctx, func(ctx context.Context) error {
-		lastSort, err := i.serviceApiService.LastSortIndex(ctx, sid)
-		if err != nil {
-			if !errors.Is(err, gorm.ErrRecordNotFound) {
-				return err
-			}
-		}
-		for _, aid := range apis.Apis {
-			lastSort++
-			err = i.serviceApiService.Bind(ctx, sid, aid, lastSort)
-			if err != nil {
-				return err
-			}
-		}
-		if sInfo.Status == service.StatusOff {
-			// 未开启，不上线服务
-			return nil
-		}
-		return i.syncServiceApi(ctx, sid, apis.Apis, partitionIds, true)
-	})
-}
-
-func (i *imlServiceModule) UnbindServiceApi(ctx context.Context, pid string, sid string, apiIds []string) error {
-	if len(apiIds) == 0 {
-		return nil
-	}
-	_, err := i.projectService.CheckProject(ctx, pid, projectRuleMustServer)
-
-	if err != nil {
-		return err
-	}
-	sInfo, err := i.serviceService.Get(ctx, sid)
-	if err != nil {
-		return err
-	}
-
-	partitions, err := i.servicePartitionService.List(ctx, sid)
-	if err != nil {
-		return err
-	}
-	partitionIds := utils.SliceToSlice(partitions, func(p *service.Partition) string {
-		return p.Pid
-	})
-	return i.transaction.Transaction(ctx, func(ctx context.Context) error {
-		for _, aid := range apiIds {
-			err = i.serviceApiService.Unbind(ctx, sid, aid)
-			if err != nil {
-				return err
-			}
-		}
-
-		if sInfo.Status == service.StatusOff {
-			// 未开启，不下线api
-			return nil
-		}
-		return i.syncServiceApi(ctx, sid, apiIds, partitionIds, false)
-	})
-}
-
-func (i *imlServiceModule) SortApis(ctx context.Context, pid string, sid string, apis *serviceDto.BindApis) error {
-	_, err := i.projectService.CheckProject(ctx, pid, projectRuleMustServer)
-
-	if err != nil {
-		return err
-	}
-	if len(apis.Apis) == 0 {
-		return nil
-	}
-	return i.transaction.Transaction(ctx, func(ctx context.Context) error {
-		err = i.serviceApiService.Clear(ctx, sid)
-		if err != nil {
-			return err
-		}
-		for idx, aid := range apis.Apis {
-			err = i.serviceApiService.Bind(ctx, sid, aid, idx+1)
-			if err != nil {
-				return err
-			}
-		}
-		return nil
-	})
-}
-
-func (i *imlServiceModule) ServiceApis(ctx context.Context, pid string, sid string) ([]*serviceDto.ServiceApi, error) {
-	_, err := i.projectService.CheckProject(ctx, pid, projectRuleMustServer)
-
-	if err != nil {
-		return nil, err
-	}
-	apis, err := i.serviceApiService.List(ctx, sid)
-	if err != nil {
-		return nil, err
-	}
-	sorts := make([]*serviceDto.ServiceApi, 0, len(apis))
-	for _, a := range apis {
-		apiInfo, err := i.apiService.GetInfo(ctx, a.Aid)
+		membersForUser, err := i.teamMemberService.FilterMembersForUser(ctx, userID)
 		if err != nil {
 			return nil, err
 		}
-		sorts = append(sorts, &serviceDto.ServiceApi{
-			Id:          a.Aid,
-			Name:        apiInfo.Name,
-			Method:      apiInfo.Method,
-			Path:        apiInfo.Path,
-			Description: apiInfo.Description,
-		})
+		teamIds := membersForUser[userID]
+		condition["team"] = teamIds
+		return i.serviceService.Search(ctx, keyword, condition, "update_at desc")
 	}
-	return sorts, nil
+
 }
 
-func (i *imlServiceModule) ServiceDoc(ctx context.Context, pid string, sid string) (*serviceDto.ServiceDoc, error) {
-	_, err := i.projectService.CheckProject(ctx, pid, projectRuleMustServer)
-
+func (i *imlServiceModule) SearchMyServices(ctx context.Context, teamId string, keyword string) ([]*service_dto.ServiceItem, error) {
+	services, err := i.searchMyServices(ctx, teamId, keyword)
 	if err != nil {
 		return nil, err
 	}
-	info, err := i.serviceService.Get(ctx, sid)
-	if err != nil {
-		return nil, err
-	}
-	doc, err := i.serviceDocService.Get(ctx, sid)
-	if err != nil {
-		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, err
-		}
-		return &serviceDto.ServiceDoc{
-			Id:   sid,
-			Name: info.Name,
-			Doc:  "",
-		}, nil
-	}
-	return &serviceDto.ServiceDoc{
-		Id:         sid,
-		Name:       info.Name,
-		Doc:        doc.Doc,
-		Creator:    auto.UUID(doc.Creator),
-		CreateTime: auto.TimeLabel(doc.CreateTime),
-		Updater:    auto.UUID(doc.Updater),
-		UpdateTime: auto.TimeLabel(doc.UpdateTime),
-	}, nil
-}
-
-func (i *imlServiceModule) SaveServiceDoc(ctx context.Context, pid string, sid string, input *serviceDto.SaveServiceDoc) error {
-	_, err := i.projectService.CheckProject(ctx, pid, projectRuleMustServer)
-
-	if err != nil {
-		return err
-	}
-	return i.serviceDocService.Save(ctx, &service.SaveDoc{
-		Sid: sid,
-		Doc: input.Doc,
+	serviceIds := utils.SliceToSlice(services, func(p *service.Service) string {
+		return p.Id
 	})
-}
-
-func (i *imlServiceModule) Search(ctx context.Context, keyword string, pid string) ([]*serviceDto.ServiceItem, error) {
-	_, err := i.projectService.CheckProject(ctx, pid, projectRuleMustServer)
-
+	apiCountMap, err := i.apiService.CountByGroup(ctx, "", map[string]interface{}{"service": serviceIds}, "service")
 	if err != nil {
 		return nil, err
 	}
 
-	services, err := i.serviceService.Search(ctx, keyword, map[string]interface{}{
-		"project": pid,
-	}, "update_at desc", "create_at desc")
-	if err != nil {
-		return nil, err
-	}
-	serviceIds := utils.SliceToSlice(services, func(s *service.Service) string {
-		return s.Id
-	})
-	partitionMap, err := i.servicePartitionService.PartitionsByService(ctx, serviceIds...)
-	if err != nil {
-		return nil, err
-	}
-	subscribers, err := i.subscribeService.ListByServices(ctx, serviceIds...)
-	if err != nil {
-		return nil, err
-	}
-	subscribeMap := make(map[string]struct{})
-	for _, s := range subscribers {
-		if s.ApplyStatus != subscribe.ApplyStatusReview && s.ApplyStatus != subscribe.ApplyStatusSubscribe {
+	items := make([]*service_dto.ServiceItem, 0, len(services))
+	for _, model := range services {
+		if teamId != "" && model.Team != teamId {
 			continue
 		}
-		if _, ok := subscribeMap[s.Service]; ok {
-			continue
-		}
-		subscribeMap[s.Service] = struct{}{}
-	}
-
-	items := make([]*serviceDto.ServiceItem, 0, len(serviceIds))
-	for _, s := range services {
-
-		apiCount, err := i.serviceApiService.Count(ctx, s.Id)
-		if err != nil {
-			return nil, err
-		}
-		_, notDelete := subscribeMap[s.Id]
-		items = append(items, &serviceDto.ServiceItem{
-			Id:          s.Id,
-			Name:        s.Name,
-			Partition:   auto.List(partitionMap[s.Id]),
-			ServiceType: s.ServiceType,
+		apiCount := apiCountMap[model.Id]
+		items = append(items, &service_dto.ServiceItem{
+			Id:          model.Id,
+			Name:        model.Name,
+			Description: model.Description,
+			CreateTime:  auto.TimeLabel(model.CreateTime),
+			UpdateTime:  auto.TimeLabel(model.UpdateTime),
+			Team:        auto.UUID(model.Team),
 			ApiNum:      apiCount,
-			Status:      s.Status,
-			CreateTime:  auto.TimeLabel(s.CreateTime),
-			UpdateTime:  auto.TimeLabel(s.UpdateTime),
-			CanDelete:   !notDelete,
+			CanDelete:   apiCount == 0,
 		})
-
 	}
-
 	return items, nil
 }
 
-func (i *imlServiceModule) Create(ctx context.Context, pid string, input *serviceDto.CreateService) (*serviceDto.Service, error) {
-	pInfo, err := i.projectService.CheckProject(ctx, pid, projectRuleMustServer)
+func (i *imlServiceModule) SimpleAPPS(ctx context.Context, keyword string) ([]*service_dto.SimpleServiceItem, error) {
+	w := make(map[string]interface{})
+	w["as_app"] = true
+	services, err := i.serviceService.Search(ctx, keyword, w)
+	if err != nil {
+		return nil, err
+	}
+	return utils.SliceToSlice(services, func(p *service.Service) *service_dto.SimpleServiceItem {
+		return &service_dto.SimpleServiceItem{
+			Id:          p.Id,
+			Name:        p.Name,
+			Description: p.Description,
+
+			Team: auto.UUID(p.Team),
+		}
+	}), nil
+}
+
+func (i *imlServiceModule) Simple(ctx context.Context, keyword string) ([]*service_dto.SimpleServiceItem, error) {
+	w := make(map[string]interface{})
+	w["as_server"] = true
+
+	services, err := i.serviceService.Search(ctx, keyword, w)
+	if err != nil {
+		return nil, err
+	}
+
+	items := make([]*service_dto.SimpleServiceItem, 0, len(services))
+	for _, p := range services {
+
+		items = append(items, &service_dto.SimpleServiceItem{
+			Id:          p.Id,
+			Name:        p.Name,
+			Description: p.Description,
+			Team:        auto.UUID(p.Team),
+		})
+	}
+	return items, nil
+}
+
+func (i *imlServiceModule) MySimple(ctx context.Context, keyword string) ([]*service_dto.SimpleServiceItem, error) {
+	services, err := i.searchMyServices(ctx, "", keyword)
 
 	if err != nil {
 		return nil, err
 	}
-	if input.ID == "" {
-		input.ID = uuid.New().String()
-	}
-	if input.ServiceType != "inner" && input.Catalogue == nil {
-		return nil, fmt.Errorf("group is required")
-	}
-	catalogue := ""
-	if input.Catalogue != nil {
-		catalogue = *input.Catalogue
-	}
 
-	err = i.transaction.Transaction(ctx, func(ctx context.Context) error {
-		t := strings.Join(input.Tags, ",")
-		err = i.serviceService.Create(ctx, &service.CreateService{
-			Uuid:         input.ID,
-			Name:         input.Name,
-			Description:  input.Description,
-			Logo:         input.Logo,
-			ServiceType:  input.ServiceType,
-			Project:      pid,
-			Team:         pInfo.Team,
-			Organization: pInfo.Organization,
-			Catalogue:    catalogue,
-			Status:       service.StatusOff,
-			Tag:          t,
+	items := make([]*service_dto.SimpleServiceItem, 0, len(services))
+	for _, p := range services {
+
+		items = append(items, &service_dto.SimpleServiceItem{
+			Id:          p.Id,
+			Name:        p.Name,
+			Description: p.Description,
+			Team:        auto.UUID(p.Team),
 		})
-		if err != nil {
-			return err
-		}
-		err = i.servicePartitionService.Delete(ctx, nil, []string{input.ID})
-		if err != nil {
-			return err
-		}
-		for _, p := range input.Partition {
-			err = i.servicePartitionService.Create(ctx, &service.CreatePartition{
-				Sid: input.ID,
-				Pid: p,
-			})
-			if err != nil {
-				return err
-			}
-		}
-		tags, err := i.getTagUuids(ctx, input.Tags)
-		if err != nil {
-			return err
-		}
-		err = i.serviceTagService.Delete(ctx, nil, []string{input.ID})
-		if err != nil {
-			return err
-		}
-		for _, t := range tags {
-			err = i.serviceTagService.Create(ctx, &service.CreateTag{
-				Tid: t,
-				Sid: input.ID,
-			})
-			if err != nil {
-				return err
-			}
-		}
+	}
+	return items, nil
+}
 
-		return nil
+func (i *imlServiceModule) Get(ctx context.Context, id string) (*service_dto.Service, error) {
+	serviceInfo, err := i.serviceService.Get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	tags, err := i.serviceTagService.List(ctx, []string{serviceInfo.Id}, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	s := service_dto.ToService(serviceInfo)
+	s.Tags = auto.List(utils.SliceToSlice(tags, func(p *service_tag.Tag) string {
+		return p.Tid
+	}))
+	return s, nil
+}
+
+func (i *imlServiceModule) Search(ctx context.Context, teamID string, keyword string) ([]*service_dto.ServiceItem, error) {
+	var list []*service.Service
+	var err error
+	if teamID != "" {
+		_, err = i.teamService.Get(ctx, teamID)
+		if err != nil {
+			return nil, err
+		}
+		list, err = i.serviceService.Search(ctx, keyword, map[string]interface{}{"team": teamID, "as_server": true}, "update_at desc")
+	} else {
+		list, err = i.serviceService.Search(ctx, keyword, map[string]interface{}{"as_server": true}, "update_at desc")
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	serviceIds := utils.SliceToSlice(list, func(s *service.Service) string {
+		return s.Id
+	})
+
+	apiCountMap, err := i.apiService.CountByGroup(ctx, "", map[string]interface{}{"service": serviceIds}, "service")
+	if err != nil {
+		return nil, err
+	}
+	//serviceCountMap, err := i.serviceService.CountByGroup(ctx, "", map[string]interface{}{"uuid": serviceIds}, "service")
+	//if err != nil {
+	//	return nil, err
+	//}
+
+	items := make([]*service_dto.ServiceItem, 0, len(list))
+	for _, model := range list {
+		apiCount := apiCountMap[model.Id]
+		//serviceCount := serviceCountMap[model.Id]
+		items = append(items, &service_dto.ServiceItem{
+			Id:          model.Id,
+			Name:        model.Name,
+			Description: model.Description,
+			CreateTime:  auto.TimeLabel(model.CreateTime),
+			UpdateTime:  auto.TimeLabel(model.UpdateTime),
+			Team:        auto.UUID(model.Team),
+			ApiNum:      apiCount,
+			CanDelete:   apiCount == 0,
+		})
+	}
+	return items, nil
+}
+
+func (i *imlServiceModule) Create(ctx context.Context, teamID string, input *service_dto.CreateService) (*service_dto.Service, error) {
+
+	if input.Id == "" {
+		input.Id = uuid.New().String()
+	}
+	mo := &service.Create{
+		Id:          input.Id,
+		Name:        input.Name,
+		Description: input.Description,
+		Team:        teamID,
+		ServiceType: service.ServiceType(input.ServiceType),
+		Catalogue:   input.Catalogue,
+		Prefix:      input.Prefix,
+		Logo:        input.Logo,
+	}
+	if mo.ServiceType == service.PublicService && mo.Catalogue == "" {
+		return nil, fmt.Errorf("catalogue can not be empty")
+	}
+	if input.AsApp == nil {
+		// 默认值为false
+		mo.AsApp = false
+	} else {
+		mo.AsApp = *input.AsApp
+	}
+	if input.AsServer == nil {
+		// 默认值为true
+		mo.AsServer = true
+	} else {
+		mo.AsServer = *input.AsServer
+	}
+	input.Prefix = strings.Trim(strings.Trim(input.Prefix, " "), "/")
+	err := i.transaction.Transaction(ctx, func(ctx context.Context) error {
+		return i.serviceService.Create(ctx, mo)
 	})
 	if err != nil {
 		return nil, err
 	}
-	return i.Get(ctx, pid, input.ID)
+	return i.Get(ctx, input.Id)
+}
+
+func (i *imlServiceModule) Edit(ctx context.Context, id string, input *service_dto.EditService) (*service_dto.Service, error) {
+	_, err := i.serviceService.Get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	err = i.transaction.Transaction(ctx, func(ctx context.Context) error {
+		serviceType := (*service.ServiceType)(input.ServiceType)
+		if serviceType != nil && *serviceType == service.PublicService {
+			if input.Catalogue == nil || *input.Catalogue == "" {
+				return fmt.Errorf("catalogue can not be empty")
+			}
+		}
+
+		err = i.serviceService.Save(ctx, id, &service.Edit{
+			Name:        input.Name,
+			Description: input.Description,
+			Logo:        input.Logo,
+			ServiceType: serviceType,
+			Catalogue:   input.Catalogue,
+		})
+		if err != nil {
+			return err
+		}
+		if input.Tags != nil {
+			tags, err := i.getTagUuids(ctx, *input.Tags)
+			if err != nil {
+				return err
+			}
+			i.serviceTagService.Delete(ctx, nil, []string{id})
+			for _, t := range tags {
+				err = i.serviceTagService.Create(ctx, &service_tag.CreateTag{
+					Tid: t,
+					Sid: id,
+				})
+				if err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+	return i.Get(ctx, id)
+}
+
+func (i *imlServiceModule) Delete(ctx context.Context, id string) error {
+
+	err := i.transaction.Transaction(ctx, func(ctx context.Context) error {
+		count, err := i.apiService.CountByService(ctx, id)
+		if err != nil {
+			return err
+		}
+		if count > 0 {
+			return fmt.Errorf("service has apis, can not delete")
+		}
+
+		return i.serviceService.Delete(ctx, id)
+	})
+	return err
 }
 
 func (i *imlServiceModule) getTagUuids(ctx context.Context, tags []string) ([]string, error) {
@@ -502,214 +372,341 @@ func (i *imlServiceModule) getTagUuids(ctx context.Context, tags []string) ([]st
 	return tagList, nil
 }
 
-func (i *imlServiceModule) Edit(ctx context.Context, pid string, sid string, input *serviceDto.EditService) (*serviceDto.Service, error) {
-	_, err := i.projectService.CheckProject(ctx, pid, projectRuleMustServer)
+func (i *imlServiceModule) ServiceDoc(ctx context.Context, pid string) (*serviceDto.ServiceDoc, error) {
+	_, err := i.serviceService.Check(ctx, pid, map[string]bool{"as_server": true})
 
 	if err != nil {
 		return nil, err
+	}
+	info, err := i.serviceService.Get(ctx, pid)
+	if err != nil {
+		return nil, err
+	}
+	doc, err := i.serviceDocService.Get(ctx, pid)
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, err
+		}
+		return &serviceDto.ServiceDoc{
+			Id:   pid,
+			Name: info.Name,
+			Doc:  "",
+		}, nil
+	}
+	return &serviceDto.ServiceDoc{
+		Id:         pid,
+		Name:       info.Name,
+		Doc:        doc.Doc,
+		Creator:    auto.UUID(doc.Creator),
+		CreateTime: auto.TimeLabel(doc.CreateTime),
+		Updater:    auto.UUID(doc.Updater),
+		UpdateTime: auto.TimeLabel(doc.UpdateTime),
+	}, nil
+}
+
+func (i *imlServiceModule) SaveServiceDoc(ctx context.Context, pid string, input *serviceDto.SaveServiceDoc) error {
+	_, err := i.serviceService.Check(ctx, pid, map[string]bool{"as_server": true})
+
+	if err != nil {
+		return err
+	}
+	return i.serviceDocService.Save(ctx, &service_doc.SaveDoc{
+		Sid: pid,
+		Doc: input.Doc,
+	})
+}
+
+var _ IAppModule = &imlAppModule{}
+
+type imlAppModule struct {
+	teamService       team.ITeamService              `autowired:""`
+	serviceService    service.IServiceService        `autowired:""`
+	teamMemberService team_member.ITeamMemberService `autowired:""`
+	subscribeService  subscribe.ISubscribeService    `autowired:""`
+	transaction       store.ITransaction             `autowired:""`
+}
+
+func (i *imlAppModule) Search(ctx context.Context, teamId string, keyword string) ([]*service_dto.AppItem, error) {
+	var services []*service.Service
+	var err error
+	if teamId != "" {
+		_, err = i.teamService.Get(ctx, teamId)
+		if err != nil {
+			return nil, err
+		}
+		services, err = i.serviceService.Search(ctx, keyword, map[string]interface{}{"team": teamId, "as_app": true}, "update_at desc")
+	} else {
+		services, err = i.serviceService.Search(ctx, keyword, map[string]interface{}{"as_app": true}, "update_at desc")
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	serviceIds := utils.SliceToSlice(services, func(p *service.Service) string {
+		return p.Id
+	})
+
+	subscribers, err := i.subscribeService.SubscriptionsByApplication(ctx, serviceIds...)
+	if err != nil {
+		return nil, err
+	}
+
+	subscribeCount := map[string]int64{}
+	subscribeVerifyCount := map[string]int64{}
+	verifyTmp := map[string]struct{}{}
+	subscribeTmp := map[string]struct{}{}
+	for _, s := range subscribers {
+		key := fmt.Sprintf("%s-%s", s.Service, s.Application)
+		switch s.ApplyStatus {
+		case subscribe.ApplyStatusSubscribe:
+			if _, ok := subscribeTmp[key]; !ok {
+				subscribeTmp[key] = struct{}{}
+				subscribeCount[s.Application]++
+			}
+		case subscribe.ApplyStatusReview:
+			if _, ok := verifyTmp[key]; !ok {
+				verifyTmp[key] = struct{}{}
+				subscribeVerifyCount[s.Application]++
+			}
+		default:
+
+		}
+	}
+	items := make([]*service_dto.AppItem, 0, len(services))
+	for _, model := range services {
+		subscribeNum := subscribeCount[model.Id]
+		verifyNum := subscribeVerifyCount[model.Id]
+		items = append(items, &service_dto.AppItem{
+			Id:                 model.Id,
+			Name:               model.Name,
+			Description:        model.Description,
+			CreateTime:         auto.TimeLabel(model.CreateTime),
+			UpdateTime:         auto.TimeLabel(model.UpdateTime),
+			Team:               auto.UUID(model.Team),
+			SubscribeNum:       subscribeNum,
+			SubscribeVerifyNum: verifyNum,
+			CanDelete:          subscribeNum == 0,
+		})
+	}
+	sort.Slice(items, func(i, j int) bool {
+		if items[i].SubscribeNum != items[j].SubscribeNum {
+			return items[i].SubscribeNum > items[j].SubscribeNum
+		}
+		if items[i].SubscribeVerifyNum != items[j].SubscribeVerifyNum {
+			return items[i].SubscribeVerifyNum > items[j].SubscribeVerifyNum
+		}
+		return items[i].Name < items[j].Name
+	})
+	return items, nil
+}
+
+func (i *imlAppModule) CreateApp(ctx context.Context, teamID string, input *service_dto.CreateApp) (*service_dto.App, error) {
+
+	if input.Id == "" {
+		input.Id = uuid.New().String()
+	}
+	userId := utils.UserId(ctx)
+	mo := &service.Create{
+		Id:          input.Id,
+		Name:        input.Name,
+		Description: input.Description,
+		Team:        teamID,
+		AsApp:       true,
+	}
+	// 判断用户是否在团队内
+	members, err := i.teamMemberService.Members(ctx, []string{teamID}, []string{userId})
+	if err != nil {
+		return nil, err
+	}
+	if len(members) == 0 {
+		return nil, fmt.Errorf("master is not in team")
 	}
 
 	err = i.transaction.Transaction(ctx, func(ctx context.Context) error {
-		t := strings.Join(input.Tags, ",")
-		err = i.serviceService.Save(ctx, sid, &service.EditService{
-			Name:        input.Name,
-			Description: input.Description,
-			Logo:        input.Logo,
-			ServiceType: input.ServiceType,
-			Catalogue:   input.Catalogue,
-			Tag:         &t,
-		})
+
+		return i.serviceService.Create(ctx, mo)
+
+	})
+	if err != nil {
+		return nil, err
+	}
+	return i.GetApp(ctx, input.Id)
+}
+
+func (i *imlAppModule) UpdateApp(ctx context.Context, appId string, input *service_dto.UpdateApp) (*service_dto.App, error) {
+	//userId := utils.UserId(ctx)
+	info, err := i.serviceService.Get(ctx, appId)
+	if err != nil {
+		return nil, err
+	}
+	if !info.AsApp {
+		return nil, fmt.Errorf("not app")
+	}
+	//if info.Master != userId {
+	//	return nil, fmt.Errorf("user is not app master, can not update")
+	//}
+
+	err = i.serviceService.Save(ctx, appId, &service.Edit{
+		Name:        input.Name,
+		Description: input.Description,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return i.GetApp(ctx, info.Id)
+}
+
+func (i *imlAppModule) searchMyApps(ctx context.Context, teamId string, keyword string) ([]*service.Service, error) {
+	userID := utils.UserId(ctx)
+	condition := make(map[string]interface{})
+	condition["as_app"] = true
+	if teamId != "" {
+		_, err := i.teamService.Get(ctx, teamId)
 		if err != nil {
-			return err
+			return nil, err
 		}
-		tags, err := i.getTagUuids(ctx, input.Tags)
+		condition["team"] = teamId
+		return i.serviceService.Search(ctx, keyword, condition, "update_at desc")
+	} else {
+		membersForUser, err := i.teamMemberService.FilterMembersForUser(ctx, userID)
 		if err != nil {
-			return err
+			return nil, err
 		}
-		err = i.serviceTagService.Delete(ctx, nil, []string{sid})
-		if err != nil {
-			return err
-		}
-		for _, t := range tags {
-			err = i.serviceTagService.Create(ctx, &service.CreateTag{
-				Tid: t,
-				Sid: sid,
-			})
-			if err != nil {
-				return err
+		teamIds := membersForUser[userID]
+		condition["team"] = teamIds
+
+		return i.serviceService.Search(ctx, keyword, condition, "update_at desc")
+	}
+}
+
+func (i *imlAppModule) SearchMyApps(ctx context.Context, teamId string, keyword string) ([]*service_dto.AppItem, error) {
+	services, err := i.searchMyApps(ctx, teamId, keyword)
+	if err != nil {
+		return nil, err
+	}
+	serviceIds := utils.SliceToSlice(services, func(p *service.Service) string {
+		return p.Id
+	})
+
+	subscribers, err := i.subscribeService.SubscriptionsByApplication(ctx, serviceIds...)
+	if err != nil {
+		return nil, err
+	}
+
+	subscribeCount := map[string]int64{}
+	subscribeVerifyCount := map[string]int64{}
+	verifyTmp := map[string]struct{}{}
+	subscribeTmp := map[string]struct{}{}
+	for _, s := range subscribers {
+		key := fmt.Sprintf("%s-%s", s.Service, s.Application)
+		switch s.ApplyStatus {
+		case subscribe.ApplyStatusSubscribe:
+			if _, ok := subscribeTmp[key]; !ok {
+				subscribeTmp[key] = struct{}{}
+				subscribeCount[s.Application]++
 			}
-		}
+		case subscribe.ApplyStatusReview:
+			if _, ok := verifyTmp[key]; !ok {
+				verifyTmp[key] = struct{}{}
+				subscribeVerifyCount[s.Application]++
+			}
+		default:
 
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	return i.Get(ctx, pid, sid)
-}
-
-func (i *imlServiceModule) Delete(ctx context.Context, pid string, sid string) error {
-	_, err := i.projectService.CheckProject(ctx, pid, projectRuleMustServer)
-
-	if err != nil {
-		return err
-	}
-	list, err := i.subscribeService.ListByServices(ctx, sid)
-	if err != nil {
-		return err
-	}
-	for _, l := range list {
-		if l.ApplyStatus == subscribe.ApplyStatusSubscribe || l.ApplyStatus == subscribe.ApplyStatusReview {
-			return fmt.Errorf("service %s is used", sid)
 		}
 	}
-	partitions, err := i.servicePartitionService.List(ctx, sid)
-	if err != nil {
-		return err
-	}
-	partitionIds := make([]string, 0, len(partitions))
-	for _, p := range partitions {
-		partitionIds = append(partitionIds, p.Pid)
-	}
-	return i.transaction.Transaction(ctx, func(ctx context.Context) error {
-		err := i.serviceService.Delete(ctx, sid)
-		if err != nil {
-			return err
-		}
-		err = i.servicePartitionService.Delete(ctx, nil, []string{sid})
-		if err != nil {
-			return err
-		}
-		err = i.serviceTagService.Delete(ctx, nil, []string{sid})
-		if err != nil {
-			return err
-		}
-		apis, err := i.serviceApiService.List(ctx, sid)
-		if err != nil {
-			return err
-		}
-		err = i.serviceApiService.Clear(ctx, sid)
-		if err != nil {
-			return err
-		}
-		apiIds := utils.SliceToSlice(apis, func(s *service.Api) string {
-			return s.Aid
+	items := make([]*service_dto.AppItem, 0, len(services))
+	for _, model := range services {
+		subscribeNum := subscribeCount[model.Id]
+		verifyNum := subscribeVerifyCount[model.Id]
+		items = append(items, &service_dto.AppItem{
+			Id:                 model.Id,
+			Name:               model.Name,
+			Description:        model.Description,
+			CreateTime:         auto.TimeLabel(model.CreateTime),
+			UpdateTime:         auto.TimeLabel(model.UpdateTime),
+			Team:               auto.UUID(model.Team),
+			SubscribeNum:       subscribeNum,
+			SubscribeVerifyNum: verifyNum,
+			CanDelete:          subscribeNum == 0,
 		})
-
-		return i.syncServiceApi(ctx, sid, apiIds, partitionIds, false)
+	}
+	sort.Slice(items, func(i, j int) bool {
+		if items[i].SubscribeNum != items[j].SubscribeNum {
+			return items[i].SubscribeNum > items[j].SubscribeNum
+		}
+		if items[i].SubscribeVerifyNum != items[j].SubscribeVerifyNum {
+			return items[i].SubscribeVerifyNum > items[j].SubscribeVerifyNum
+		}
+		return items[i].Name < items[j].Name
 	})
+	return items, nil
 }
 
-func (i *imlServiceModule) Get(ctx context.Context, pid string, sid string) (*serviceDto.Service, error) {
-	info, err := i.projectService.CheckProject(ctx, pid, projectRuleMustServer)
+func (i *imlAppModule) SimpleApps(ctx context.Context, keyword string) ([]*service_dto.SimpleAppItem, error) {
+	w := make(map[string]interface{})
+	w["as_app"] = true
+	services, err := i.serviceService.Search(ctx, keyword, w)
+	if err != nil {
+		return nil, err
+	}
+	return utils.SliceToSlice(services, func(p *service.Service) *service_dto.SimpleAppItem {
+		return &service_dto.SimpleAppItem{
+			Id:          p.Id,
+			Name:        p.Name,
+			Description: p.Description,
+			Team:        auto.UUID(p.Team),
+		}
+	}), nil
+}
 
+func (i *imlAppModule) MySimpleApps(ctx context.Context, keyword string) ([]*service_dto.SimpleAppItem, error) {
+	services, err := i.searchMyApps(ctx, "", keyword)
 	if err != nil {
 		return nil, err
 	}
-	s, err := i.serviceService.Get(ctx, sid)
-	if err != nil {
-		return nil, err
-	}
-	partitions, err := i.servicePartitionService.List(ctx, sid)
-	if err != nil {
-		return nil, err
-	}
-	partitionIds := make([]string, 0, len(partitions))
-	for _, p := range partitions {
-		partitionIds = append(partitionIds, p.Pid)
-	}
-	tags, err := i.serviceTagService.List(ctx, []string{sid}, nil)
-	if err != nil {
-		return nil, err
-	}
-	tagIds := make([]string, 0, len(tags))
-	for _, t := range tags {
-		tagIds = append(tagIds, t.Tid)
-	}
+	items := make([]*service_dto.SimpleAppItem, 0, len(services))
+	for _, p := range services {
 
-	out := &serviceDto.Service{
-		Id:          s.Id,
-		Name:        s.Name,
-		Description: s.Description,
-		Logo:        s.Logo,
-		ServiceType: s.ServiceType,
+		items = append(items, &service_dto.SimpleAppItem{
+			Id:          p.Id,
+			Name:        p.Name,
+			Description: p.Description,
+			Team:        auto.UUID(p.Team),
+		})
+	}
+	return items, nil
+}
+
+func (i *imlAppModule) GetApp(ctx context.Context, appId string) (*service_dto.App, error) {
+	info, err := i.serviceService.Get(ctx, appId)
+	if err != nil {
+		return nil, err
+	}
+	if !info.AsApp {
+		return nil, errors.New("not app")
+	}
+	return &service_dto.App{
+		Id:          info.Id,
+		Name:        info.Name,
+		Description: info.Description,
 		Team:        auto.UUID(info.Team),
-		Project:     auto.UUID(s.Project),
-		Catalogue:   auto.UUID(s.Catalogue),
-		Partition:   auto.List(partitionIds),
-		Tags:        auto.List(tagIds),
-		Status:      s.Status,
-	}
-	return out, nil
+		CreateTime:  auto.TimeLabel(info.CreateTime),
+		UpdateTime:  auto.TimeLabel(info.UpdateTime),
+		AsApp:       info.AsApp,
+	}, nil
 }
 
-func (i *imlServiceModule) Enable(ctx context.Context, pid string, sid string) error {
-	_, err := i.projectService.CheckProject(ctx, pid, projectRuleMustServer)
-
+func (i *imlAppModule) DeleteApp(ctx context.Context, appId string) error {
+	info, err := i.serviceService.Get(ctx, appId)
 	if err != nil {
-		return err
-	}
-	partitions, err := i.servicePartitionService.List(ctx, sid)
-	if err != nil {
-		return err
-	}
-	partitionIds := utils.SliceToSlice(partitions, func(p *service.Partition) string {
-		return p.Pid
-	})
-	status := service.StatusOn
-	return i.transaction.Transaction(ctx, func(ctx context.Context) error {
-		err = i.serviceService.Save(ctx, sid, &service.EditService{
-			Status: &status,
-		})
-		if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return err
 		}
-		apis, err := i.serviceApiService.List(ctx, sid)
-		if err != nil {
-			return err
-		}
-		if len(apis) == 0 {
-			return nil
-		}
-		apiIds := utils.SliceToSlice(apis, func(i *service.Api) string {
-			return i.Aid
-		})
-		return i.syncServiceApi(ctx, sid, apiIds, partitionIds, true)
-	})
-
-}
-
-func (i *imlServiceModule) Disable(ctx context.Context, pid string, sid string) error {
-	_, err := i.projectService.CheckProject(ctx, pid, projectRuleMustServer)
-
-	if err != nil {
-		return err
+		return nil
 	}
-	partitions, err := i.servicePartitionService.List(ctx, sid)
-	if err != nil {
-		return err
+	if !info.AsApp {
+		return errors.New("not app, can not delete")
 	}
-	partitionIds := utils.SliceToSlice(partitions, func(p *service.Partition) string {
-		return p.Pid
-	})
-	status := service.StatusOff
-	return i.transaction.Transaction(ctx, func(ctx context.Context) error {
-		err = i.serviceService.Save(ctx, sid, &service.EditService{
-			Status: &status,
-		})
-		if err != nil {
-			return err
-		}
-		apis, err := i.serviceApiService.List(ctx, sid)
-		if err != nil {
-			return err
-		}
-		if len(apis) == 0 {
-			return nil
-		}
-		apiIds := utils.SliceToSlice(apis, func(i *service.Api) string {
-			return i.Aid
-		})
-		return i.syncServiceApi(ctx, sid, apiIds, partitionIds, false)
-	})
+
+	return i.serviceService.Delete(ctx, appId)
 }

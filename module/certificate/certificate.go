@@ -11,9 +11,9 @@ import (
 )
 
 type ICertificateModule interface {
-	Create(ctx context.Context, partitionId string, create *certificate_dto.FileInput) error
+	Create(ctx context.Context, create *certificate_dto.FileInput) error
 	Update(ctx context.Context, id string, edit *certificate_dto.FileInput) error
-	ListForPartition(ctx context.Context, partitionId string) ([]*certificate_dto.Certificate, error)
+	List(ctx context.Context) ([]*certificate_dto.Certificate, error)
 	Detail(ctx context.Context, id string) (*certificate_dto.Certificate, *certificate_dto.File, error)
 	Delete(ctx context.Context, id string) error
 }

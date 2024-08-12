@@ -150,9 +150,9 @@ func (s *imlReleaseService) GetApiDocCommit(ctx context.Context, id string, apiU
 	return commits[0].Commit, nil
 }
 
-func (s *imlReleaseService) GetRunningApiDocCommit(ctx context.Context, project string, apiUUID string) (string, error) {
+func (s *imlReleaseService) GetRunningApiDocCommit(ctx context.Context, service string, apiUUID string) (string, error) {
 	running, err := s.releaseRuntime.First(ctx, map[string]interface{}{
-		"project": project,
+		"service": service,
 	})
 	if err != nil {
 		return "", err
@@ -161,9 +161,9 @@ func (s *imlReleaseService) GetRunningApiDocCommit(ctx context.Context, project 
 
 }
 
-func (s *imlReleaseService) GetRunningApiProxyCommit(ctx context.Context, project string, apiUUID string) (string, error) {
+func (s *imlReleaseService) GetRunningApiProxyCommit(ctx context.Context, service string, apiUUID string) (string, error) {
 	running, err := s.releaseRuntime.First(ctx, map[string]interface{}{
-		"project": project,
+		"service": service,
 	})
 	if err != nil {
 		return "", err
@@ -210,22 +210,22 @@ func (s *imlReleaseService) GetRunningApiProxyCommit(ctx context.Context, projec
 //func (s *imlReleaseService) DiffUpstreams(ctx context.Context, baseUpstreams []*UpstreamCommit, targetUpstreams []*UpstreamCommit) []*UpstreamDiff {
 //	Upstreams := make([]*UpstreamDiff, 0, len(targetUpstreams)+len(baseUpstreams))
 //	baseUpstreamMap := utils.SliceToMap(baseUpstreams, func(v *UpstreamCommit) string {
-//		return fmt.Sprintf("%s-%s", v.UpstreamCommit, v.Partition)
+//		return fmt.Sprintf("%s-%s", v.UpstreamCommit, v.Cluster)
 //	})
 //	for _, targetUpstream := range targetUpstreams {
-//		key := fmt.Sprintf("%s-%s", targetUpstream.UpstreamCommit, targetUpstream.Partition)
+//		key := fmt.Sprintf("%s-%s", targetUpstream.UpstreamCommit, targetUpstream.Cluster)
 //		if baseUpstream, ok := baseUpstreamMap[key]; ok {
 //			if baseUpstream.Commit != targetUpstream.Commit {
 //				Upstreams = append(Upstreams, &UpstreamDiff{
 //					UpstreamCommit:  targetUpstream.UpstreamCommit,
-//					Partition: targetUpstream.Partition,
+//					Cluster: targetUpstream.Cluster,
 //					Commit:    targetUpstream.Commit,
 //					Change:    project_diff.ChangeTypeUpdate,
 //				})
 //			} else {
 //				Upstreams = append(Upstreams, &UpstreamDiff{
 //					UpstreamCommit:  targetUpstream.UpstreamCommit,
-//					Partition: targetUpstream.Partition,
+//					Cluster: targetUpstream.Cluster,
 //					Commit:    targetUpstream.Commit,
 //					Change:    project_diff.ChangeTypeNone,
 //				})
@@ -234,7 +234,7 @@ func (s *imlReleaseService) GetRunningApiProxyCommit(ctx context.Context, projec
 //		} else {
 //			Upstreams = append(Upstreams, &UpstreamDiff{
 //				UpstreamCommit:  targetUpstream.UpstreamCommit,
-//				Partition: targetUpstream.Partition,
+//				Cluster: targetUpstream.Cluster,
 //				Commit:    targetUpstream.Commit,
 //				Change:    project_diff.ChangeTypeNew,
 //			})
@@ -243,7 +243,7 @@ func (s *imlReleaseService) GetRunningApiProxyCommit(ctx context.Context, projec
 //	for _, baseUpstream := range baseUpstreamMap {
 //		Upstreams = append(Upstreams, &UpstreamDiff{
 //			UpstreamCommit:  baseUpstream.UpstreamCommit,
-//			Partition: baseUpstream.Partition,
+//			Cluster: baseUpstream.Cluster,
 //			Commit:    baseUpstream.Commit,
 //			Change:    project_diff.ChangeTypeDelete,
 //		})
@@ -251,11 +251,15 @@ func (s *imlReleaseService) GetRunningApiProxyCommit(ctx context.Context, projec
 //	return Upstreams
 //}
 
-func (s *imlReleaseService) SetRunning(ctx context.Context, project string, id string) error {
+func (s *imlReleaseService) SetRunning(ctx context.Context, service string, id string) error {
+	_, err := s.releaseRuntime.DeleteWhere(ctx, map[string]interface{}{"service": service})
+	if err != nil {
+		return err
+	}
 	operator := utils.UserId(ctx)
 	return s.releaseRuntime.Save(ctx, &release.Runtime{
 		Id:         0,
-		Project:    project,
+		Service:    service,
 		Release:    id,
 		UpdateTime: time.Now(),
 		Operator:   operator,
@@ -263,7 +267,7 @@ func (s *imlReleaseService) SetRunning(ctx context.Context, project string, id s
 
 }
 
-func (s *imlReleaseService) CreateRelease(ctx context.Context, project string, version string, remark string, apisProxyCommits, apiDocCommits map[string]string, upstreams map[string]map[string]string) (*Release, error) {
+func (s *imlReleaseService) CreateRelease(ctx context.Context, service string, version string, remark string, apisProxyCommits, apiDocCommits map[string]string, upstreams map[string]map[string]string) (*Release, error) {
 	operator := utils.UserId(ctx)
 	releaseId := uuid.NewString()
 	commits := make([]*release.Commit, 0, len(apisProxyCommits)+len(apiDocCommits)+len(upstreams))
@@ -300,13 +304,13 @@ func (s *imlReleaseService) CreateRelease(ctx context.Context, project string, v
 		Id:       0,
 		UUID:     releaseId,
 		Name:     version,
-		Project:  project,
+		Service:  service,
 		Remark:   remark,
 		Creator:  operator,
 		CreateAt: time.Now(),
 	}
 	err := s.releaseStore.Transaction(ctx, func(ctx context.Context) error {
-		ok, e := s.CheckNewVersion(ctx, project, version)
+		ok, e := s.CheckNewVersion(ctx, service, version)
 		if e != nil {
 			return e
 		}
@@ -326,9 +330,9 @@ func (s *imlReleaseService) CreateRelease(ctx context.Context, project string, v
 	return FromEntity(ev), nil
 }
 
-func (s *imlReleaseService) CheckNewVersion(ctx context.Context, project string, version string) (bool, error) {
+func (s *imlReleaseService) CheckNewVersion(ctx context.Context, service string, version string) (bool, error) {
 	v, err := s.releaseStore.First(ctx, map[string]interface{}{
-		"project": project,
+		"service": service,
 		"name":    version,
 	})
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -396,8 +400,8 @@ func (s *imlReleaseService) DeleteRelease(ctx context.Context, id string) error 
 
 }
 
-func (s *imlReleaseService) List(ctx context.Context, project string) ([]*Release, error) {
-	list, err := s.releaseStore.List(ctx, map[string]interface{}{"project": project}, "create_at desc")
+func (s *imlReleaseService) List(ctx context.Context, service string) ([]*Release, error) {
+	list, err := s.releaseStore.List(ctx, map[string]interface{}{"service": service}, "create_at desc")
 	if err != nil {
 		return nil, err
 	}
@@ -445,9 +449,9 @@ func (s *imlReleaseService) GetReleaseInfos(ctx context.Context, id string) ([]*
 	return apiProxyCommits, apiDocumentCommits, upstreamCommits, nil
 }
 
-func (s *imlReleaseService) GetRunning(ctx context.Context, project string) (*Release, error) {
+func (s *imlReleaseService) GetRunning(ctx context.Context, service string) (*Release, error) {
 	running, err := s.releaseRuntime.First(ctx, map[string]interface{}{
-		"project": project,
+		"service": service,
 	})
 	if err != nil {
 		return nil, err

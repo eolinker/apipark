@@ -99,3 +99,13 @@ export type DynamicMenuItem = {
 }
 
 export type AccessDataType = keyof typeof PERMISSION_DEFINITION[0]
+
+
+
+export type SimpleMemberItem = {
+    id:string
+    name:string
+    email:string
+    department:string
+    avatar:string
+}
