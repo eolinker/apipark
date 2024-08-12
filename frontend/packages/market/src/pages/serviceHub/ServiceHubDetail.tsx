@@ -10,7 +10,7 @@ import { ApplyServiceHandle, ServiceBasicInfoType, ServiceDetailType } from "../
 import { EntityItem } from "@common/const/type.ts";
 import { ApplyServiceModal } from "./ApplyServiceModal.tsx";
 import ServiceHubApiDocument from "./ServiceHubApiDocument.tsx";
-import { ApiFilled, LeftOutlined } from "@ant-design/icons";
+import { ApiFilled, ArrowLeftOutlined, LeftOutlined } from "@ant-design/icons";
 import { Typography } from 'antd';
 import { SimpleSystemItem } from "@core/const/system/type.ts";
 import { Icon } from "@iconify/react/dist/iconify.js";
@@ -121,14 +121,17 @@ const ServiceHubDetail = ()=>{
         <section className=" grid grid-cols-5 h-full ">
             <section className="col-span-4 border-0 border-r-[1px] border-solid border-BORDER flex flex-col overflow-hidden">
                 <section className="flex flex-col gap-btnbase p-btnbase ">
-                    <a onClick={()=>navigate('/serviceHub/list')}><LeftOutlined />返回</a>
+                    
+                    <div className="text-[18px] leading-[25px] pb-[12px]">
+                        <Button type="text" onClick={()=>navigate(`/serviceHub/list`)}><ArrowLeftOutlined className="max-h-[14px]" />返回</Button>
+                    </div>
                     <div className="flex">
                         {/* <Avatar shape="square" size={50} className=" bg-[linear-gradient(135deg,white,#f0f0f0)] text-[#333] rounded-[12px]" > {service?.name?.substring(0,1)}</Avatar> */}
                         <Avatar shape="square" size={50} 
                             className={ `rounded-[12px] border-none rounded-[12px] ${ serviceBasicInfo?.logo ? 'bg-[linear-gradient(135deg,white,#f0f0f0)]' : 'bg-[linear-gradient(135deg,#7F83F7,#4E54FF)]'}`} 
                             src={ serviceBasicInfo?.logo ?  <img src={serviceBasicInfo?.logo} alt="Logo" style={{  maxWidth: '200px', width:'45px',height:'45px',objectFit:'unset'}} 
                             /> : undefined}
-                            icon={serviceBasicInfo?.logo ? '' :<iconpark-icon  className="" name="auto-generate-api"></iconpark-icon>}> </Avatar>
+                            icon={serviceBasicInfo?.logo ? '' :<iconpark-icon   name="auto-generate-api"></iconpark-icon>}> </Avatar>
 
                         <div className="pl-[20px] w-[calc(100%-50px)]">
                             <p className="text-[14px] h-[20px] leading-[20px] truncate font-bold">{serviceName}</p>
@@ -150,7 +153,7 @@ const ServiceHubDetail = ()=>{
             </section>
             <section className="col-span-1 p-btnbase px-btnrbase">
                     <Descriptions title="服务信息" column={1} size={'small'}>
-                        <Descriptions.Item label="接入应用">{serviceBasicInfo?.appNum || '-'}</Descriptions.Item>
+                        <Descriptions.Item label="接入应用">{serviceBasicInfo?.appNum ?? '-'}</Descriptions.Item>
                         <Descriptions.Item label="供应方">{serviceBasicInfo?.team?.name || '-'}</Descriptions.Item>
                         <Descriptions.Item label="分类">{serviceBasicInfo?.catalogue?.name || '-'}</Descriptions.Item>
                         <Descriptions.Item label="标签">{serviceBasicInfo?.tags?.map(x=>x.name)?.join(',') || '-'}</Descriptions.Item>

@@ -10,8 +10,8 @@ import ThemeSwitcher from '@common/components/aoplatform/ThemeSwitcher'
 const antdComponentThemeToken = {
   token: {
     // Seed Token，影响范围大
-    colorPrimary: '#7371fc',
-    colorLink:'#7371fc',
+    colorPrimary: '#3D46F2',
+    colorLink:'#3D46F2',
     colorBorder:'#ededed',
     colorText:'#333',
     borderRadius: 4,
@@ -38,7 +38,7 @@ const antdComponentThemeToken = {
       optionHoverBg:'#EBEEF2'
     },
     Layout: {
-      bodyBg: 'linear-gradient(107.97deg, rgba(32,41,117,1) 4.41%,rgba(16,13,27,1) 86.11%);',
+      bodyBg: '#17163E',
       headerBg: 'transparent',
       headerColor: '#333',
       headerPadding: '10 20px',

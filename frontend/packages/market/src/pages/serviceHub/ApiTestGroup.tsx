@@ -60,7 +60,7 @@ export default function ApiTestGroup({apiInfoList,selectedApiId }:ApiTestGroupTy
 
     return (
         <div className="flex flex-1 h-full w-full">
-            <div className="w-[224px] p-btnbase border-0 border-solid border-r-[1px] border-r-BORDER">
+            <div className="w-[220px] p-btnbase border-0 border-solid border-r-[1px] border-r-BORDER">
                 <Input className=" my-btnybase" onChange={(e) => debounce(onSearchWordChange, 100)(e)}
                         allowClear placeholder="搜索分类或标签"
                        prefix={<SearchOutlined className="cursor-pointer" onClick={(e) => {

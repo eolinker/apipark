@@ -301,8 +301,8 @@ export default function IntelligentPluginList(){
             footer:(_, { OkBtn, CancelBtn }) =>{
                 return (
                         <>
-                            <WithPermission access="system.partition.self.edit"><CancelBtn/></WithPermission>
-                            <WithPermission access="system.partition.self.edit"><OkBtn/></WithPermission>
+                            <WithPermission access=""><CancelBtn/></WithPermission>
+                            <WithPermission access=""><OkBtn/></WithPermission>
                         </>
                 );
             },
@@ -330,7 +330,7 @@ export default function IntelligentPluginList(){
             onSearchWordChange={(e)=>{setSearchWord(e.target.value);setTableHttpReload(true);setTableHttpReload(true)}}
         />
         
-        <DrawerWithFooter title={`${drawerType === 'add' ? '添加' : '编辑'}${pluginName }`} open={drawerOpen} onClose={()=>{setCurDetail(undefined);setDrawerOpen(false)}} onSubmit={()=>drawerFormRef.current?.save()?.then((res)=>{res && manualReloadTable();return res})}  submitAccess='system.partition.self.edit'>
+        <DrawerWithFooter title={`${drawerType === 'add' ? '添加' : '编辑'}${pluginName }`} open={drawerOpen} onClose={()=>{setCurDetail(undefined);setDrawerOpen(false)}} onSubmit={()=>drawerFormRef.current?.save()?.then((res)=>{res && manualReloadTable();return res})}  submitAccess=''>
             <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin/>} spinning={drawerLoading}>
                 <IntelligentPluginConfig 
                     ref={drawerFormRef!} 

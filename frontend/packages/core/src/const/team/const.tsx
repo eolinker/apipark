@@ -35,10 +35,10 @@ export const TEAM_TABLE_COLUMNS: ProColumns<TeamTableListItem>[] = [
     },
     {
         title: '服务数量',
-        dataIndex: 'systemNum',
+        dataIndex: 'serviceNum',
         ellipsis:true,
         sorter: (a,b)=> {
-            return a.systemNum - b.systemNum
+            return a.serviceNum - b.serviceNum
         },
     },
     {

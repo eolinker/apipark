@@ -135,7 +135,7 @@ const ServiceHubList:FC = ()=>{
             <div className="h-full  padding-top-40"> 
         <Spin className="h-full" wrapperClassName="h-full"  indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} spinning={filterOption.listLoading}>
             {filterOption.showServicesList && filterOption.showServicesList.length > 0 ? <VirtuosoGrid
-            style={{ height: '100%',marginTop:'20px'}} 
+            style={{ height: '100%'}} 
             data={filterOption.showServicesList}
             totalCount={filterOption.showServicesList.length}
             itemContent={(index) => {
@@ -189,10 +189,10 @@ const CardTitle = (service:ServiceHubTableListItem)=>{
                     <Tag color="#7371fc1b" className="text-theme font-normal border-0 mr-[12px] max-w-[70px] truncate" key={service.id} bordered={false} title={service.catalogue?.name || '-'}>{service.catalogue?.name || '-'}</Tag>
                    
                     <Tooltip  title='API 数量'>
-                        <span className="mr-[12px]"><ApiOutlined className="mr-[1px] text-[14px]"/><span className="font-normal">{service.apiNum ?? '-'}</span></span>
+                        <span className="mr-[12px]"><ApiOutlined className="mr-[1px] text-[14px] h-[14px] w-[14px]"/><span className="font-normal text-[14px]">{service.apiNum ?? '-'}</span></span>
                     </Tooltip>
                     <Tooltip  title='接入应用数量'>
-                        <span className="mr-[12px] flex items-center"><span className="h-[16px] mr-[4px] flex items-center"><iconpark-icon  className="" name="auto-generate-api"></iconpark-icon></span><span className="font-normal">{service.subscriberNum ?? '-'}</span></span>
+                        <span className="mr-[12px] flex items-center"><span className="h-[14px] mr-[4px] flex items-center"><iconpark-icon  className="max-h-[14px]  h-[14px] w-[14px]"  name="auto-generate-api"></iconpark-icon></span><span className="font-normal text-[14px]">{service.subscriberNum ?? '-'}</span></span>
                     </Tooltip>
                 </div>
             </div>

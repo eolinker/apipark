@@ -30,6 +30,7 @@ export const PARTITION_CERT_TABLE_COLUMNS: ProColumns<PartitionCertTableListItem
         ellipsis: true,
         dataIndex: 'notAfter',
         copyable: true,
+        width:320,
         renderText: (value:string,entity:PartitionCertTableListItem) => {
             return `${entity.notBefore} - ${entity.notAfter}`
         },

@@ -37,7 +37,7 @@ const SystemInsidePublic:FC = ()=>{
 
     return (
         <>
-            <Tabs defaultActiveKey={pageStatus.toString()} size="small" className="h-auto bg-MAIN_BG" tabBarStyle={{paddingLeft:'10px',marginTop:'0px',marginBottom:'0px'}} tabBarGutter={20} items={SYSTEM_PUBLISH_TAB_ITEMS} onChange={onChange} destroyInactiveTabPane={true}/>
+            <Tabs defaultActiveKey={pageStatus.toString()} size="small" className="h-auto bg-MAIN_BG" tabBarStyle={{paddingLeft:'10px'}} tabBarGutter={20} items={SYSTEM_PUBLISH_TAB_ITEMS} onChange={onChange} destroyInactiveTabPane={true}/>
             <Outlet />
         </>
     )

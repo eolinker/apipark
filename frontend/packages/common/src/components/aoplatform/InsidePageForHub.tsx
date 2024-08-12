@@ -3,6 +3,7 @@ import { Button, Tag } from "antd"
 import {useNavigate} from "react-router-dom";
 import WithPermission from "@common/components/aoplatform/WithPermission";
 import { FC, ReactNode } from "react";
+import { ArrowLeftOutlined } from "@ant-design/icons";
 
 
 class InsidePageProps {
@@ -27,10 +28,12 @@ const InsidePageForHub:FC<InsidePageProps> = ({showBanner=true,pageTitle,tagList
     return (
         <div className="h-full flex flex-col flex-1 overflow-hidden max-w-[1500px] m-auto">
             { showBanner &&  <div className="p-btnbase  mx-[4px]">
-                <p className="mb-[16px] h-[20px] "><a className="leading-[20px] inline-block "onClick={goBack}> {"<  返回列表"}</a></p>
+                <div className="text-[18px] leading-[25px] pb-[12px]">
+                        <Button type="text" onClick={goBack}><ArrowLeftOutlined className="max-h-[14px]" />返回</Button>
+                    </div>
                 <div className="flex justify-between">
                     <div className="">
-                        <span className="text-[20px] font-bold">{pageTitle}</span>
+                        <span className="text-[26px] text-theme">{pageTitle}</span>
                         {tagList && tagList?.length > 0 && tagList?.map((tag)=>{
                             return ( <Tag key={tag.label as string} bordered={false}>{tag.label}</Tag>)
                         })}
@@ -39,7 +42,7 @@ const InsidePageForHub:FC<InsidePageProps> = ({showBanner=true,pageTitle,tagList
                         onBtnClick&&onBtnClick()
                     }}>{btnTitle}</Button></WithPermission>}
                 </div>
-                <p className="text-[14px] leading-[22px] text-[#999]">
+                <p className="mb-[30px]">
                     {description}
                 </p>
             </div>}

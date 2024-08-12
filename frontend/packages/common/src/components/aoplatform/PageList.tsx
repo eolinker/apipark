@@ -75,9 +75,9 @@ const PageList = <T extends Record<string, unknown>>(props: React.PropsWithChild
 
   useEffect(() => {
     const handleResize = () => {
-      if (parentRef.current) {
+      if (parentRef.current && !noScroll) {
         const res = parentRef.current.getBoundingClientRect();
-        const height = res.height - ((noTop ? 0 : 52) + 40 + (showPagination && !dragSortKey ? 52 : 0)); // 减去顶部按钮、底部分页、表头高度
+        const height = res.height - ((noTop ? 0 : 52) + 40 + (showPagination && !dragSortKey ? 52 : 0) +( besidesTableHeight ?? 0)); // 减去顶部按钮、底部分页、表头高度
         setTableWidth(minTableWidth > res.width ? minTableWidth : undefined);
         height && setTableHeight(minVirtualHeight === undefined ? height : (height > minVirtualHeight ? height : minVirtualHeight));
       }
@@ -85,7 +85,7 @@ const PageList = <T extends Record<string, unknown>>(props: React.PropsWithChild
 
     const debouncedHandleResize = debounce(handleResize, 200);
 
-    if (!resizeObserverRef.current || noScroll) {
+    if (!resizeObserverRef.current && !noScroll) {
       // 创建一个 ResizeObserver 来监听高度变化，只创建一次
       resizeObserverRef.current = new ResizeObserver(debouncedHandleResize);
       // 开始监听

@@ -55,7 +55,7 @@ export default function ApprovalPage(){
                     <Menu
                         onClick={onMenuClick}
                         className="h-full overflow-y-auto"
-                        style={{ width: 182 }}
+                        style={{ width: 220 }}
                         selectedKeys={[pageType]}
                         mode="inline"
                         items={menuItems}

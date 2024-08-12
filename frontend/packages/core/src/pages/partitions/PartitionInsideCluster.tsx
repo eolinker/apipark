@@ -79,7 +79,13 @@ const PartitionInsideCluster:FC = ()=> {
 
     return (
         <>
-            <div className="p-btnbase overflow-hidden h-full">
+            <div className=" overflow-auto h-full">
+                
+                <div className="pb-[30px] pt-0">
+                        <p className="text-theme text-[26px] mb-[20px]">集群</p>
+                        <p>设置访问 API 的集群，让 API 在分布式环境中稳定运行，并且能够根据业务需求进行灵活扩展和优化。</p>
+                </div>
+
                 <div className="pb-btnbase"> <WithPermission access="system.devops.cluster.edit" key="changeClusterConfig"><Button type="primary" onClick={() => openModal('editNode')}>修改集群配置</Button></WithPermission></div>
                 <Spin wrapperClassName=" h-[calc(100%-44px)] flex-1 overflow-auto" indicator={<LoadingOutlined style={{ fontSize: 24 }} spin/>} spinning={loading}>
                     <div className="h-full overflow-auto ">

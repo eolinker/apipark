@@ -10,7 +10,7 @@ import useInitializeMonaco from "@common/hooks/useInitializeMonaco";
 const antdComponentThemeToken = {
   token: {
     // Seed Token，影响范围大
-    colorPrimary: '#7371fc',
+    colorPrimary: '#3D46F2',
     colorBorder:'#ededed',
     colorText:'#333',
     borderRadius: 4,

@@ -64,13 +64,13 @@ export function ParamLimit({ min, max, onChange, minLabel = 'Minimum', maxLabel 
                     border: '1px solid #EDEDED'
                   },
                   '& .Mui-focused .MuiOutlinedInput-notchedOutline':{
-                    border:'1px solid #7371fc'
+                    border:'1px solid #3D46F2'
                   },
                   '& .MuiInputLabel-root.Mui-focused':{
-                    color:'#7371fc'
+                    color:'#3D46F2'
                   },
                   '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline':{
-                    borderColor:'#7371fc'
+                    borderColor:'#3D46F2'
                     }
                 }}
                 value={minValue}
@@ -90,13 +90,13 @@ export function ParamLimit({ min, max, onChange, minLabel = 'Minimum', maxLabel 
                     border: '1px solid #EDEDED'
                   },
                   '& .Mui-focused .MuiOutlinedInput-notchedOutline':{
-                    border:'1px solid #7371fc'
+                    border:'1px solid #3D46F2'
                   },
                   '& .MuiInputLabel-root.Mui-focused':{
-                    color:'#7371fc'
+                    color:'#3D46F2'
                   },
                   '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline':{
-                    borderColor:'#7371fc'
+                    borderColor:'#3D46F2'
                     }
                 }}
                 onChange={handleMaxChange}

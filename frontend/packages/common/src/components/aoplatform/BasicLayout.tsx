@@ -21,7 +21,7 @@ import { UserInfoType, UserProfileHandle } from '@common/const/type.ts';
 import { useFetch } from '@common/hooks/http.ts';
   
 const themeToken = {
-    bgLayout:'linear-gradient(107.97deg, rgba(32,41,117,1) 4.41%,rgba(16,13,27,1) 86.11%);',
+    bgLayout:'#17163E;',
     header: {
         heightLayoutHeader:72
     },
@@ -164,7 +164,6 @@ const themeToken = {
         })
     }
 
-
     return(
         <div
             id="test-pro-layout"
@@ -184,7 +183,7 @@ const themeToken = {
                 location={{
                     pathname,
                 }}
-                siderWidth={212}
+                siderWidth={220}
                 breakpoint={'lg'}
                 route={headerMenuData}
                 token={themeToken}
@@ -260,7 +259,7 @@ const themeToken = {
                 collapsed={false}
                 collapsedButtonRender={false}
                 >
-                  <div className="w-full h-calc-100vh-minus-navbar px-[40px] py-[30px]">
+                  <div className={`w-full h-calc-100vh-minus-navbar px-[40px] pt-[30px] ${currentUrl.startsWith('/role/list') ? 'overflow-auto' : 'overflow-hidden' }`}>
                     <Outlet />
                   </div>
                 </ProLayout>

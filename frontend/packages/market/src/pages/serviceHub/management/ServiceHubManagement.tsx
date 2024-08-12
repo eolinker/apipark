@@ -138,18 +138,18 @@ useEffect(() => {
     return (<>{
         teamList && teamList.length > 0 ?
         <div className="flex flex-1 h-full">
-            <div className="w-[224px] border-0 border-solid border-r-[1px] border-r-BORDER h-full overflow-hidden">
-            <div className="text-[18px] leading-[25px] pl-[20px] pt-[20px] pb-[10px] font-bold">团队</div>
-            <Menu
-                onClick={onClick}
-                style={{ width: 224, paddingLeft:'8px', paddingRight:'8px' }}
-                className="overflow-auto h-[calc(100%-55px)]"
-                mode="inline"
-                items={teamList}
-                selectedKeys={teamId?[teamId]:[]}
-                />
-        </div>
-        <div className="w-[calc(100%-224px)] padding-top-20">
+            <div className="w-[220px] border-0 border-solid border-r-[1px] border-r-BORDER h-full overflow-hidden">
+                <div className="text-[18px] leading-[25px] pl-[20px] pt-[20px] pb-[10px] font-bold">团队</div>
+                <Menu
+                    onClick={onClick}
+                    style={{ width: 220}}
+                    className="overflow-auto h-[calc(100%-55px)]"
+                    mode="inline"
+                    items={teamList}
+                    selectedKeys={teamId?[teamId]:[]}
+                    />
+            </div>
+        <div className="w-[calc(100%-220px)] padding-top-20">
             <div className="mt-[20px]  ml-[40px] text-[18px] leading-[25px] font-bold">应用</div>
             <VirtuosoGrid
                 style={{ height: 'calc(100% - 45px)'}}
@@ -205,7 +205,7 @@ const CardTitle = (service:ServiceHubAppListItem)=>{
                 <p className="text-[14px] h-[20px] leading-[20px] truncate">{service.name}</p>
                 <div className="mt-[10px] h-[20px] flex items-center font-normal">
                     <Tooltip title={`订阅的服务数量：已通过 ${service.subscribeNum ?? '-'} 个，申请中 ${service.subscribeVerifyNum ?? '-'} 个`}>
-                        <span className="mr-[12px] flex items-center"><span className="h-[16px] mr-[4px] flex items-center"><iconpark-icon  className="" name="auto-generate-api"></iconpark-icon></span><span className="font-normal">{(service.subscribeNum + service.subscribeVerifyNum)?? '-'}</span></span>
+                        <span className="mr-[12px] flex items-center"><span className="h-[14px] mr-[4px] flex items-center"><iconpark-icon  className="max-h-[14px] h-[14px] w-[14px]" name="auto-generate-api"></iconpark-icon></span><span className="font-normal text-[14px]">{(service.subscribeNum + service.subscribeVerifyNum)?? '-'}</span></span>
                     </Tooltip>
                 </div>
             </div>

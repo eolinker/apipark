@@ -34,7 +34,7 @@ export const ServiceHubGroup = ({children,filterOption,dispatch}:ServiceHubGroup
             const {code,data,msg} = response
             if(code === STATUS_CODE.SUCCESS){
                 dispatch({type:SERVICE_HUB_LIST_ACTIONS.GET_CATEGORIES,payload:data.catalogues})
-                dispatch({type:SERVICE_HUB_LIST_ACTIONS.GET_TAGS,payload:[...data.tags,{id:'empty',name:'(空标签)'}]})
+                dispatch({type:SERVICE_HUB_LIST_ACTIONS.GET_TAGS,payload:[...data.tags,{id:'empty',name:'无标签'}]})
                 dispatch({type:SERVICE_HUB_LIST_ACTIONS.SET_SELECTED_CATE,payload:[...data.catalogues.map((x:CategorizesType)=>x.id)]})
                 dispatch({type:SERVICE_HUB_LIST_ACTIONS.SET_SELECTED_TAG,payload:[...data.tags.map((x:TagType)=>x.id),'empty']})
             }else{
@@ -71,9 +71,9 @@ export const ServiceHubGroup = ({children,filterOption,dispatch}:ServiceHubGroup
 
     return (
         <div className="flex flex-1 h-full">
-            <div className="w-[250px] border-0 border-solid border-r-[1px] border-r-BORDER">
+            <div className="w-[220px] border-0 border-solid border-r-[1px] border-r-BORDER">
             <div className=" h-full">
-                <Input className="rounded-SEARCH_RADIUS m-[10px] h-[40px] bg-[#f8f8f8] w-[230px]" onChange={(e) => debounce(onSearchWordChange, 500)(e.target.value)}
+                <Input className="rounded-SEARCH_RADIUS m-[10px] h-[40px] bg-[#f8f8f8] w-[200px]" onChange={(e) => debounce(onSearchWordChange, 500)(e.target.value)}
                     allowClear placeholder="搜索服务"
                     prefix={<SearchOutlined className="cursor-pointer"/>}/>
                     <div className="h-[calc(100%-60px)] overflow-auto">
@@ -108,7 +108,7 @@ export const ServiceHubGroup = ({children,filterOption,dispatch}:ServiceHubGroup
                 </div>
             </div>
         </div>
-        <div className="w-[calc(100%-224px)]">
+        <div className="w-[calc(100%-220px)]">
           {children}
         </div>
     </div>);

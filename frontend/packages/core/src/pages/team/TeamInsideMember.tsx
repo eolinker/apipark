@@ -288,6 +288,7 @@ const TeamInsideMember:FC = ()=>{
             request={()=>getMemberList()}
             primaryKey="user.id"
             addNewBtnTitle="添加成员"
+            className="ml-[20px] mt-[20px]"
             searchPlaceholder="输入姓名查找"
             onAddNewBtnClick={()=>{openModal('add')}}
             addNewBtnAccess="team.team.member.add"

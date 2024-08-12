@@ -282,18 +282,24 @@ const PartitionInsideCert:FC = ()=>{
     },[memberValueEnum])
 
     return (
-        <PageList
-            id="global_partition_cert"
-            ref={pageListRef}
-            columns = {[...columns,...operation]}
-            request={()=>getPartitionCertList()}
-            showPagination={false}
-            addNewBtnTitle="添加证书"
-            addNewBtnAccess="system.devops.ssl_certificate.add"
-            onAddNewBtnClick={()=>{openModal('add')}}
-            onRowClick={(row:PartitionCertTableListItem)=>openModal('edit',row)}
-            tableClickAccess="system.devops.ssl_certificate.edit"
-        />
+        <div className="flex flex-col flex-1 h-full">
+            <div className="pb-[30px] pt-0">
+                        <p className="text-theme text-[26px] mb-[20px]">证书</p>
+                        <p>通过为 API 服务配置和管理 SSL 证书，企业可以加密数据传输，防止敏感信息被窃取或篡改。 </p>
+            </div>
+            <PageList
+                id="global_partition_cert"
+                ref={pageListRef}
+                columns = {[...columns,...operation]}
+                request={()=>getPartitionCertList()}
+                showPagination={false}
+                addNewBtnTitle="添加证书"
+                addNewBtnAccess="system.devops.ssl_certificate.add"
+                onAddNewBtnClick={()=>{openModal('add')}}
+                onRowClick={(row:PartitionCertTableListItem)=>openModal('edit',row)}
+                tableClickAccess="system.devops.ssl_certificate.edit"
+            />
+        </div>
     )
 
 }

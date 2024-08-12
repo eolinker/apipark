@@ -27,10 +27,10 @@ export const routerKeyMap = new Map<string, string[]|string>([
 export const TOTAL_MENU_ITEMS: MenuProps['items'] = [
   
   getNavItem('工作空间', 'workspace','/tenantManagement',<Icon icon="ic:baseline-space-dashboard" width="18" height="18"/>, [
-    getNavItem('我的', 'my','/tenantManagement',<Icon icon="ic:baseline-home" width="18" height="18"/>,[
-      getNavItem(<a>应用</a>, 'tenantManagement','/tenantManagement',null,undefined,undefined,''),
-      getNavItem(<a>服务</a>, 'service','/service',null,undefined,undefined,''),
-      getNavItem(<a>团队</a>, 'team','/team',null,undefined,undefined,''),
+    getNavItem('我的', 'my','/tenantManagement',null,[
+      getNavItem(<a>应用</a>, 'tenantManagement','/tenantManagement',<Icon icon="ic:baseline-apps" width="18" height="18"/>,undefined,undefined,''),
+      getNavItem(<a>服务</a>, 'service','/service',<Icon icon="ic:baseline-blinds-closed" width="18" height="18"/>,undefined,undefined,''),
+      getNavItem(<a>团队</a>, 'team','/team',<Icon icon="ic:baseline-people-alt" width="18" height="18"/>,undefined,undefined,''),
     ],undefined,''),
       getNavItem(<a>API 市场</a>, 'serviceHub','/serviceHub',<Icon icon="ic:baseline-hub" width="18" height="18"/>,undefined,undefined,'system.workspace.api_market.view'),
   ]),
@@ -42,18 +42,18 @@ export const TOTAL_MENU_ITEMS: MenuProps['items'] = [
   ]):null,
 
   getNavItem('系统设置', 'operationCenter','/member',<Icon icon="ic:baseline-settings" width="18" height="18"/>, [
-    getNavItem('组织', 'organization','/member',<Icon icon="ic:baseline-people-alt" width="18" height="18"/>,[
-      getNavItem(<a>成员</a>, 'member','/member',null,undefined,undefined,'system.organization.member.view'),
-      getNavItem(<a>角色</a>, 'role','/role',null,undefined,undefined,'system.organization.role.view'),
+    getNavItem('组织', 'organization','/member',null,[
+      getNavItem(<a>成员</a>, 'member','/member',<Icon icon="ic:baseline-people-alt" width="18" height="18"/>,undefined,undefined,'system.organization.member.view'),
+      getNavItem(<a>角色</a>, 'role','/role',<Icon icon="ic:baseline-verified-user" width="18" height="18"/>,undefined,undefined,'system.organization.role.view'),
     ],undefined,''),
-    getNavItem('API 市场', 'serviceHubSetting','/servicecategories',<Icon icon="ic:baseline-hub" width="18" height="18"/>,[
-      getNavItem(<a>服务分类管理</a>, 'servicecategories','/servicecategories',null,undefined,undefined,'system.api_market.service_classification.view'),
+    getNavItem('API 市场', 'serviceHubSetting','/servicecategories',null,[
+      getNavItem(<a>服务分类管理</a>, 'servicecategories','/servicecategories',<Icon icon="ic:baseline-hub" width="18" height="18"/>,undefined,undefined,'system.api_market.service_classification.view'),
     ],undefined,'system.api_market.service_classification.view'),
 
-    getNavItem('运维与集成', 'maintenanceCenter','/cluster', <Icon icon="ic:baseline-memory" width="18" height="18"/>, [
-      getNavItem(<a>集群</a>, 'cluster','/cluster',null,undefined,undefined,'system.devops.cluster.view'),
-      getNavItem(<a>证书</a>, 'cert','/cert',null,undefined,undefined,'system.devops.ssl_certificate.view'),
-      getNavItem(<a>日志</a>, 'logsettings','/logsettings',null,undefined,undefined,'system.devops.log_configuration.view'),
+    getNavItem('运维与集成', 'maintenanceCenter','/cluster', null, [
+      getNavItem(<a>集群</a>, 'cluster','/cluster',<Icon icon="ic:baseline-device-hub" width="18" height="18"/>,undefined,undefined,'system.devops.cluster.view'),
+      getNavItem(<a>证书</a>, 'cert','/cert',<Icon icon="ic:baseline-security" width="18" height="18"/>,undefined,undefined,'system.devops.ssl_certificate.view'),
+      getNavItem(<a>日志</a>, 'logsettings','/logsettings',<Icon icon="ic:baseline-sticky-note-2" width="18" height="18"/>,undefined,undefined,'system.devops.log_configuration.view'),
       APP_MODE === 'pro' ? getNavItem(<a>资源</a>, 'resourcesettings','/resourcesettings',null,undefined,undefined,'system.partition.self.view'):null,
       APP_MODE === 'pro' ? getNavItem(<a>Open API</a>, 'openapi','/openapi',null,undefined,undefined,'system.openapi.self.view'):null,
     ]),

@@ -89,7 +89,7 @@ export const EditMemberModal = forwardRef<MemberDropdownModalHandle,MemberDropdo
                 <Form.Item<MemberDropdownModalFieldType>
                     label="邮箱"
                     name="email"
-                    rules={[{required: true, message: '必填项',whitespace:true },{type:"email"}]}
+                    rules={[{required: true, message: '必填项',whitespace:true },{type:"email",message: '不是有效邮箱地址'}]}
                 >
                     <Input className="w-INPUT_NORMAL" disabled={type ==='editMember'} placeholder="请输入"/>
                 </Form.Item>

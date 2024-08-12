@@ -66,11 +66,7 @@ const SystemInsidePage:FC = ()=> {
         }
         const filteredMenu = filterMenu(SYSTEM_PAGE_MENU_ITEMS as MenuItemGroupType<MenuItemType>[])
         setActiveMenu((pre)=>{
-            if(!pre){
-                const activeMenu = filteredMenu?.[0]?.children?.[0]?.key as string
-                return activeMenu
-            }
-            return pre
+            return pre ?? 'api'
         })
         return  filteredMenu || []
     },[accessData])
@@ -80,13 +76,15 @@ const SystemInsidePage:FC = ()=> {
     };
     
     useEffect(() => {
+        console.log(apiId, serviceId, currentUrl)
         if(apiId !== undefined){
             setActiveMenu('api')
         }else if(serviceId !== currentUrl.split('/')[currentUrl.split('/').length - 1]){ 
             setActiveMenu(currentUrl.split('/')[currentUrl.split('/').length - 1])
         }else{
-            setActiveMenu('upstream')
+            setActiveMenu('api')
         }
+        console.log(activeMenu)
     }, [currentUrl]);
 
     useEffect(()=>{
@@ -116,12 +114,12 @@ const SystemInsidePage:FC = ()=> {
                     <Menu
                         onClick={onMenuClick}
                         className="h-full overflow-y-auto"
-                        style={{ width: 182 }}
+                        style={{ width: 220 }}
                         selectedKeys={[activeMenu!]}
                         mode="inline"
                         items={menuData as unknown as ItemType<MenuItemType>[] } 
                     />
-                    <div  className={` ${['setting', 'upstream'].indexOf(activeMenu!) !== -1   ? 'pt-[20px] pl-btnbase pr-btnrbase' :''} w-full h-full flex flex-1 flex-col overflow-auto bg-MAIN_BG`}>
+                    <div  className={` ${['setting', 'upstream'].indexOf(activeMenu!) !== -1   ? 'pr-btnrbase' :''} w-full h-full flex flex-1 flex-col overflow-auto bg-MAIN_BG  pt-[20px] pl-[20px] pb-[20px] ` }>
                             <Outlet/>
                     </div>
                 </div>

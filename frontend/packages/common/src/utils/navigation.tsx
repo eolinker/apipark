@@ -12,7 +12,7 @@ export function getNavItem(
 ): MenuItem {
   return {
     key,
-    icon :icon ?? <span className="w-[20px]"></span>,
+    icon :icon ,
     path,
     routes:children,
     name:label,

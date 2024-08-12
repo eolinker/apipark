@@ -208,7 +208,7 @@ export const PublishTableStatusColorClass = {
     'fail' : 'text-[#ff3b30]',
     'apply' : 'text-[#46BE11]',
     'refuse' : 'text-[#EF0020]',
-    'running' : 'text-[#7371FC]',
+    'running' : 'text-[#3D46F2]',
     'accept' : 'text-[#147AFE]',
     'none' : 'text-[var(--MAIN_TEXT)]',
     'approval' :  'text-[#03a9f4]',
