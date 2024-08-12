@@ -84,7 +84,6 @@ export default function ApiProxy({ proxyInfo, title, loading = false, onMoreSett
 
   useEffect(() => {
     setRows(proxyInfo?.headers || [])
-    //console.log(proxyInfo?.headers)
   }, [proxyInfo]);
 
   return (

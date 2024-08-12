@@ -1,4 +1,4 @@
-import { Select, Button, App, Radio, Drawer } from "antd";
+import { Select, Button, App, Drawer } from "antd";
 import { useEffect, useRef, useState } from "react";
 import { MonitorSubscriberData, SearchBody } from "@dashboard/const/type";
 import { EntityItem } from "@common/const/type";
@@ -7,8 +7,6 @@ import MonitorTable, { MonitorTableHandler } from "./MonitorTable";
 import { DefaultOptionType } from "antd/es/select";
 import { BasicResponse, STATUS_CODE } from "@common/const/const";
 import { getTime } from "../utils/dashboard";
-import { useParams } from "react-router-dom";
-import { RouterParams } from "@core/components/aoplatform/RenderRoutes";
 import { useExcelExport } from "@common/hooks/excel";
 import { APPLICATION_TABLE_GLOBAL_COLUMNS_CONFIG } from "@dashboard/const/const";
 import { CloseOutlined, ExpandOutlined } from "@ant-design/icons";
@@ -34,7 +32,6 @@ export default function MonitorAppPage(props:MonitorAppPageProps){
     const [queryData, setQueryData] = useState<MonitorSubQueryData>({type:'subscriber'});
     const [exportLoading, setExportLoading] = useState(false);
     const [datePickerValue, setDatePickerValue] = useState<RangeValue>();
-    const { partitionId } = useParams<RouterParams>()
     const monitorAppTableRef = useRef<MonitorTableHandler>(null)
     const {exportExcel} = useExcelExport<MonitorSubscriberData>()
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
@@ -43,10 +40,8 @@ export default function MonitorAppPage(props:MonitorAppPageProps){
     const [queryBtnLoading, setQueryBtnLoading] = useState<boolean>(false)
 
     useEffect(() => {
-        if(partitionId){
           getMonitorData();
           getAppList()
-        }
       }, []);
 
     const getMonitorData = () => {
@@ -179,7 +174,7 @@ export default function MonitorAppPage(props:MonitorAppPageProps){
             
         <Drawer 
           destroyOnClose={true} 
-          className={fullScreen? 'h-[calc(100%-50px)] mt-[50px]':''} 
+          className={fullScreen? 'h-calc-100vh-minus-navbar mt-navbar-height':''} 
           mask={!fullScreen} 
           title={<>
               {fullScreen && <a className="mr-btnrbase text-[14px]" onClick={()=>{setFullScreen?.(false)}}>

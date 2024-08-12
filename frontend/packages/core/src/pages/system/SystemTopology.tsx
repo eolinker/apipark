@@ -1,9 +1,3 @@
-/*
- * @Date: 2024-03-27 16:26:36
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-07-12 14:56:02
- * @FilePath: \frontend\packages\core\src\pages\system\SystemTopology.tsx
- */
 
 import G6, { EdgeConfig, Graph, NodeConfig } from "@antv/g6";
 import  { useCallback, useEffect, useRef, useState } from "react";
@@ -26,7 +20,7 @@ import { SystemTopologyResponse } from "../../const/system/type";
 
 export default function SystemTopology() {
     const {message} = App.useApp()
-    const {systemId}  = useParams<RouterParams>()
+    const {serviceId, teamId}  = useParams<RouterParams>()
     const graphContainerRef = useRef<HTMLDivElement>(null);
     const graphRef = useRef<Graph>(null);
     const [graphData, setGraphData] = useState<GraphData>();
@@ -37,10 +31,10 @@ export default function SystemTopology() {
     const [zoomNum, setZoomNum] = useState<number>(1)
 
     const getNodeData = ()=>{
-        fetchData<BasicResponse<SystemTopologyResponse>>('project/topology',{method:'GET',eoParams:{project:systemId}},).then(response=>{
+        fetchData<BasicResponse<SystemTopologyResponse>>('service/topology',{method:'GET',eoParams:{service:serviceId,team:teamId}},).then(response=>{
             const {code,data,msg} = response
             if(code === STATUS_CODE.SUCCESS){
-                setGraphData(transformData({...data,currentSystem:{id:systemId,name:systemInfo?.name || ''}}))
+                setGraphData(transformData({...data,currentSystem:{id:serviceId,name:systemInfo?.name || ''}}))
             }else{
                 message.error(msg || '操作失败')
             }
@@ -115,12 +109,12 @@ export default function SystemTopology() {
       getNodeData()
       setBreadcrumb([
         {
-            title: <Link to={`/system/list`}>内部数据服务</Link>
+            title: <Link to={`/service/list`}>内部数据服务</Link>
         },
         {
             title: '调用拓扑图'
         }])
-    },[systemId])
+    },[serviceId])
 
     useEffect(() => {
         // 初始化 G6 图
@@ -243,8 +237,8 @@ function transformData(response: SystemTopologyResponse & {currentSystem: Entity
   // 添加订阅者节点和边
   response.subscribers.forEach(subscriber => {
     nodes.push({
-      id: subscriber.project.id,
-      label: `${subscriber.project.name}`,
+      id: subscriber.service.id,
+      label: `${subscriber.service.name}`,
       type: 'subscriberProject',
       style: {
         fill: SYSTEM_TOPOLOGY_NODE_TYPE_COLOR_MAP.subscriberProject.fill, 
@@ -255,7 +249,7 @@ function transformData(response: SystemTopologyResponse & {currentSystem: Entity
       const service = response.services.find(s => s.id === serviceData.id);
       if (service) {
         edges.push({
-          source: subscriber.project.id,
+          source: subscriber.service.id,
           target: response.currentSystem.id,
           type: 'subscribes',
           style:{
@@ -264,7 +258,7 @@ function transformData(response: SystemTopologyResponse & {currentSystem: Entity
           }
         });
         // edges.push({
-        //   source: subscriber.project.id,
+        //   source: subscriber.service.id,
         //   target: service.id,
         //   type: 'subscribes',
         //   style:{
@@ -286,8 +280,8 @@ function transformData(response: SystemTopologyResponse & {currentSystem: Entity
   // 添加调用者节点和边
   response.invoke?.forEach(invoker => {
     nodes.push({
-      id: invoker.project.id,
-      label: `${invoker.project.name}`,
+      id: invoker.service.id,
+      label: `${invoker.service.name}`,
       type: 'invokeProject',
       style: {
         fill: SYSTEM_TOPOLOGY_NODE_TYPE_COLOR_MAP.invokeProject.fill, 
@@ -297,7 +291,7 @@ function transformData(response: SystemTopologyResponse & {currentSystem: Entity
     
       edges.push({
         source: response.currentSystem.id,
-        target: invoker.project.id,
+        target: invoker.service.id,
         type: 'subscribes',
         style:{
           endArrow:true,
@@ -327,7 +321,7 @@ function transformData(response: SystemTopologyResponse & {currentSystem: Entity
     //     });
     //     edges.push({
     //       source: serviceData.id,
-    //       target: invoker.project.id,
+    //       target: invoker.service.id,
     //       type: 'invokes',
     //       style:{
     //         stroke: SYSTEM_TOPOLOGY_NODE_TYPE_COLOR_MAP.invokeProject.stroke, // 订阅服务节点使用蓝色

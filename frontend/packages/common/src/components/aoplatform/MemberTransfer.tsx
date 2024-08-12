@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-05-16 15:38:43
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-05 18:55:12
- * @FilePath: \frontend\packages\common\src\components\aoplatform\MemberTransfer.tsx
- */
+
 import { GetProp, TransferProps, TreeDataNode, theme, Transfer, Tree, Spin } from "antd";
 import { DataNode, TreeProps } from "antd/es/tree";
 import {  Ref, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";

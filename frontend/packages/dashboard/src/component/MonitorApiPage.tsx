@@ -35,7 +35,6 @@ export default function MonitorApiPage(props:MonitorApiPageProps){
     const [datePickerValue, setDatePickerValue] = useState<RangeValue>();
     const [queryData, setQueryData] = useState<MonitorApiQueryData>();
     const [exportLoading, setExportLoading] = useState<boolean>(false);
-    const { partitionId } = useParams<RouterParams>()
     const monitorApiTableRef = useRef<MonitorTableHandler>(null)
     const {exportExcel} = useExcelExport<MonitorApiData>()
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
@@ -45,16 +44,13 @@ export default function MonitorApiPage(props:MonitorApiPageProps){
       const {fetchData} = useFetch()
 
     useEffect(() => {
-        if(partitionId){
           getMonitorData();
           getApiList();
           getProjectList();
-        }
-        
       }, []);
 
     const getApiList = (projectIds?:string[])=>{
-      return fetchData<{apis:EntityItem[]}>('simple/project/apis',{method:'POST',eoParams:{partition:partitionId},eoBody:({projects:projectIds || queryData?.projects})}).then((resp) => {
+      return fetchData<{apis:EntityItem[]}>('simple/project/apis',{method:'POST',eoBody:({projects:projectIds || queryData?.projects})}).then((resp) => {
         const {code,data,msg} = resp
         if(code === STATUS_CODE.SUCCESS){
             setApiOptionList(data.apis?.map((x:EntityItem)=>({label:x.name, value:x.id})))
@@ -68,7 +64,7 @@ export default function MonitorApiPage(props:MonitorApiPageProps){
     }
 
     const getProjectList = ()=>{
-      return fetchData<{projects:EntityItem[]}>('simple/projects',{method:'GET',eoParams:{partition:partitionId}}).then((resp) => {
+      return fetchData<{projects:EntityItem[]}>('simple/projects',{method:'GET'}).then((resp) => {
         const {code,data,msg} = resp
         if(code === STATUS_CODE.SUCCESS){
             setProjectOptionList(data.projects?.map((x:EntityItem)=>({label:x.name, value:x.id})))
@@ -212,7 +208,7 @@ export default function MonitorApiPage(props:MonitorApiPageProps){
         <Drawer 
           destroyOnClose={true} 
           maskClosable={false}
-          className={fullScreen? 'h-[calc(100%-50px)] mt-[50px]':''} 
+          className={fullScreen? 'h-calc-100vh-minus-navbar mt-navbar-height':''} 
           mask={!fullScreen} 
           title={<>
               {fullScreen && <a className="mr-btnrbase text-[14px]" onClick={()=>{setFullScreen?.(false)}}>

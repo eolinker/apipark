@@ -1,21 +1,7 @@
-import { getItem } from "@common/utils/navigation";
 import { ProColumns } from "@ant-design/pro-components";
 import { PartitionCertTableListItem, PartitionClusterNodeModalTableListItem, PartitionClusterNodeTableListItem, PartitionClusterTableListItem, PartitionTableListItem } from "./types";
 import { ColumnType } from "antd/es/table";
 import CopyAddrList from "@common/components/aoplatform/CopyAddrList";
-import { MenuProps } from "antd";
-import { Link } from "react-router-dom";
-
-const APP_MODE = import.meta.env.VITE_APP_MODE;
-
-export const PARTITIONS_INNER_MENU: MenuProps['items'] = [
-    getItem('管理', 'grp', null,
-        [getItem(<Link to="cluster">集群</Link>, 'cluster',undefined,undefined,undefined,'system.partition.cluster.view'),
-            getItem(<Link to="cert">证书管理</Link>, 'cert',undefined,undefined,undefined,'system.partition.cert.view'),
-            APP_MODE ==='pro' ? getItem(<Link to="dashboard_setting">监控配置</Link>, 'dashboard_setting',undefined,undefined,undefined,'system.partition.self.view'):null,
-            getItem(<Link to="setting">环境设置</Link>, 'setting',undefined,undefined,undefined,'system.partition.self.view')],
-        'group'),
-];
 
 
 export const PARTITION_CERT_TABLE_COLUMNS: ProColumns<PartitionCertTableListItem>[] = [

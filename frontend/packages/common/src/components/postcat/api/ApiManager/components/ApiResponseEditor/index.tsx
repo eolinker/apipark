@@ -29,7 +29,6 @@ export function ApiResponseEditor({ editorRef ,apiInfo=null, loaded}: { editorRe
   const bodyRef = useRef<ApiMessageBodyApi>(null)
 
   useEffect(() => {
-    //console.log(loaded, apiInfo)
     if (loaded && (apiInfo || apiInfo === null)) {
       setApiHeaders((apiInfo?.responseList?.[0]?.responseParams?.headerParams as unknown as MessageBody[]) || [])
       setInnerLoaded(true)

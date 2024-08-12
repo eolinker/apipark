@@ -1,15 +1,8 @@
-/*
- * @Date: 2024-02-27 11:03:54
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-06 17:27:37
- * @FilePath: \frontend\packages\market\src\const\serviceHub\const.tsx
- */
 
 import { ProColumns } from "@ant-design/pro-components";
 import { MenuProps } from "antd";
 import { getItem } from "@common/utils/navigation";
 import { ServiceHubTableListItem } from "./type";
-import { ApiOutlined, KeyOutlined } from "@ant-design/icons";
 
 export const SERVICE_HUB_TABLE_COLUMNS: ProColumns<ServiceHubTableListItem>[] = [
     {
@@ -37,14 +30,8 @@ export const SERVICE_HUB_TABLE_COLUMNS: ProColumns<ServiceHubTableListItem>[] = 
         renderText:(_,entity:ServiceHubTableListItem)=>entity.tags?.map(x=>x.name).join(',') || '-'
     },
     {
-        title: '所属组织',
-        dataIndex: ['organization','name'],
-        copyable: true,
-        ellipsis:true
-    },
-    {
         title: '所属系统',
-        dataIndex: ['project','name'],
+        dataIndex: ['app','name'],
         copyable: true,
         ellipsis:true
     },
@@ -59,18 +46,13 @@ export const SERVICE_HUB_TABLE_COLUMNS: ProColumns<ServiceHubTableListItem>[] = 
         dataIndex: ['catalogue','name'],
         copyable: true,
         ellipsis:true
-    },
-    {
-        title: '可用环境',
-        dataIndex: 'partition',
-        ellipsis:true,
-        renderText:(_,entity:ServiceHubTableListItem)=>entity.partition?.map((x)=>x.name).join(',')
     }
 ];
 
 
 export const TENANT_MANAGEMENT_APP_MENU: MenuProps['items'] = [
    
-    getItem('访问授权', 'authorization',<KeyOutlined rotate={225}/>),
-    getItem('应用管理', 'setting',<span><iconpark-icon  className="" name="auto-generate-api"></iconpark-icon></span>),
+    getItem('订阅的服务', 'service'),
+    getItem('访问授权', 'authorization'),
+    getItem('应用管理', 'setting'),
 ];

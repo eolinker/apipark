@@ -7,15 +7,14 @@ import {BasicResponse, STATUS_CODE} from "@common/const/const.ts";
 import {useFetch} from "@common/hooks/http.ts";
 import {RouterParams} from "@core/components/aoplatform/RenderRoutes.tsx";
 import {  CategorizesType, ServiceHubTableListItem, TagType } from "../../const/serviceHub/type.ts";
-import {  PartitionItem } from "@common/const/type.ts";
 import { VirtuosoGrid } from 'react-virtuoso';
-import { ApiOutlined,LoadingOutlined,ProjectOutlined } from "@ant-design/icons";
+import { ApiOutlined,LoadingOutlined } from "@ant-design/icons";
 import ServiceHubGroup from "./ServiceHubGroup.tsx";
+import { unset } from "lodash-es";
 
 export enum SERVICE_HUB_LIST_ACTIONS {
     GET_CATEGORIES = 'GET_CATEGORIES',
     GET_TAGS ='GET_TAGS',
-    GET_PARTITIONS = 'GET_PARTITIONS',
     GET_SERVICES = 'GET_SERVICES',
     SET_SERVICES='SET_SERVICES',
     SET_SELECTED_CATE = 'SET_SELECTED_CATE',
@@ -28,7 +27,6 @@ export enum SERVICE_HUB_LIST_ACTIONS {
 export type ServiceHubListActionType = 
 | { type: SERVICE_HUB_LIST_ACTIONS.GET_CATEGORIES, payload: CategorizesType[] }
 | { type: SERVICE_HUB_LIST_ACTIONS.GET_TAGS, payload: TagType[] }
-| { type: SERVICE_HUB_LIST_ACTIONS.GET_PARTITIONS, payload: PartitionItem[] }
 | { type: SERVICE_HUB_LIST_ACTIONS.GET_SERVICES, payload: ServiceHubTableListItem[] }
 | { type: SERVICE_HUB_LIST_ACTIONS.SET_SERVICES, payload: ServiceHubTableListItem[] }
 | { type: SERVICE_HUB_LIST_ACTIONS.SET_SELECTED_CATE, payload: string[] }
@@ -40,7 +38,6 @@ export type ServiceHubListActionType =
 export const initialServiceHubListState = {
     categoriesList: [] as CategorizesType[],
     tagsList: [] as TagType[],
-    partitionList: [] as PartitionItem[],
     servicesList: [] as ServiceHubTableListItem[],
     showServicesList: [] as ServiceHubTableListItem[],
     selectedCate: [] as string[],
@@ -58,8 +55,6 @@ export const initialServiceHubListState = {
             return { ...state, categoriesList: action.payload , getCateAndTagData:true};
         case SERVICE_HUB_LIST_ACTIONS.GET_TAGS: 
             return { ...state, tagsList: action.payload , getCateAndTagData:true};
-        case SERVICE_HUB_LIST_ACTIONS.GET_PARTITIONS: 
-            return { ...state, partitionList: action.payload, getPartitionData:true };
         case SERVICE_HUB_LIST_ACTIONS.GET_SERVICES: 
             return { ...state, servicesList: action.payload };
         case SERVICE_HUB_LIST_ACTIONS.SET_SERVICES: 
@@ -89,7 +84,6 @@ export const initialServiceHubListState = {
             if((!x.tags || !x.tags.length )&& dataSet.selectedTag.indexOf('empty') === -1) return false
             if(x.tags && x.tags.length && !x.tags.some(tag => dataSet.selectedTag.includes(tag.id))) return false;
             if(!dataSet.selectedPartition || dataSet.selectedPartition.length === 0) return false
-            if(x.partitions && x.partitions.length && !x.partitions.some(partition => dataSet.selectedPartition.includes(partition.id))) return false;
             if( dataSet.keyword && !x.name.includes(dataSet.keyword)) return false
             return true
         })
@@ -188,7 +182,7 @@ export default ServiceHubList
 const CardTitle = (service:ServiceHubTableListItem)=>{
     return(
         <div className="flex">
-            <Avatar shape="square" size={50} className=" bg-[linear-gradient(135deg,white,#f0f0f0)] text-[#333] rounded-[12px]" src={service.logo ?  <img src={service.logo} alt="Logo" style={{  maxWidth: '200px', width:'68px',height:'68px'}} /> : undefined}> {service.logo ? '' : service.name.substring(0,1)}</Avatar>
+            <Avatar shape="square" size={50} className=" border-none bg-[linear-gradient(135deg,white,#f0f0f0)] text-[#333] rounded-[12px]" src={service.logo ?  <img src={service.logo} alt="Logo" style={{  maxWidth: '200px', width:'45px',height:'45px',objectFit:'unset'}} /> : undefined}> {service.logo ? '' : service.name.substring(0,1)}</Avatar>
             <div className="pl-[20px] w-[calc(100%-50px)]">
                 <p className="text-[14px] h-[20px] leading-[20px] truncate w-full">{service.name}</p>
                 <div className="mt-[10px] h-[20px] flex items-center font-normal">

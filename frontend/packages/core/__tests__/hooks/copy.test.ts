@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-05-10 14:45:29
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-05-10 16:45:38
- * @FilePath: \frontend\packages\core\__tests__\hooks\copy.test.ts
- */
+
 import { renderHook, act } from '@testing-library/react-hooks';
 import useCopyToClipboard from '../../src/hooks/copy';
 

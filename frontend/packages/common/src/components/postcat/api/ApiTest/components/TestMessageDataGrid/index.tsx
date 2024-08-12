@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:10
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 10:50:00
- * @FilePath: \frontend\packages\common\src\components\postcat\api\ApiTest\components\TestMessageDataGrid\index.tsx
- */
+
 import { Autocomplete, Box, LinearProgress, TextField, ThemeProvider, Tooltip, createTheme, useTheme } from '@mui/material'
 import {
   DataGridPro, GridCallbackDetails,

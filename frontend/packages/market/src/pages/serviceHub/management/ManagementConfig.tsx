@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:11
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-06 14:40:21
- * @FilePath: \frontend\packages\market\src\pages\serviceHub\management\ManagementConfig.tsx
- */
+
 import {App, Button, Divider, Form, Input, Row} from "antd";
 import  {forwardRef, useEffect, useImperativeHandle, useState} from "react";
 import {v4 as uuidv4} from 'uuid'
@@ -43,12 +38,12 @@ const ManagementConfig = forwardRef<ManagementConfigHandle,ManagementConfigProps
     const save:()=>Promise<boolean | string> =  ()=>{
         return new Promise((resolve, reject)=>{
             form.validateFields().then((value)=>{
-                fetchData<BasicResponse<{projects:ManagementConfigFieldType}>>(type === 'add'? 'team/app' : 'app/info',{method:type === 'add'? 'POST' : 'PUT',eoBody:(value), eoParams:type === 'add' ? {team:teamId}:{app:appId}}).then(response=>{
+                fetchData<BasicResponse<{apps:ManagementConfigFieldType}>>(type === 'add'? 'team/app' : 'app/info',{method:type === 'add'? 'POST' : 'PUT',eoBody:(value), eoParams:type === 'add' ? {team:teamId}:{app:appId,team:teamId}}).then(response=>{
                     const {code,data,msg} = response
                     if(code === STATUS_CODE.SUCCESS){
                         message.success(msg || '操作成功！')
-                        form.setFieldsValue(data.projects)
-                        type === 'edit' && setAppName(data.projects.name)
+                        form.setFieldsValue(data.apps)
+                        type === 'edit' && setAppName(data.apps.name)
                         resolve(true)
                     }else{
                         message.error(msg || '操作失败')
@@ -61,11 +56,11 @@ const ManagementConfig = forwardRef<ManagementConfigHandle,ManagementConfigProps
 
     // 获取表单默认值
     const getApplicationInfo = () => {
-        fetchData<BasicResponse<{ project: ManagementConfigFieldType }>>('app/info',{method:'GET',eoParams:{app:appId},eoTransformKeys:['as_app']}).then(response=>{
+        fetchData<BasicResponse<{ app: ManagementConfigFieldType }>>('app/info',{method:'GET',eoParams:{app:appId,team:teamId},eoTransformKeys:['as_app']}).then(response=>{
             const {code,data,msg} = response
             if(code === STATUS_CODE.SUCCESS){
-                setAppName(data.project.name)
-                setTimeout(()=>{form.setFieldsValue({...data.project})},0)
+                setAppName(data.app.name)
+                setTimeout(()=>{form.setFieldsValue({...data.app})},0)
             }else{
                 message.error(msg || '操作失败')
             }
@@ -96,7 +91,7 @@ const ManagementConfig = forwardRef<ManagementConfigHandle,ManagementConfigProps
 
     
     const deleteApplication = ()=>{
-        fetchData<BasicResponse<null>>('app',{method:'DELETE',eoParams:{app:appId}}).then(response=>{
+        fetchData<BasicResponse<null>>('app',{method:'DELETE',eoParams:{app:appId,team:teamId}}).then(response=>{
             const {code,msg} = response
             if(code === STATUS_CODE.SUCCESS){
                 message.success(msg || '操作成功！')
@@ -121,7 +116,7 @@ const ManagementConfig = forwardRef<ManagementConfigHandle,ManagementConfigProps
     }, [appId]);
 
     return  (<><WithPermission 
-    //  access={type === 'edit' ? 'system.openapi.self.edit':'system.openapi.self.add'}
+     access={type === 'edit' ? 'team.application.application.edit':'team.application.application.add'}
     >
         <Form
             layout='vertical'
@@ -163,11 +158,11 @@ const ManagementConfig = forwardRef<ManagementConfigHandle,ManagementConfigProps
                         <Row className="mb-[10px]"
                             // wrapperCol={{ offset: 5, span: 19 }}
                             >
-                        {/* <WithPermission access={onEdit ? 'team.mySystem.self.edit' :'team.mySystem.self.add'}> */}
+                        <WithPermission access={type === 'edit'? 'team.application.application.edit' :'team.application.application.add'}>
                             <Button type="primary" htmlType="submit">
                                 保存
                             </Button>
-                            {/* </WithPermission> */}
+                            </WithPermission>
                         </Row>  </>                   
             } </div>
             </Form>
@@ -177,9 +172,9 @@ const ManagementConfig = forwardRef<ManagementConfigHandle,ManagementConfigProps
                 <Divider />
                 <p className="text-center">删除应用之后将无法找回，请谨慎操作！</p>
                 <div className="text-center">
-                    {/* <WithPermission access="project.mySystem.self.delete"> */}
+                    <WithPermission access="team.application.application.delete">
                         <Button className="m-auto mt-[16px] mb-[20px]" type="default" danger={true} onClick={deleteApplicationModal} loading={delBtnLoading}>删除应用</Button>
-                        {/* </WithPermission> */}
+                        </WithPermission>
                 </div>
             </div>
         </>}</>

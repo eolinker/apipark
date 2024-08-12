@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:11
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-03-07 15:04:12
- * @FilePath: \frontend\packages\core\src\pages\approval\ApprovalPage.tsx
- */
+
 import { Menu, MenuProps, Tabs, TabsProps} from "antd";
 import {Link, useLocation, useNavigate} from "react-router-dom";
 import {useEffect, useState} from "react";

@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-06-04 08:54:16
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 14:25:53
- * @FilePath: \frontend\packages\core\src\pages\logRetrieval\LogRetrieval.tsx
- */
+
 import {App, Button, Cascader, Checkbox, Collapse, Empty, Modal, Select, Spin, Table} from "antd";
 import  {useEffect, useState} from "react";
 import {ColumnsType} from "antd/es/table";
@@ -32,7 +27,6 @@ import MonacoEditorWrapper ,{MonacoEditorRefType} from "@common/components/aopla
 }
 
 type OutputItemExtraInfo = {
-    partition:string
     cluster:string
     node:string
 }

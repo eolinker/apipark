@@ -1,16 +1,10 @@
-/*
- * @Date: 2024-01-31 15:00:10
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-05-17 16:42:12
- * @FilePath: \frontend\packages\core\src\components\TransferTable.tsx
- */
+
 import { Input,Table} from "antd";
 import {forwardRef, KeyboardEventHandler, Ref, useCallback, useEffect, useImperativeHandle, useRef, useState} from "react";
 import styles from './TransferTable.module.css'
 import {CloseOutlined, SearchOutlined} from "@ant-design/icons";
 import {debounce} from "lodash-es";
 import {ColumnsType} from "antd/es/table";
-// import Table from '../../../../../../../github/ant-design/components/table/index';
 
 export type TransferTableProps<T> = {
     request?:(k?:string)=>Promise<{data:T[],success:boolean}>
@@ -38,10 +32,8 @@ const TransferTable = forwardRef<TransferTableHandle<{[k:string]:unknown}>, Tran
     const [loading, setLoading] = useState<boolean>(false)
     const parentRef = useRef<HTMLDivElement>(null);
     const [tableHeight, setTableHeight] = useState(window.innerHeight * 80 / 100 );
-    // const [tableWidth, setTableWidth] = useState(216);
     const [tableShow, setTableShow] = useState(false);
 
-    // console.log(tableWidth)
     useImperativeHandle(ref, () =>({
         selectedData: () => selectedData,
         selectedRowKeys: () => selectedRowKeys,}))

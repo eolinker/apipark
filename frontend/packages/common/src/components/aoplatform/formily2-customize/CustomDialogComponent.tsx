@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:11
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-05 15:15:58
- * @FilePath: \frontend\packages\common\src\components\aoplatform\formily2-customize\CustomDialogComponent.tsx
- */
+
 import {forwardRef,useImperativeHandle} from 'react'
 import { createSchemaField } from '@formily/react'
 import {

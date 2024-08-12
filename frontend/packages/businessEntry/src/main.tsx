@@ -1,9 +1,3 @@
-/*
- * @Date: 2023-11-27 17:18:27
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-05-29 18:26:15
- * @FilePath: \frontend\packages\core\src\main.tsx
- */
 import {StrictMode} from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'

@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-02-19 15:41:25
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 19:09:43
- * @FilePath: \frontend\packages\core\src\pages\system\publish\SystemInsidePublish.tsx
- */
+
 import { Tabs } from "antd"
 import { useState, useEffect, FC } from "react"
 import { Link, Outlet, useLocation, useNavigate, useParams } from "react-router-dom"
@@ -18,7 +13,7 @@ const SystemInsidePublic:FC = ()=>{
     const currentUrl = location.pathname
     const [pageStatus,setPageStatus] = useState<0|1>(Number(query.get('status') ||0) as 0|1)
     const navigateTo = useNavigate()
-    const {orgId, teamId} = useParams<RouterParams>();
+    const { teamId} = useParams<RouterParams>();
 
     const onChange = (key: string) => {
         setPageStatus(Number(key) as 0|1)
@@ -32,7 +27,7 @@ const SystemInsidePublic:FC = ()=>{
     useEffect(() => {
         setBreadcrumb([
             {
-                title:<Link to={`/system/list`}>内部数据服务</Link>
+                title:<Link to={`/service/list`}>内部数据服务</Link>
             },
             {
                 title:'发布'

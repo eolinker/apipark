@@ -1,9 +1,3 @@
-/*
- * @Date: 2024-05-30 18:18:52
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-06 17:09:14
- * @FilePath: \frontend\packages\market\src\pages\serviceHub\management\ManagementInsideService.tsx
- */
 import { MoreOutlined, SearchOutlined } from "@ant-design/icons"
 import { Card, Input,Button ,Dropdown,App, Tag, Empty } from "antd"
 import { debounce } from "lodash-es"
@@ -13,22 +7,25 @@ import { BasicResponse, STATUS_CODE } from "@common/const/const"
 import { useBreadcrumb } from "@common/contexts/BreadcrumbContext"
 import { useFetch } from "@common/hooks/http"
 import { SubscribeApprovalInfoType } from "@common/const/approval/type"
-import { SubSubscribeApprovalModalContent } from "@core/pages/system/subSubscribe/SubSubscribeApprovalDetailModalContent"
 import { Link, useNavigate, useOutletContext, useParams } from "react-router-dom"
 import { RouterParams } from "@core/components/aoplatform/RenderRoutes"
 import { TenantManagementServiceListItem } from "../../../const/serviceHub/type"
 import { useTenantManagementContext } from "../../../contexts/TenantManagementContext"
+import { ApprovalModalContent } from "./ApprovalModalContent"
+import { checkAccess } from "@common/utils/permission"
+import { useGlobalContext } from "@common/contexts/GlobalStateContext"
 
 export default function ManagementInsideService(){
     const {message, modal} = App.useApp()
     const [serviceList, setServiceList] = useState<TenantManagementServiceListItem[]>([])
     const {fetchData} = useFetch()
     const { setBreadcrumb} = useBreadcrumb()
-    const {teamId,appId,partitionId} = useParams<RouterParams>()
+    const {teamId,appId} = useParams<RouterParams>()
     const navigateTo = useNavigate()
     const [keyword, setKeyword] = useState<string>('')
     const { refreshGroup} = useOutletContext<{refreshGroup:()=>void,appName:string}>()
     const {appName} = useTenantManagementContext()
+    const {accessData} = useGlobalContext()
 
     const onSearchWordChange = (e)=>{
         setKeyword(e.target.value)
@@ -37,7 +34,7 @@ export default function ManagementInsideService(){
   
     const cancelSubscribeApply = (entity:TenantManagementServiceListItem) => {
         return new Promise((resolve, reject)=>{
-            fetchData<BasicResponse<null>>('application/subscription/cancel_apply',{method:'POST',eoParams:{subscription:entity.id!,application:appId!}}).then(response=>{
+            fetchData<BasicResponse<null>>('application/subscription/cancel_apply',{method:'POST',eoParams:{subscription:entity.id!,application:appId!,team:teamId}}).then(response=>{
                 const {code,msg} = response
                 if(code === STATUS_CODE.SUCCESS){
                     message.success(msg || '操作成功！')
@@ -52,7 +49,7 @@ export default function ManagementInsideService(){
 
     const cancelSubscribe = (entity:TenantManagementServiceListItem) => {
         return new Promise((resolve, reject)=>{
-            fetchData<BasicResponse<null>>('application/subscription/cancel',{method:'POST',eoParams:{subscription:entity.id!,application:appId!}}).then(response=>{
+            fetchData<BasicResponse<null>>('application/subscription/cancel',{method:'POST',eoParams:{subscription:entity.id!,application:appId!,team:teamId}}).then(response=>{
                 const {code,msg} = response
                 if(code === STATUS_CODE.SUCCESS){
                     message.success(msg || '操作成功！')
@@ -66,17 +63,16 @@ export default function ManagementInsideService(){
     }
     
     const openModal =async (type:'view'|'cancelSub'|'cancelSubApply',entity?:TenantManagementServiceListItem)=>{
-        //console.log(type,entity)
         let title:string = ''
         let content:string|React.ReactNode = ''
         switch (type){
             case 'view':{
                 message.loading('正在加载数据')
-                const {code,data,msg} = await fetchData<BasicResponse<{approval:SubscribeApprovalInfoType}>>('project/subscription/approval',{method:'GET',eoParams:{subscription:entity!.id, project:appId},eoTransformKeys:['apply_project','apply_team','apply_time','approval_time']})
+                const {code,data,msg} = await fetchData<BasicResponse<{approval:SubscribeApprovalInfoType}>>('app/subscription/approval',{method:'GET',eoParams:{subscription:entity!.id, app:appId,team:teamId},eoTransformKeys:['apply_project','apply_team','apply_time','approval_time']})
                 message.destroy()
                 if(code === STATUS_CODE.SUCCESS){
                     title='审批详情'
-                        content = <SubSubscribeApprovalModalContent data={data.approval} type={type} systemId={appId}/>;
+                        content = <ApprovalModalContent data={data.approval} type={type} systemId={appId}/>;
                 }else{
                     message.error(msg || '操作失败')
                     return
@@ -109,7 +105,7 @@ export default function ManagementInsideService(){
             width:600,
             okText:'确认',
             okButtonProps:{
-                // disabled : !checkAccess( `project.mySystem.auth.${type}`, accessData)
+                disabled : !checkAccess( `team.application.authorization.${type}`, accessData)
             },
             cancelText:'取消',
             closable:true,
@@ -122,7 +118,7 @@ export default function ManagementInsideService(){
         // {
         //     key: 'edit',
         //     label: (
-        //         // <WithPermission access="system.member.department.add" key="addChildPermission">
+        //         // <WithPermission access="system.organization.member.department.add" key="addChildPermission">
         //             <Button key="edit" type="text" className="h-[32px] border-none p-0 flex items-center bg-transparent " onClick={()=>openModal('view',entity)}>
         //             审批记录
         //         </Button>
@@ -132,7 +128,7 @@ export default function ManagementInsideService(){
         entity.applyStatus === 1 ? {
             key: 'cancelSubApply',
             label: (
-                // <WithPermission access="system.member.department.delete"  key="deletePermission">
+                // <WithPermission access="system.organization.member.department.delete"  key="deletePermission">
                     <Button key="cancelSubApply" type="text" className="h-[32px] border-none p-0 flex items-center bg-transparent " onClick={()=>openModal('cancelSubApply',entity)}>
                     取消订阅申请
                 </Button>
@@ -141,7 +137,7 @@ export default function ManagementInsideService(){
         }:{
             key: 'cancelSub',
             label: (
-                // <WithPermission access="system.member.department.delete"  key="deletePermission">
+                // <WithPermission access="system.organization.member.department.delete"  key="deletePermission">
                     <Button key="cancelSub" type="text" className="h-[32px] border-none p-0 flex items-center bg-transparent " onClick={()=>openModal('cancelSub',entity)}>
                     取消订阅
                 </Button>
@@ -151,7 +147,7 @@ export default function ManagementInsideService(){
     ]
 
     const getServiceList = ()=>{
-        fetchData<BasicResponse<{subscriptions:TenantManagementServiceListItem}>>('application/subscriptions',{method:'GET', eoParams:{application:appId,partition:partitionId},eoTransformKeys:['apply_status']}).then(response=>{
+        fetchData<BasicResponse<{subscriptions:TenantManagementServiceListItem}>>('application/subscriptions',{method:'GET', eoParams:{application:appId,team:teamId},eoTransformKeys:['apply_status']}).then(response=>{
             const {code,data,msg} = response
             if(code === STATUS_CODE.SUCCESS){
                 setServiceList(data.subscriptions && data.subscriptions.length > 0 ? [...data.subscriptions] : [])
@@ -166,9 +162,9 @@ export default function ManagementInsideService(){
 
     useEffect(() => {
         getServiceList()
-    }, [partitionId]);
+    }, []);
 
-    return (<div className="w-[70%] mx-auto h-full pt-[32px]">
+    return (<div className=" mx-auto h-full pt-[32px]">
         <div className="flex items-center justify-between w-full ml-[10px] text-[18px] leading-[25px] pb-[18px]" >
             <span className="font-bold">服务</span>
             <Input className="w-[200px] mr-[20px] rounded-[20px]" onChange={ onSearchWordChange ?  (e) => debounce(onSearchWordChange, 100)(e) : undefined  } onPressEnter={()=>getServiceList()} allowClear placeholder='搜索服务'  prefix={<SearchOutlined className="cursor-pointer" onClick={()=>{getServiceList()}}/>}/>

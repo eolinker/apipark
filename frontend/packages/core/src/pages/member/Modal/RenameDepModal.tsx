@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-05-27 15:41:03
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-05-31 17:53:43
- * @FilePath: \frontend\packages\core\src\pages\member\Modal\RenameDepModal.tsx
- */
+
 import { App, Form, Input } from "antd";
 import { forwardRef, useImperativeHandle, useEffect } from "react";
 import WithPermission from "@common/components/aoplatform/WithPermission.tsx";

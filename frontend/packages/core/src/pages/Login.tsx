@@ -22,7 +22,6 @@ const Login:FC = ()=> {
             const {code,data} = response
             if(code === STATUS_CODE.SUCCESS && data.status !== 'anonymous'){
                 dispatch({type:'LOGIN'})
-                //console.log('校验成功')
                 navigate(state.mainPage)
             }else{
                 dispatch({type:'LOGOUT'})

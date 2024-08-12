@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-04-19 10:21:03
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-05-29 18:48:57
- * @FilePath: \frontend\packages\common\src\components\aoplatform\TagWithPermission.tsx
- */
+
 import { Tag, TagProps } from "antd";
 import { useState, useMemo, useEffect } from "react";
 import { PERMISSION_DEFINITION } from "@common/const/permissions";

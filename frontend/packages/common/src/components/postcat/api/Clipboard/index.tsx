@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:10
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-04-30 16:57:24
- * @FilePath: \frontend\packages\core\src\components\api\Clipboard\index.tsx
- */
+
 import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { Box } from '@mui/material'

@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-02-02 18:30:49
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 11:20:46
- * @FilePath: \frontend\packages\core\src\const\user\const.tsx
- */
+
 import { ProColumns } from "@ant-design/pro-components";
 import { ColumnsType } from "antd/es/table";
 import { MemberItem } from "@common/const/type";

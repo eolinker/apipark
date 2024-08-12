@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-06-04 16:01:08
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-07-12 10:35:00
- * @FilePath: \frontend\packages\dashboard\src\pages\DashboardProjectList.tsx
- */
+
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { RouterParams } from "@core/components/aoplatform/RenderRoutes";
@@ -15,7 +10,7 @@ import DashboardDetail from "./DashboardDetail";
 import { TimeRangeButton } from "@common/components/aoplatform/TimeRangeSelector";
 
 export default function DashboardProjectList(){
-  const { partitionId,dashboardType } = useParams<RouterParams>()
+  const { dashboardType } = useParams<RouterParams>()
   const {fetchData } = useFetch()
   const [fullScreen, setFullScreen] = useState<boolean>(false)
   const [queryData, setQueryData] = useState<MonitorSubQueryData>({type:'provider'});
@@ -26,7 +21,6 @@ export default function DashboardProjectList(){
   const fetchTableData:(body:SearchBody)=>Promise<BasicResponse<{statistics:MonitorSubscriberData[]}>>= (body:MonitorSubQueryData) =>{
     return fetchData<BasicResponse<{statistics:MonitorSubscriberData[]}>>(`monitor/provider`,{
       method:'POST', 
-      eoParams:{partition:partitionId},
       eoBody:({...body, dataType:'subscriber'}), 
       eoTransformKeys:['dataType','request_total','request_success','request_rate','proxy_total','proxy_success','proxy_rate','status_fail','avg_resp','max_resp','min_resp','avg_traffic','max_traffic','min_traffic','min_traffic']}).then(resp => {
         if (resp.code === STATUS_CODE.SUCCESS) {
@@ -43,5 +37,5 @@ export default function DashboardProjectList(){
               setTimeButton={setTimeButton} 
               detailEntityName={detailEntityName}
               setDetailEntityName={setDetailEntityName}
-              detailDrawerContent={<DashboardDetail fullScreen={fullScreen} name={detailEntityName!} queryData={{...queryData,timeButton}} dashboardDetailId={detailId!} partitionId={partitionId!} dashboardType={dashboardType as "api" | "subscriber"}/>} fullScreen={fullScreen} setFullScreen={setFullScreen} setDetailId={setDetailId}/>)
+              detailDrawerContent={<DashboardDetail fullScreen={fullScreen} name={detailEntityName!} queryData={{...queryData,timeButton}} dashboardDetailId={detailId!}  dashboardType={dashboardType as "api" | "subscriber"}/>} fullScreen={fullScreen} setFullScreen={setFullScreen} setDetailId={setDetailId}/>)
 }

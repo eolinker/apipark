@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:11
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 11:44:31
- * @FilePath: \frontend\packages\common\src\components\postcat\api\PreviewTable\index.tsx
- */
+
 import { GridActionsCellItem } from '@mui/x-data-grid-pro'
 import type { ReactNode } from 'react'
 import type { SxProps, Theme } from '@mui/material'

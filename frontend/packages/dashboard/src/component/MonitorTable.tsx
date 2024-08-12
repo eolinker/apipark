@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-03-18 12:03:42
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-07-12 10:34:38
- * @FilePath: \frontend\packages\dashboard\src\component\MonitorTable.tsx
- */
+
 import { ActionType, ProColumns } from "@ant-design/pro-components"
 import { useImperativeHandle, useRef, useState } from "react"
 import PageList from "@common/components/aoplatform/PageList"

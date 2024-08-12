@@ -1,9 +1,3 @@
-/*
- * @Date: 2023-11-27 17:18:27
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-07-12 19:54:26
- * @FilePath: \frontend\packages\businessEntry\src\App.tsx
- */
 import '@core/App.css'
 import { ConfigProvider } from 'antd';
 import RenderRoutes from '@businessEntry/components/aoplatform/RenderRoutes';
@@ -11,6 +5,7 @@ import {BreadcrumbProvider} from "@common/contexts/BreadcrumbContext.tsx";
 import { StyleProvider } from '@ant-design/cssinjs';
 import zhCN from 'antd/locale/zh_CN';
 import useInitializeMonaco from "@common/hooks/useInitializeMonaco";
+import ThemeSwitcher from '@common/components/aoplatform/ThemeSwitcher'
 
 const antdComponentThemeToken = {
   token: {
@@ -43,13 +38,12 @@ const antdComponentThemeToken = {
       optionHoverBg:'#EBEEF2'
     },
     Layout: {
-      bodyBg: '#fff',
-      headerBg: '#fff',
+      bodyBg: 'linear-gradient(107.97deg, rgba(32,41,117,1) 4.41%,rgba(16,13,27,1) 86.11%);',
+      headerBg: 'transparent',
       headerColor: '#333',
-      headerHeight: 50,
       headerPadding: '10 20px',
-      lightSiderBg: '#fff',
-      siderBg: '#fff',
+      lightSiderBg: 'transparent',
+      siderBg: 'transparent',
     },
     Breadcrumb:{
       itemColor:'#666',
@@ -116,6 +110,16 @@ const antdComponentThemeToken = {
         // itemSelectedColor:'#333',
         // itemSelectedBg:'#EBEEF2',
         // itemHoverBg:'#EBEEF2'
+        // itemHeight:'72px',
+        // darkItemBg:'transparent',
+        // itemBg:'transparent',
+        // itemSelectedBg:'transparent',
+        // darkItemSelectedBg:'transparent',
+        // subMenuItemBg:'transparent',
+        // itemActiveBg:'transparent',
+        // darkSubMenuItemBg:'transparent',
+        // activeBarHeight:'2px',
+        // activeBarBorderWidth:2
       },
       List:{
         itemPadding:'8px 0'
@@ -142,9 +146,10 @@ function App() {
           locale={zhCN}
           wave={{disabled:true}}
           theme={antdComponentThemeToken}>
-                <BreadcrumbProvider>
-                    <RenderRoutes />
-                </BreadcrumbProvider>
+            <ThemeSwitcher />
+            <BreadcrumbProvider>
+                <RenderRoutes />
+            </BreadcrumbProvider>
         </ConfigProvider>
       </StyleProvider>
   );

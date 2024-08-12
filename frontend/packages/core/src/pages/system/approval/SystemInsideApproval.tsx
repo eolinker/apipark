@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:11
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-04-19 16:56:54
- * @FilePath: \frontend\packages\core\src\pages\system\approval\SystemInsideApproval.tsx
- */
+
 import {Tabs} from "antd";
 import {Outlet, useLocation, useNavigate} from "react-router-dom";
 import './SystemInsideApproval.module.css'

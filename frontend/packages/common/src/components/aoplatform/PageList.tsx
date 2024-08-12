@@ -1,10 +1,4 @@
-/*
- * @Date: 2023-11-28 11:53:17
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-07 10:58:56
- * @FilePath: \frontend\packages\common\src\components\aoplatform\PageList.tsx
- * @Description:列表页（带添加按钮、搜索框-可选、分页、导入-可选）
- */
+
 import {Button, Dropdown, Input, MenuProps, TablePaginationConfig} from 'antd';
 import {ChangeEvent, RefAttributes, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState} from 'react';
 import type {ActionType, ParamsType, ProColumns, ProTableProps} from '@ant-design/pro-components';
@@ -45,14 +39,18 @@ interface PageListProps<T> extends ProTableProps<T, unknown>, RefAttributes<Acti
   minVirtualHeight?:number
   besidesTableHeight?:number
   noTop?:boolean
+  tableClass?:string
   tableTitleClass?:string
   addNewBtnWrapperClass?:string
   delayLoading?:boolean
+  noScroll?:boolean
+  /* 前端分页的表格，需要传入该字段以支持后端搜索 */
+  manualReloadTable?:()=>void
 }
 
 
 const PageList = <T extends Record<string, unknown>>(props: React.PropsWithChildren<PageListProps<T>>,ref: React.Ref<ActionType>) => {
-  const {id,columns,request,dropMenu,searchPlaceholder,showPagination=true,primaryKey='id',addNewBtnTitle,addNewBtnAccess,tableClickAccess,onAddNewBtnClick,beforeSearchNode,onSearchWordChange,afterNewBtn,dragSortKey,onDragSortEnd,tableTitle,rowSelection,onChange,dataSource,onRowClick,showColSetting=false,minVirtualHeight,noTop,addNewBtnWrapperClass,tableTitleClass,delayLoading = true,besidesTableHeight} = props
+  const {id,columns,request,dropMenu,searchPlaceholder,showPagination=true,primaryKey='id',addNewBtnTitle,addNewBtnAccess,tableClickAccess,tableClass,onAddNewBtnClick,beforeSearchNode,onSearchWordChange,manualReloadTable,afterNewBtn,dragSortKey,onDragSortEnd,tableTitle,rowSelection,onChange,dataSource,onRowClick,showColSetting=false,minVirtualHeight,noTop,addNewBtnWrapperClass,tableTitleClass,delayLoading = true,besidesTableHeight, noScroll} = props
   const parentRef = useRef<HTMLDivElement>(null);
   const [tableHeight, setTableHeight] = useState(minVirtualHeight || window.innerHeight);
   const [tableWidth, setTableWidth] = useState<number|undefined>(undefined);
@@ -87,7 +85,7 @@ const PageList = <T extends Record<string, unknown>>(props: React.PropsWithChild
 
     const debouncedHandleResize = debounce(handleResize, 200);
 
-    if (!resizeObserverRef.current) {
+    if (!resizeObserverRef.current || noScroll) {
       // 创建一个 ResizeObserver 来监听高度变化，只创建一次
       resizeObserverRef.current = new ResizeObserver(debouncedHandleResize);
       // 开始监听
@@ -115,8 +113,7 @@ const PageList = <T extends Record<string, unknown>>(props: React.PropsWithChild
     let width:number = 0
     const res = columns?.map(
       (x)=>{
-        // x.width = x.width ?? 100; 
-        width += Number(x.width ?? (x.filters || x.sorter ? 120 : 100))
+        width += Number(x.width ?? ((x.filters || x.sorter) ? 120 : 100))
         x.copyable = x.copyable === false? false: true
         const sorter = localStorage.getItem(`${id}_sorter`)
         const filters = localStorage.getItem(`${id}_filters`)
@@ -154,7 +151,7 @@ const PageList = <T extends Record<string, unknown>>(props: React.PropsWithChild
   };
 
   return (
-    <div ref={parentRef} className={`eo_page_list bg-MAIN_BG ${dragSortKey ? 'eo_page_drag':''}`}style={{ height: '100%' }}>
+    <div ref={parentRef} className={`eo_page_list bg-MAIN_BG ${dragSortKey ? 'eo_page_drag':''} ${tableClass ?? ''}`}style={{ height: '100%' }}>
       {dragSortKey? <DragSortTable<T>
           actionRef={actionRef}
           columns={newColumns}
@@ -164,7 +161,7 @@ const PageList = <T extends Record<string, unknown>>(props: React.PropsWithChild
           request={request}
           dragSortKey={dragSortKey}
           onDragSortEnd={onDragSortEnd}
-          scroll={{ y: tableHeight }}
+          scroll={noScroll ? undefined :{ y: tableHeight }}
           options={{
             reload: false,
             density: false,
@@ -177,7 +174,7 @@ const PageList = <T extends Record<string, unknown>>(props: React.PropsWithChild
           actionRef={actionRef}
           columns={newColumns}
           virtual
-          scroll={{x:tableWidth,y: tableHeight }}
+          scroll={noScroll ? undefined : {x:tableWidth,y: tableHeight }}
           size="middle"
           rowSelection={rowSelection}
           tableAlertRender={false}
@@ -194,7 +191,7 @@ const PageList = <T extends Record<string, unknown>>(props: React.PropsWithChild
             </Dropdown>):null,
           ]}
           toolbar={{
-            actions:[...[beforeSearchNode],...[searchPlaceholder?<Input className="" onChange={ onSearchWordChange ?  (e) => debounce(onSearchWordChange, 100)(e) : undefined  } onPressEnter={()=>actionRef.current?.reload?.()} allowClear placeholder={searchPlaceholder}  prefix={<SearchOutlined className="cursor-pointer" onClick={()=>{actionRef.current?.reload?.()}}/>}/>:null]],
+            actions:[...[beforeSearchNode],...[searchPlaceholder?<Input className="" onChange={ onSearchWordChange ?  (e) => debounce(onSearchWordChange, 100)(e) : undefined  } onPressEnter={()=>manualReloadTable ? manualReloadTable():actionRef.current?.reload?.()} allowClear placeholder={searchPlaceholder}  prefix={<SearchOutlined className="cursor-pointer" onClick={()=>{actionRef.current?.reload?.()}}/>}/>:null]],
           }}
           options={{
             reload: false,

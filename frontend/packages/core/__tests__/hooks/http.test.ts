@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-05-10 17:25:32
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-05-11 16:16:20
- * @FilePath: \frontend\packages\core\__tests__\hooks\http.test.ts
- */
+
 import { useFetch } from '../../src/hooks/http';
 import fetchMock from 'jest-fetch-mock';
 

@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:10
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 10:54:35
- * @FilePath: \frontend\packages\common\src\components\postcat\ApiEdit.tsx
- */
+
 import {Collapse} from "./api/Collapse";
 import {forwardRef, useEffect, useImperativeHandle, useRef, useState} from "react";
 import {Select,Input,Space} from "antd";
@@ -154,7 +149,7 @@ export const theme = createTheme({
     }
   });
   
-export default function ApiEdit({apiInfo,editorRef,loaded,systemId}:{apiInfo:SystemApiDetail,editorRef?:React.RefObject<ApiEditApi>,loaded:boolean,systemId:string}){
+export default function ApiEdit({apiInfo,editorRef,loaded,serviceId, teamId}:{apiInfo:SystemApiDetail,editorRef?:React.RefObject<ApiEditApi>,loaded:boolean,serviceId:string, teamId:string}){
     const requestRef = useRef<ApiRequestEditorApi>(null)
     const responseRef = useRef<ApiResponseEditorApi>(null)
     const resultListRef = useRef<ResponseExampleCompoEditorApi>(null)
@@ -243,7 +238,7 @@ export default function ApiEdit({apiInfo,editorRef,loaded,systemId}:{apiInfo:Sys
                         }
 
                         <Collapse title='转发配置' key="proxy"  >
-                            <SystemInsideApiProxy className="m-[12px] px-[12px]" initProxyValue={apiInfo?.proxy} systemId={systemId!} ref={proxyRef} />
+                            <SystemInsideApiProxy className="m-[12px] px-[12px]" initProxyValue={apiInfo?.proxy} serviceId={serviceId!} ref={proxyRef} />
                         </Collapse>
 
                         <Collapse title='请求参数' key="request"  >

@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:11
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-07-12 10:13:56
- * @FilePath: \frontend\packages\core\src\pages\team\TeamList.tsx
- */
+
 import PageList from "@common/components/aoplatform/PageList.tsx"
 import {ActionType, ProColumns} from "@ant-design/pro-components";
 import  {FC, useEffect, useMemo, useRef, useState} from "react";
@@ -37,7 +32,7 @@ const TeamList:FC = ()=>{
     const [modalType, setModalType] = useState<'add'|'edit'>('add')
 
     const getTeamList = ()=>{
-        return fetchData<BasicResponse<{teams:TeamTableListItem}>>(!checkPermission('system.team.self.view') ? 'teams':'manager/teams',{method:'GET',eoParams:{keyword:searchWord},eoTransformKeys:['create_time','system_num','can_delete']}).then(response=>{
+        return fetchData<BasicResponse<{teams:TeamTableListItem}>>(!checkPermission('system.organization.team.view') ? 'teams':'manager/teams',{method:'GET',eoParams:{keyword:searchWord},eoTransformKeys:['create_time','system_num','can_delete']}).then(response=>{
             const {code,data,msg} = response
             if(code === STATUS_CODE.SUCCESS){
                 return  {data:data.teams, success: true}
@@ -97,7 +92,7 @@ const TeamList:FC = ()=>{
                 const {code,data,msg} = await fetchData<BasicResponse<{team:TeamConfigFieldType}>>(`manager/team`,{method:'GET',eoParams:{id:entity!.id}})
                 message.destroy()
                 if(code === STATUS_CODE.SUCCESS){
-                    setCurTeam({...data.team,master:data.team.master.id,organization:data.team.organization.id})
+                    setCurTeam({...data.team,master:data.team.master.id})
                     setModalVisible(true)
                 }else{
                     message.error(msg || '操作失败')
@@ -123,7 +118,7 @@ const TeamList:FC = ()=>{
             width:600,
             okText:'确认',
             okButtonProps:{
-                disabled : !checkAccess( `system.team.self.${type}`, accessData)
+                disabled : !checkAccess( `system.organization.team.${type}`, accessData)
             },
             cancelText:'取消',
             closable:true,
@@ -139,9 +134,9 @@ const TeamList:FC = ()=>{
             width:  96,
             valueType: 'option',
             render: (_: React.ReactNode, entity: TeamTableListItem) => [
-                    <TableBtnWithPermission  access="" key="view" navigateTo={`../inside/${entity.organization.id}/${entity.id}/setting`} btnTitle="查看"/>,
+                    <TableBtnWithPermission  access="" key="view" navigateTo={`../inside/${entity.id}/setting`} btnTitle="查看"/>,
                     <Divider type="vertical" className="mx-0"  key="div2"/>,
-                    <TableBtnWithPermission  access="system.team.self.delete" key="delete"  disabled={!entity.canDelete} tooltip="服务数据清除后，方可删除" onClick={()=>{openModal('delete',entity)}} btnTitle="删除"/>,
+                    <TableBtnWithPermission  access="system.organization.team.delete" key="delete"  disabled={!entity.canDelete} tooltip="服务数据清除后，方可删除" onClick={()=>{openModal('delete',entity)}} btnTitle="删除"/>,
             ],
         }
     ]
@@ -171,11 +166,11 @@ const TeamList:FC = ()=>{
                 request = {()=>getTeamList()}
                 showPagination={false}
                 addNewBtnTitle='添加团队'
-                addNewBtnAccess = "system.team.self.add"
+                addNewBtnAccess = "system.organization.team.add"
                 searchPlaceholder="输入名称、ID、负责人查找团队"
                 onAddNewBtnClick={()=>{openModal('add')}}
                 onSearchWordChange={(e)=>{setSearchWord(e.target.value)}}
-                onRowClick={(row:TeamTableListItem)=>(navigate(`../inside/${row.organization.id}/${row.id}/setting`))}
+                onRowClick={(row:TeamTableListItem)=>(navigate(`../inside/${row.id}/setting`))}
             />
             <Modal
                 title={modalType === 'add' ? "添加团队" : "配置团队"}
@@ -191,7 +186,7 @@ const TeamList:FC = ()=>{
                 }}
                 onCancel={() => {setModalVisible(false)}}
                 okText="确认"
-                okButtonProps={{disabled : !checkAccess( `system.team.self.edit`, accessData)}}
+                okButtonProps={{disabled : !checkAccess( `system.organization.team.edit`, accessData)}}
                 cancelText='取消'
                 closable={true}
                 onOk={()=>teamConfigRef.current?.save().then((res)=>{

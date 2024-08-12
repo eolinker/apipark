@@ -1,6 +1,6 @@
 
 :root {
-  --layout-header-height: 50px;
+  --layout-header-height: 72px;
   --layout-footer-height: 30px;
 
   --btn-icon-margin: 5px;
@@ -1005,7 +1005,7 @@ p{
 .ant-form-item-explain{
   font-size: 12px !important;
 }
-.ant-form .ant-form-item {
+.ant-form:not(.no-bg-form) .ant-form-item {
   .ant-input-number.ant-input-number-in-form-item{
     width:100% !important;
   }

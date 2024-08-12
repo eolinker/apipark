@@ -11,8 +11,9 @@ import { Key, useEffect, useMemo, useRef, useState } from "react";
 import { ServiceHubCategoryConfig } from "./ServiceHubCategoryConfig";
 import { useGlobalContext } from "@common/contexts/GlobalStateContext";
 import { useBreadcrumb } from "@common/contexts/BreadcrumbContext";
-import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
+import { LoadingOutlined } from "@ant-design/icons";
 import { cloneDeep } from "lodash-es";
+import { Icon } from "@iconify/react/dist/iconify.js";
 
 export default function ServiceCategory(){
    const [gData, setGData] = useState<CategorizesType[]>([]);
@@ -88,7 +89,7 @@ export default function ServiceCategory(){
         {
             key: 'addChildCate',
             label: (
-                <WithPermission access="system.serviceHub.category.add"><Button className="border-none p-0 flex items-center bg-transparent " onClick={()=>openModal('addChildCate',entity)}>
+                <WithPermission access="system.api_market.service_classification.add"><Button className="border-none p-0 flex items-center bg-transparent " onClick={()=>openModal('addChildCate',entity)}>
                     添加子分类
                 </Button></WithPermission>
             ),
@@ -96,7 +97,7 @@ export default function ServiceCategory(){
         {
             key: 'renameCate',
             label: (
-                <WithPermission access="system.serviceHub.category.edit"><Button className=" border-none p-0 flex items-center bg-transparent " onClick={()=>openModal('renameCate',entity)}>
+                <WithPermission access="system.api_market.service_classification.edit"><Button className=" border-none p-0 flex items-center bg-transparent " onClick={()=>openModal('renameCate',entity)}>
                     修改分类名称
                 </Button></WithPermission>
             ),
@@ -104,7 +105,7 @@ export default function ServiceCategory(){
         {
             key: 'delete',
             label: (
-                <WithPermission access="system.serviceHub.category.delete"><Button className=" border-none p-0 flex items-center bg-transparent " onClick={()=>openModal('delete',entity)}>
+                <WithPermission access="system.api_market.service_classification.delete"><Button className=" border-none p-0 flex items-center bg-transparent " onClick={()=>openModal('delete',entity)}>
                     删除
                 </Button></WithPermission>
             ),
@@ -144,7 +145,7 @@ export default function ServiceCategory(){
         };
         
         const action = actionToPermissionMap[type];
-        const permission :keyof typeof PERMISSION_DEFINITION[0]= `system.serviceHub.category.${action}`;
+        const permission :keyof typeof PERMISSION_DEFINITION[0]= `system.api_market.service_classification.${action}`;
         
         return !checkAccess(permission, accessData);
     };
@@ -260,7 +261,9 @@ export default function ServiceCategory(){
                         onDrop={onDrop}
                         treeData={treeData}
                         />
-                        <Button type="link" className="mt-[12px] pl-[0px]" onClick={()=>openModal('addCate')}><PlusOutlined className='mr-[2px]' />添加分类</Button>
+                        <WithPermission access="system.api_market.service_classification.add">
+                            <Button type="link" className="mt-[12px] pl-[0px]" onClick={()=>openModal('addCate')}><Icon icon="ic:baseline-add" width="18" height="18" className='mr-[2px]'/>添加分类</Button>
+                        </WithPermission>
                     </Spin>
                 </div>
         </div>

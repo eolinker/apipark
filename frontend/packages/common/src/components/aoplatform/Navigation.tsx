@@ -1,85 +1,70 @@
+
 import {FC, useEffect, useMemo, useState} from 'react';
 import type { MenuProps } from 'antd';
 import { Menu } from 'antd';
 import { useLocation, useNavigate} from "react-router-dom";
-import { getItem } from '@common/utils/navigation';
+import { getNavItem } from '@common/utils/navigation';
 import { PERMISSION_DEFINITION } from '@common/const/permissions';
 import { useGlobalContext } from '@common/contexts/GlobalStateContext';
-import { DashboardOutlined, DeploymentUnitOutlined, HddOutlined, TeamOutlined } from '@ant-design/icons';
-
+import { ProjectFilled } from '@ant-design/icons';
+import { Icon } from '@iconify/react';
 export type MenuItem = Required<MenuProps>['items'][number];
 
-// type NavigationItemType = {
-//   title: string,
-//   iconType: string,
-//   icon: string,
-//   router: string,
-//   access:string [],
-//   children: NavigationItemType[]
-// }
 const APP_MODE = import.meta.env.VITE_APP_MODE;
 
-const routerKeyMap = new Map([
-  ['assets','/assets'],
-  ['dashboard','/dashboard'],
-  ['systemrunning','/systemrunning'],
-  ['system','/system/list'],
-  ['servicecategories','/servicecategories'],
-  ['organization','/organization/list'],
-  ['team','/team/list'],
-  ['member','/member/list'],
-  ['user','/user/list'],
-  ['role','/role'],
-  ['access','/access'],
-  ['partition','/partition/list'],
-  ['openapi','/openapi'],
-  ['logsettings','/logsettings'],
-  ['resourcesettings','/resourcesettings']])
+// avoid changing route within ths same category
+export const routerKeyMap = new Map<string, string[]|string>([
+  ['workspace',['tenantManagement','service','team','serviceHub']],
+  ['my',['tenantManagement','service','team']],
+  ['mainPage',['dashboard','systemrunning']],
+  ['operationCenter',['member','user','role','servicecategories']],
+  ['organization',['member','user','role']],
+  ['serviceHubSetting',['servicecategories']],
+  ['maintenanceCenter',['partition','logsettings','resourcesettings','openapi']
+]])
 
   
-const TOTAL_MENU_ITEMS: MenuProps['items'] = [
-  APP_MODE === 'pro' ? getItem('仪表盘', 'mainPage', <DashboardOutlined />,[
-    // getItem(<a >资产视图</a>, 'assets',null,undefined,undefined,''),
-    getItem(<a >运行视图</a>, 'dashboard',null,undefined,undefined,''),
-    getItem(<a >系统拓扑图</a>, 'systemrunning',null,undefined,undefined,''),
-    // getItem((<Link to="/approval"  className="flex items-center"><span className='mr-[4px]'>审批</span><Badge size="small" count={2} /></Link>), 'approval', null),
+export const TOTAL_MENU_ITEMS: MenuProps['items'] = [
+  
+  getNavItem('工作空间', 'workspace','/tenantManagement',<Icon icon="ic:baseline-space-dashboard" width="18" height="18"/>, [
+    getNavItem('我的', 'my','/tenantManagement',<Icon icon="ic:baseline-home" width="18" height="18"/>,[
+      getNavItem(<a>应用</a>, 'tenantManagement','/tenantManagement',null,undefined,undefined,''),
+      getNavItem(<a>服务</a>, 'service','/service',null,undefined,undefined,''),
+      getNavItem(<a>团队</a>, 'team','/team',null,undefined,undefined,''),
+    ],undefined,''),
+      getNavItem(<a>API 市场</a>, 'serviceHub','/serviceHub',<Icon icon="ic:baseline-hub" width="18" height="18"/>,undefined,undefined,'system.workspace.api_market.view'),
+  ]),
+
+
+  APP_MODE === 'pro' ? getNavItem('仪表盘', 'mainPage', '/dashboard',<Icon icon="ic:baseline-bar-chart" width="18" height="18"/>,[
+    getNavItem(<a >运行视图</a>, 'dashboard','/dashboard',<ProjectFilled />,undefined,undefined,''),
+    getNavItem(<a >系统拓扑图</a>, 'systemrunning','/systemrunning',<ProjectFilled />,undefined,undefined,''),
   ]):null,
 
-  getItem('数据服务资产', 'dataAssets',<DeploymentUnitOutlined />, [
-    getItem(<a>内部数据服务</a>, 'system',null,undefined,undefined,''),
-    getItem(<a>服务分类管理</a>, 'servicecategories',null,undefined,undefined,''),
-  ]),
+  getNavItem('系统设置', 'operationCenter','/member',<Icon icon="ic:baseline-settings" width="18" height="18"/>, [
+    getNavItem('组织', 'organization','/member',<Icon icon="ic:baseline-people-alt" width="18" height="18"/>,[
+      getNavItem(<a>成员</a>, 'member','/member',null,undefined,undefined,'system.organization.member.view'),
+      getNavItem(<a>角色</a>, 'role','/role',null,undefined,undefined,'system.organization.role.view'),
+    ],undefined,''),
+    getNavItem('API 市场', 'serviceHubSetting','/servicecategories',<Icon icon="ic:baseline-hub" width="18" height="18"/>,[
+      getNavItem(<a>服务分类管理</a>, 'servicecategories','/servicecategories',null,undefined,undefined,'system.api_market.service_classification.view'),
+    ],undefined,'system.api_market.service_classification.view'),
 
-  getItem('组织架构', 'operationCenter',<TeamOutlined />, [
-    getItem(<a>成员与部门</a>, 'member',null,undefined,undefined,'system.member.self.view'),
-    getItem(<a>组织</a>, 'organization',null,undefined,undefined,'system.organization.self.view'),
-    getItem(<a>团队</a>, 'team',null,undefined,undefined,''),
-    getItem(<a>用户组</a>, 'user',null,undefined,undefined,'system.user.self.view'),
-    getItem(<a>自定义角色</a>, 'role',null,undefined,undefined,'system.role.self.view'),
-    getItem(<a>权限配置</a>, 'access',null,undefined,undefined,'system.access.self.view'),
-  ]),
-
-  getItem('运维与集成', 'maintenanceCenter', <HddOutlined />, [
-    getItem(<a>部署管理</a>, 'partition',null,undefined,undefined,'system.partition.self.view'),
-    getItem(<a>日志配置</a>, 'logsettings',null,undefined,undefined,'system.partition.self.view'),
-    APP_MODE === 'pro' ? getItem(<a>资源配置</a>, 'resourcesettings',null,undefined,undefined,'system.partition.self.view'):null,
-    // getItem(<Link to="/email">邮箱设置</Link>, 'email'),
-    APP_MODE === 'pro' ? getItem(<a>Open API</a>, 'openapi',null,undefined,undefined,'system.openapi.self.view'):null,
-    // getItem(<Link to="/webhook">Webhook</Link>, 'webhook'),
-    // getItem(<Link to="/template/httplog">HTTP 日志配置</Link>, 'httplog'),
-    // getItem(<Link to="/logretrieval">日志检索</Link>, 'logretrieval',null,undefined,undefined,'system.logRetrieval.self.view'),
-    // getItem(<Link to="/auditlog">审计日志</Link>, 'auditlog'),
+    getNavItem('运维与集成', 'maintenanceCenter','/cluster', <Icon icon="ic:baseline-memory" width="18" height="18"/>, [
+      getNavItem(<a>集群</a>, 'cluster','/cluster',null,undefined,undefined,'system.devops.cluster.view'),
+      getNavItem(<a>证书</a>, 'cert','/cert',null,undefined,undefined,'system.devops.ssl_certificate.view'),
+      getNavItem(<a>日志</a>, 'logsettings','/logsettings',null,undefined,undefined,'system.devops.log_configuration.view'),
+      APP_MODE === 'pro' ? getNavItem(<a>资源</a>, 'resourcesettings','/resourcesettings',null,undefined,undefined,'system.partition.self.view'):null,
+      APP_MODE === 'pro' ? getNavItem(<a>Open API</a>, 'openapi','/openapi',null,undefined,undefined,'system.openapi.self.view'):null,
+    ]),
   ]),
 ];
 
 const Navigation: FC = () => {
-  // const { message } = App.useApp()
   const location = useLocation()
   const [selectedKeys, setSelectedKeys] = useState<string>('')
   const currentUrl = location.pathname
   const navigateTo = useNavigate()
-  // const {fetchData} = useFetch()
-  // const [navigationItemList, setNavigationItemList] = useState<NavigationItemType[]>([])
   const { accessData,checkPermission} = useGlobalContext()
 
   const onClick: MenuProps['onClick'] = (e) => {
@@ -88,59 +73,21 @@ const Navigation: FC = () => {
     newUrl && navigateTo(newUrl)
   };
 
-  // useEffect(()=>{
-  //   const newUrl = routerKeyMap.get(selectedKeys)
-  //   console.log(newUrl)
-  //   newUrl && navigateTo(newUrl)
-  // },[selectedKeys])
-
-  // 插件相关，暂时隐藏
-  // const getNavigationData = ()=>{
-  //   fetchData<BasicResponse<{ navigation: NavigationItemType[] }>>('navigation',{method:'GET',eoApiPrefix:'_system/'},).then(response=>{
-  //         const {code,data,msg} = response
-  //         if(code === STATUS_CODE.SUCCESS){
-  //           setNavigationItemList(data.navigation)
-  //         }else{
-  //             message.error(msg || '操作失败')
-  //         }
-  //     })
-  // }
-
-  // const navigations = useMemo(()=>{
-  //  const getNavTitle = (data:NavigationItemType,root?:boolean)=>{
-  //       if(root){
-  //         return data.title
-  //       }
-  //       return <Link to={data.router} >{data.title}</Link>
-  //   }
-
-  //   const handleNavigationData:(data:NavigationItemType[],root?:boolean)=>MenuItem[] = (data:NavigationItemType[],root?:boolean)=>{
-  //     return data?.map(x=>getItem(
-  //       getNavTitle(x,root),
-  //       x.router.split('/')[0] === 'template' ? x.router.split('/')[1] : x.router.split('/')[0],
-  //       x.icon,
-  //       x.children && handleNavigationData(x.children)))
-  //   }
-
-  //   return handleNavigationData(navigationItemList,true)
-  // },[navigationItemList])
-
-  
   const menuData = useMemo(()=>{
     const filterMenu = (menu:Array<{[k:string]:unknown}>)=>{
         return menu.filter(x=> x && (x.access ? checkPermission(x.access as keyof typeof PERMISSION_DEFINITION[0]): true))
     }
-    return TOTAL_MENU_ITEMS!.filter(x=>x).map((x)=> ( x.children ? {...x, children:filterMenu(x.children)} : x))?.filter(x=> x.key === 'system' || (x.children && x.children?.length > 0))
+    return TOTAL_MENU_ITEMS!.filter(x=>x).map((x)=> ( x.children ? {...x, children:filterMenu(x.children)} : x))?.filter(x=> x.key === 'service' || (x.children && x.children?.length > 0))
 },[accessData])
 
   useEffect(() => {
     setSelectedKeys(currentUrl.split('/')[1] === 'template' ? currentUrl.split('/')[2] : currentUrl.split('/')[1])
-    // getNavigationData()
   }, [currentUrl]);
 
   return (
     <Menu
       onClick={onClick}
+      theme="dark"
       style={{height:'100%' }}
       selectedKeys={[selectedKeys]}
       defaultOpenKeys={['mainPage','dataAssets','operationCenter','maintenanceCenter']}

@@ -88,7 +88,6 @@ type CodeSnippetCompoType = {
       })
 
       result.params = []
-      console.log('检查请求参数类型',result.requestParams?.bodyParams?.[0]?.contentType)
       //为请求参数 中的header、reset、body、query 添加 value 和 valueQuery  的值
       switch (result.requestParams?.bodyParams?.[0]?.contentType) {
         case 0: {
@@ -161,18 +160,15 @@ type CodeSnippetCompoType = {
         setCode(tempCode)
         return
       }
-      console.log(cloneDeep(api))
       tempCode = generateCode(
           language.toString(),
           isMultipart,
           pretreatmentRequestInfo(cloneDeep(api))
       )
-      //console.log(tempCode)
       setCode(tempCode)
     }
 
     useEffect(() => {
-      //console.log(api,Object.keys(api))
       if(!Object.keys(api).length) return
       getCode(lang[lang.length -1 ])
     }, [api])
@@ -193,39 +189,11 @@ type CodeSnippetCompoType = {
     const [placeholderTxt, setPlaceholderTxt] = useState('搜索编程语言...')
     const [selectItemTxt, setSelectItemTxt ] = useState('')
 
-    // const openChange = (open:boolean) =>{
-    //   console.log(document)
-    //   const dom:HTMLCollection | [] = document.getElementsByClassName('langCas')[0]?.getElementsByClassName('ant-select-selection-item') || []
-    //   if(open && placeholderTxt && dom.length === 1){
-    //     setSelectItemTxt(dom[0].innerHTML)
-    //     dom[0].innerHTML = placeholderTxt
-    //     return
-    //   }
-    //   if(!open && placeholderTxt && selectItemTxt && dom.length === 1 && dom[0].innerHTML === placeholderTxt){
-    //     dom[0].innerHTML = selectItemTxt
-    //     return
-    //   }
-    // }
-
     return  (
 
         <Collapse title={title}>
           <Box width="100%">
             <>
-            {/* <div className="flex p-btnbase items-center border-0 border-b border-solid border-b-BORDER">
-              {extraTitle}
-              <Cascader
-                  options={CODE_LANG}
-                  onChange={value => onChange(value as string[])}
-                  placeholder={placeholderTxt}
-                  defaultValue={[lang]} // 当前的值
-                  showSearch={{ filter }}
-                  size="small"
-                  allowClear={false}
-                  // onDropdownVisibleChange={value => openChange(value)}
-              />
-              {extraContent}
-            </div> */}
             <Codebox extraContent={<><span className="ml-[12px]">编程语言：</span><Cascader
                   options={CODE_LANG}
                   onChange={(value,record) => onChange(value as unknown as number[],record)}

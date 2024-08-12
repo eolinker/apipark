@@ -6,17 +6,14 @@ import { SubscribeApprovalTableListItem, PublishApplyStatusEnum } from "./const"
 export type SubscribeApprovalInfoType = {
     applyTime: string;
     id:string;
-    applyProject:string;
-    service:string;
+    application:string;
     applier:string;
-    project:string;
+    service:string;
     applyTeam:string;
     team:string;
     status:string;
     approver:string;
     approvalTime:string;
-    areas:string[]
-    areasList:Array<{id:string, name:string}>
     reason:string
     opinion?:string
 };
@@ -25,7 +22,7 @@ export type SubscribeApprovalInfoType = {
 export type PublishApprovalTableListItem = {
     id:string;
     applyTime:string;
-    project:string;
+    service:string;
     team:string;
     status:string;
     applier:string;
@@ -46,7 +43,6 @@ export type PublishApprovalTableListItem = {
 
 export type PublishApprovalUpstreamItem = {
     upstream:EntityItem
-    partition:EntityItem
     cluster:EntityItem
     type:'static'|'dynamic'
     addr:string[]
@@ -58,7 +54,7 @@ export type PublishApprovalUpstreamItem = {
 export type PublishApprovalInfoType = {
     id:string;
     applyTime:string;
-    project:EntityItem;
+    service:EntityItem;
     applyTeam:EntityItem;
     team:EntityItem;
     status:string;
@@ -83,7 +79,7 @@ export type ApprovalTableListItem = SubscribeApprovalTableListItem | PublishAppr
 export type PublishVersionTableListItem = {
     id:string,
     version:string
-    project:EntityItem
+    service:EntityItem
     remark:string
     createTime:string
     creator:EntityItem
@@ -101,7 +97,7 @@ export type PublishTableListItem = {
     approveTime: string,
     createTime:string,
     creator: EntityItem,
-    project:EntityItem
+    service:EntityItem
     team:EntityItem
     status:keyof typeof PublishApplyStatusEnum
 }

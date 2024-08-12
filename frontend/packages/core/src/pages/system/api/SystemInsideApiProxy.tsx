@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-04-19 15:22:46
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-05-31 17:26:40
- * @FilePath: \frontend\packages\core\src\pages\system\api\SystemInsideApiProxy.tsx
- */
+
 import { Form, Input, InputNumber } from "antd";
 import { forwardRef, useEffect, useImperativeHandle } from "react"
 import EditableTableWithModal from "@common/components/aoplatform/EditableTableWithModal";

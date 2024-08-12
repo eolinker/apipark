@@ -70,21 +70,6 @@ export const ALGORITHM_ITEM = [
     {label:'ES512',value:'ES512'},
 ]
 
-// export const SYSTEM_PAGE_MENU_ITEMS: TabsProps['items']  = [
-//     getTabItem(<span>API 管理</span>, 'api',undefined,undefined,'project.mySystem.api.view'),
-//     getTabItem(<span>上游管理</span>, 'upstream',undefined,undefined,'project.mySystem.upstream.view'),
-//     getTabItem(<span>鉴权管理</span>, 'authority',undefined,undefined,'project.mySystem.auth.view'),
-//     getTabItem(<span>发布管理</span>, 'publish',undefined,undefined,'project.mySystem.publish.view'),
-//     getTabItem(<span>我的服务</span>, 'myService',undefined,undefined,'project.mySystem.service.view'),
-//     getTabItem(<span>第三方服务</span>, 'subService',undefined,undefined,'project.mySystem.subservice.view'),
-//     getTabItem(<span>订阅方管理</span>, 'subscriber',undefined,undefined,'project.mySystem.subscriber.view'),
-//     getTabItem(<span>订阅审批</span>, 'approval',undefined,undefined,'project.mySystem.subscribeApproval.view'),
-//     getTabItem(<span>系统拓扑</span>, 'topology',undefined,undefined,'project.mySystem.topology.view'),
-//     // getItem(<Link to="./statistics">系统监控</Link>, 'statistics',undefined,undefined,'project.mySystem.statistics.view'),
-//     getTabItem(<span>权限管理</span>, 'access',undefined,undefined,'project.mySystem.access.view'),
-//     getTabItem(<span>成员管理</span>, 'member',undefined,undefined,'project.mySystem.member.view'),
-//     getTabItem(<span>系统管理</span>, 'setting',undefined,undefined,'team.mySystem.self.edit')] as TabsProps['items'] 
-
 export const SYSTEM_TABLE_COLUMNS: ProColumns<SystemTableListItem>[] = [
     {
         title: '服务名称',
@@ -101,12 +86,6 @@ export const SYSTEM_TABLE_COLUMNS: ProColumns<SystemTableListItem>[] = [
         title: '服务 ID',
         dataIndex: 'id',
         width: 140,
-        copyable: true,
-        ellipsis:true,
-    },
-    {
-        title: '所属组织',
-        dataIndex: ['organization','name'],
         copyable: true,
         ellipsis:true,
     },
@@ -177,12 +156,6 @@ export const SYSTEM_SUBSERVICE_TABLE_COLUMNS: ProColumns<SystemSubServiceTableLi
         width: 140,
         copyable: true,
         ellipsis:true
-    },
-    {
-        title: '可用环境',
-        dataIndex: 'partition',
-        ellipsis:true,
-        renderText:(_,entity)=>(entity.partition?.map((x)=>x.name).join(',')||'-')
     },
     {
         title: '申请状态',
@@ -266,12 +239,6 @@ export const SYSTEM_SUBSCRIBER_TABLE_COLUMNS: ProColumns<SystemSubscriberTableLi
         width: 140,
         copyable: true,
         ellipsis:true
-    },
-    {
-        title: '可用环境',
-        dataIndex: 'partition',
-        ellipsis:true,
-        renderText:(_,entity)=>(entity.partition?.map((x)=>x.name).join(',')||'-')
     },
     {
         title: '订阅方',
@@ -759,14 +726,6 @@ export const SYSTEM_MYSERVICE_TABLE_COLUMNS: ProColumns<MyServiceTableListItem>[
         ellipsis:true
     },
     {
-        title: '部署网络区域',
-        dataIndex: ['partition','name'],
-        ellipsis:{
-            showTitle:true
-        },
-        renderText:(_,entity)=>(entity.partition?.map((x)=>x.name).join(',')||'-')
-    },
-    {
         title: '服务类型',
         dataIndex: 'serviceType',
         ellipsis:{
@@ -906,9 +865,6 @@ export const SYSTEM_SUBSCRIBE_APPROVAL_DETAIL_LIST = [
         title:'申请状态',key:'status',renderText:()=>{}
     },
     {
-        title:'可用环境',key:'partition',dataType:'checkbox'
-    },
-    {
         title:'申请人',key:'applier',nested:'name'
     },
     // {
@@ -958,19 +914,6 @@ export const SYSTEM_TOPOLOGY_NODE_TYPE_COLOR_MAP = {
 
   export const SYSTEM_PUBLISH_ONLINE_COLUMNS = [
     {
-        title: '环境',
-        dataIndex: ['partition','name'],
-        copyable: true,
-        ellipsis:true,
-        width:160,
-    },
-    // {
-    //     title: '集群',
-    //     dataIndex: ['cluster','name'],
-    //     copyable: true,
-    //     ellipsis:true
-    // },
-    {
         title: '上线结果',
         dataIndex: 'status',
         ellipsis:{
@@ -995,29 +938,21 @@ const APP_MODE = import.meta.env.VITE_APP_MODE;
   export const SYSTEM_PAGE_MENU_ITEMS: MenuProps['items'] = [
     getItem('内部数据服务', 'assets', null,
         [
-            getItem(<Link to="./api">API</Link>, 'api',undefined,undefined,undefined,'project.mySystem.api.view'),
-            getItem(<Link to="./upstream">上游</Link>, 'upstream',undefined,undefined,undefined,'project.mySystem.upstream.view'),
-            getItem(<Link to="./publish">发布</Link>, 'publish',undefined,undefined,undefined,'project.mySystem.publish.view'),
+            getItem(<Link to="./api">API</Link>, 'api',undefined,undefined,undefined,'team.service.api.view'),
+            getItem(<Link to="./upstream">上游</Link>, 'upstream',undefined,undefined,undefined,'team.service.upstream.view'),
+            getItem(<Link to="./document">使用说明</Link>, 'document',undefined,undefined,undefined,''),
+            getItem(<Link to="./publish">发布</Link>, 'publish',undefined,undefined,undefined,'team.service.release.view'),
             ],
         'group'),
     getItem('提供服务', 'provideSer', null,
         [
-            getItem(<Link to="./myService">提供的服务列表</Link>, 'myService',undefined,undefined,undefined,'project.mySystem.service.view'),
-            getItem(<Link to="./approval">订阅审批</Link>, 'approval',undefined,undefined,undefined,'project.mySystem.subscribeApproval.view'),
-            getItem(<Link to="./subscriber">订阅方管理</Link>, 'subscriber',undefined,undefined,undefined,'project.mySystem.subscriber.view'),
+            getItem(<Link to="./approval">订阅审批</Link>, 'approval',undefined,undefined,undefined,'team.service.subscription.view'),
+            getItem(<Link to="./subscriber">订阅方管理</Link>, 'subscriber',undefined,undefined,undefined,'team.service.subscription.view'),
         ],
         'group'),
-    // getItem('使用服务', 'useSer', null,
-    //     [
-    //         getItem(<Link to="./subService">使用的服务列表</Link>, 'subService',undefined,undefined,undefined,'project.mySystem.subservice.view'),
-    //         getItem(<Link to="./authority">身份认证</Link>, 'authority',undefined,undefined,undefined,'project.mySystem.auth.view'),
-    //     ],
-    //     'group'),
     getItem('管理', 'mng', null,
         [
             APP_MODE === 'pro' ? getItem(<Link to="./topology">调用拓扑图</Link>, 'topology',undefined,undefined,undefined,'project.mySystem.topology.view'):null,
-            getItem(<Link to="./member">成员</Link>, 'member',undefined,undefined,undefined,'project.mySystem.member.view'),
-            getItem(<Link to="./access">权限</Link>, 'access',undefined,undefined,undefined,'project.mySystem.access.view'),
-            getItem(<Link to="./setting">设置</Link>, 'setting',undefined,undefined,undefined,'team.mySystem.self.edit')],
+            getItem(<Link to="./setting">设置</Link>, 'setting',undefined,undefined,undefined,'')],
         'group'),
 ];

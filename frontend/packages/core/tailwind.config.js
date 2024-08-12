@@ -71,7 +71,7 @@ export default {
             icon: '5px',
             blockbase: '40px',
             DEFAULT_BORDER_RADIUS: 'var(--border-radius)',
-            TREE_TITLE:'var(--small-padding) var(--LAYOUT_PADDING);'
+            TREE_TITLE:'var(--small-padding) var(--LAYOUT_PADDING);',
           },
           borderColor: {
             'color-base': 'var(--border-color)'

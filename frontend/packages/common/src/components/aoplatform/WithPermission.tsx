@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-02-26 15:18:46
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-05 15:49:03
- * @FilePath: \frontend\packages\common\src\components\aoplatform\WithPermission.tsx
- */
+
 import {  Tooltip } from "antd";
 import  {  ReactElement, cloneElement, useEffect, useMemo, useState } from "react";
 import { useGlobalContext } from "../../contexts/GlobalStateContext";

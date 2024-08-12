@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:11
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-04-01 16:29:06
- * @FilePath: \frontend\packages\core\src\components\formily2-customize\ArrayItemBlankComponent.tsx
- */
+
 import {forwardRef, useImperativeHandle, useState} from 'react'
 
 import { Input } from 'antd'

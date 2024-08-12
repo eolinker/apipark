@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:11
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-02-20 16:30:22
- * @FilePath: \frontend\packages\core\src\components\api\RequestMethod\index.tsx
- */
+
 import { Chip, Skeleton } from '@mui/material'
 import { useEffect, useState } from 'react'
 

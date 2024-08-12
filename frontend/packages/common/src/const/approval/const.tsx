@@ -18,7 +18,7 @@ export const SUBSCRIBE_APPROVAL_TABLE_COLUMN : ProColumns<ApprovalTableListItem>
     },
     {
         title: '申请方-应用',
-        dataIndex: ['applyProject','name'],
+        dataIndex: ['application','name'],
         copyable: true,
         ellipsis:true
     },
@@ -30,7 +30,7 @@ export const SUBSCRIBE_APPROVAL_TABLE_COLUMN : ProColumns<ApprovalTableListItem>
     },
     {
         title: '服务所属系统',
-        dataIndex: ['project','name'],
+        dataIndex: ['service','name'],
         copyable: true,
         ellipsis:true
     },
@@ -84,7 +84,7 @@ export const SUBSCRIBE_APPROVAL_INNER_TODO_TABLE_COLUMN : ProColumns<SubscribeAp
     },
     {
         title: '申请方-应用',
-        dataIndex: ['applyProject','name'],
+        dataIndex: ['application','name'],
         copyable: true,
         ellipsis:true
     },
@@ -122,7 +122,7 @@ export const SUBSCRIBE_APPROVAL_INNER_DONE_TABLE_COLUMN : ProColumns<SubscribeAp
     },
     {
         title: '申请方-应用',
-        dataIndex: ['applyProject','name'],
+        dataIndex: ['application','name'],
         copyable: true,
         ellipsis:true
     },
@@ -179,10 +179,9 @@ export const SUBSCRIBE_APPROVAL_INNER_DONE_TABLE_COLUMN : ProColumns<SubscribeAp
 export type SubscribeApprovalTableListItem = {
     applyTime: string;
     id:string;
-    applyProject:string;
+    application:string;
     service:string;
     applier:string;
-    project?:string;
     team?:string;
     status:0|1;
     approver:string;
@@ -368,7 +367,7 @@ export const PUBLISH_APPROVAL_TABLE_COLUMN : ProColumns<ApprovalTableListItem>[]
     },
     {
         title: '申请系统',
-        dataIndex: ['project','name'],
+        dataIndex: ['service','name'],
         copyable: true,
         ellipsis:true
     },

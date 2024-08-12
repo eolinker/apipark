@@ -9,7 +9,8 @@ type SubscribeApprovalModalProps = {
     type:'approval'|'view'
     data?:SubscribeApprovalInfoType
     inSystem?:boolean
-    systemId?:string
+    serviceId:string
+    teamId:string
 }
 
 export type SubscribeApprovalModalHandle = {
@@ -17,14 +18,13 @@ export type SubscribeApprovalModalHandle = {
 }
 
 type FieldType = {
-    partition?:Array<{id:string,name:string,checked:boolean}>
     reason?:string;
     opinion?:string;
 };
 
 const list = [
     {
-        title:'申请方系统',key:'applyProject'
+        title:'申请方应用',key:'application'
     },
     {
         title:'申请方所属团队',key:'applyTeam'
@@ -39,15 +39,12 @@ const list = [
         title:'申请服务',key:'service'
     },
     {
-        title:'服务所属系统',key:'project'
-    },
-    {
         title:'服务所属团队',key:'team'
     }
 ]
 export const SubscribeApprovalModalContent = forwardRef<SubscribeApprovalModalHandle,SubscribeApprovalModalProps>((props, ref) => {
     const { message } = App.useApp()
-    const {data, type,inSystem=false,systemId} = props
+    const {data, type,inSystem=false, teamId, serviceId} = props
     const [form] = Form.useForm();
     const {fetchData} = useFetch()
 
@@ -66,7 +63,7 @@ export const SubscribeApprovalModalContent = forwardRef<SubscribeApprovalModalHa
                     reject('未填写审核意见')
                     return
                 }
-                fetchData<BasicResponse<null>>(`${inSystem?'project/':''}approval/subscribe`,{method: 'POST',eoBody:({partition:value.partitions,opinion:value.opinion,operate}), eoParams:(inSystem ? {application:data!.id, project:systemId} : {id:data!.id})}).then(response=>{
+                fetchData<BasicResponse<null>>(`${inSystem?'service/':''}approval/subscribe`,{method: 'POST',eoBody:({opinion:value.opinion,operate}), eoParams:(inSystem ? {apply:data!.id, team:teamId} : {id:data!.id,team:teamId})}).then(response=>{
                     const {code,msg} = response
                     if(code === STATUS_CODE.SUCCESS){
                         message.success(msg || '操作成功！')
@@ -86,7 +83,7 @@ export const SubscribeApprovalModalContent = forwardRef<SubscribeApprovalModalHa
     )
 
     useEffect(()=>{
-        form.setFieldsValue({opinion:'',...data,...(data?.areasList && data?.areasList?.length === 1 ? {partition:[data.areasList[0].id]} : {})})
+        form.setFieldsValue({opinion:'',...data})
     },[])
 
     return (
@@ -110,16 +107,6 @@ export const SubscribeApprovalModalContent = forwardRef<SubscribeApprovalModalHa
                 autoComplete="off"
                 disabled={type === 'view'}
             >
-
-                <Form.Item<FieldType>
-                    label="申请的环境"
-                    name="partition"
-                    rules={[{ required: true, message: '必填项'  }]}
-                >
-                    <Checkbox.Group
-                        options={data?.areasList?.map((x:{id:string,name:string})=>({label:x.name,value:x.id}))}
-                    />
-                </Form.Item>
 
                 <Form.Item<FieldType>
                     label="申请原因"

@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-04-09 15:46:10
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-05-31 19:09:37
- * @FilePath: \frontend\packages\core\src\components\DrawerWithFooter.tsx
- */
+
 import { Button, Drawer, DrawerProps, Space } from "antd";
 import WithPermission from "./WithPermission";
 import { useEffect, useState } from "react";

@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-02-27 15:43:18
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-07-12 10:42:39
- * @FilePath: \frontend\packages\dashboard\src\component\MonitorLineGraph.tsx
- */
+
 import  { FC, useEffect, useMemo, useRef, useState } from 'react';
 import ECharts, { EChartsOption } from 'echarts-for-react';
 import { InvokeData, LineGraphType, MessageData } from '@dashboard/const/type';

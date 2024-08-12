@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-06-04 08:54:16
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 10:18:49
- * @FilePath: \frontend\packages\common\src\components\postcat\api\ApiPreview\components\QueryFields\index.tsx
- */
+
 import { Box, LinearProgress, useTheme } from '@mui/material'
 import { DataGridPro, GridColDef } from '@mui/x-data-grid-pro'
 import { useMemo } from 'react'

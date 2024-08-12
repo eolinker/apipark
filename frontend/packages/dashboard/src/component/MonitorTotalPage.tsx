@@ -1,9 +1,3 @@
-/*
- * @Date: 2024-02-27 11:51:23
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-07-12 10:41:59
- * @FilePath: \frontend\packages\dashboard\src\component\MonitorTotalPage.tsx
- */
 
 import { App, Select, Button, Tabs, TabsProps, Empty, Drawer, Spin } from "antd";
 import dayjs from "dayjs";
@@ -74,7 +68,6 @@ const MonitorTotalPage = (props:MonitorTotalPageProps) => {
       const [invokeStaticError,setInvokeStaticError] = useState<boolean>(false)
       const [trafficStaticError,setTrafficStaticError] = useState<boolean>(false)
       const [timeUnit, setTimeUnit] = useState<string>()
-      const { partitionId } = useParams<RouterParams>()
       const monitorApiTableRef = useRef<MonitorTableHandler>(null)
       const monitorSubTableRef = useRef<MonitorTableHandler>(null)
       const [detailEntityName,setDetailEntityName]= useState<string>('')
@@ -93,7 +86,7 @@ const MonitorTotalPage = (props:MonitorTotalPageProps) => {
       }, [requestStatus]);
 
       useEffect(() => {
-        partitionId && getMonitorData();
+         getMonitorData();
       }, []);
     
       const getMonitorData = () => {
@@ -317,7 +310,7 @@ const MonitorTotalPage = (props:MonitorTotalPageProps) => {
                 <Drawer 
                   destroyOnClose={true} 
                   maskClosable={false}
-                  className={fullScreen? 'h-[calc(100%-50px)] mt-[50px]':''} 
+                  className={fullScreen? 'h-calc-100vh-minus-navbar mt-navbar-height':''} 
                   mask={!fullScreen} 
                   title={<>
                       {fullScreen && <a className="mr-btnrbase text-[14px]" onClick={()=>{setFullScreen(false)}}>
@@ -329,7 +322,7 @@ const MonitorTotalPage = (props:MonitorTotalPageProps) => {
                   width={fullScreen ? '100%' : '60%'} 
                   onClose={()=>setDrawerOpen(false)} 
                   open={drawerOpen}>
-                  <DashboardDetail fullScreen={fullScreen} name={detailEntityName!} queryData={recordQuery!} dashboardDetailId={detailId!} partitionId={partitionId!} dashboardType={detailType as "api" | "subscriber"}/>
+                  <DashboardDetail fullScreen={fullScreen} name={detailEntityName!} queryData={recordQuery!} dashboardDetailId={detailId!} dashboardType={detailType as "api" | "subscriber"}/>
                 </Drawer>
               </div>
             </div>

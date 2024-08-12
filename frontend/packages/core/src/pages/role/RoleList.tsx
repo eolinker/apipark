@@ -1,98 +1,29 @@
-import {Alert, App, Divider, Form, Input} from "antd";
+import { App, Divider} from "antd";
 import PageList from "@common/components/aoplatform/PageList.tsx";
-import  {forwardRef, useEffect, useImperativeHandle, useRef, useState} from "react";
+import  { useEffect, useRef,} from "react";
 import {ActionType, ProColumns} from "@ant-design/pro-components";
 import {useBreadcrumb} from "@common/contexts/BreadcrumbContext.tsx";
 import {BasicResponse, STATUS_CODE} from "@common/const/const.ts";
 import {useFetch} from "@common/hooks/http.ts";
 import { ROLE_TABLE_COLUMNS } from "../../const/role/const.tsx";
-import { RoleModalContentHandle, RoleModalContentProps, RoleTableListItem } from "../../const/role/type.ts";
-import WithPermission from "@common/components/aoplatform/WithPermission.tsx";
 import TableBtnWithPermission from "@common/components/aoplatform/TableBtnWithPermission.tsx";
 import { PERMISSION_DEFINITION } from "@common/const/permissions.ts";
 import { useGlobalContext } from "@common/contexts/GlobalStateContext.tsx";
 import { checkAccess } from "@common/utils/permission.ts";
+import { useNavigate } from "react-router-dom";
+import { RoleTableListItem } from "@core/const/role/type.ts";
 
-
-const RoleModalContent = forwardRef<RoleModalContentHandle,RoleModalContentProps>((props, ref)=>{
-    const { message } = App.useApp()
-    const {type,entity} = props
-    const [form] = Form.useForm();
-    const {fetchData} = useFetch()
-    const save:()=>Promise<boolean | string> =  ()=>{
-        return new Promise((resolve, reject)=>{
-            form.validateFields().then((value)=>{
-                fetchData<BasicResponse<null>>(type === 'add'? 'manage/role':'manage/role',{method:type === 'add'? 'POST' : 'PUT',eoBody:({name:value.name}),eoParams:{id:value!.id}}).then(response=>{
-                    const {code,msg} = response
-                    if(code === STATUS_CODE.SUCCESS){
-                        message.success(msg || '操作成功！')
-                        resolve(true)
-                    }else{
-                        message.error(msg || '操作失败')
-                        reject(msg || '操作失败')
-                    }
-                }).catch((errorInfo)=> reject(errorInfo))
-            }).catch((errorInfo)=> reject(errorInfo))
-        })
-    }
-
-    useImperativeHandle(ref, ()=>({
-            save
-        })
-    )
-
-    useEffect(() => {
-        if(type === 'edit'){
-            form.setFieldsValue(entity)
-        }
-    }, []);
-
-    return (
-        <WithPermission access={type === 'edit' ? 'system.role.self.edit':'system.role.self.add'}>
-        <Form
-            layout='vertical'
-            labelAlign='left'
-            scrollToFirstError
-            form={form}
-            className="mx-auto "
-            name="RoleList"
-            // labelCol={{ offset:1, span: 4 }}
-            // wrapperCol={{ span: 19}}
-            autoComplete="off"
-        >
-
-            {type === 'edit' && <Form.Item<RoleTableListItem>
-                    label="ID"
-                    name="id"
-                    hidden
-                    rules={[{ required: true, message: '必填项' ,whitespace:true }]}
-                >
-                    <Input className="w-INPUT_NORMAL" placeholder="ID"/>
-                </Form.Item>}
-
-                <Form.Item<RoleTableListItem>
-                    label="角色名称"
-                    name="name"
-                    rules={[{ required: true, message: '必填项' ,whitespace:true }]}
-                >
-                    <Input className="w-INPUT_NORMAL" placeholder="请输入角色名称"/>
-                </Form.Item>
-        </Form></WithPermission>)
-})
 
 const RoleList = ()=>{
-    // const [searchWord, setSearchWord] = useState<string>('')
     const { modal,message } = App.useApp()
     const { setBreadcrumb } = useBreadcrumb()
-    // const [confirmLoading, setConfirmLoading] = useState(false);
     const {fetchData} = useFetch()
-    const [init, setInit] = useState<boolean>(true)
     const pageListRef = useRef<ActionType>(null);
-    const addRef = useRef<RoleModalContentHandle>(null)
-    const editRef = useRef<RoleModalContentHandle>(null)
     const {accessData} = useGlobalContext()
+    const navigateTo = useNavigate()
 
-    const operation:ProColumns<RoleTableListItem>[] =[
+    const operation:(type:string)=>ProColumns<RoleTableListItem>[] =(type:string)=>[
+        // TODO 开源版隐藏操作
         {
             title: '操作',
             key: 'option',
@@ -100,18 +31,18 @@ const RoleList = ()=>{
             fixed:'right',
             valueType: 'option',
             render: (_: React.ReactNode, entity: RoleTableListItem) => [
-                <TableBtnWithPermission  access="system.role.self.edit" key="edit" onClick={()=>{openModal('edit',entity)}} btnTitle="编辑"/>,
-                <Divider type="vertical" className="mx-0"  key="div1" />,
-                <TableBtnWithPermission  access="system.role.self.delete" key="delete" onClick={()=>{openModal('delete',entity)}} btnTitle="删除"/>,
+                <TableBtnWithPermission  access={`system.organization.role.${type}.view`} key="view" onClick={()=>{navigateTo(`/role/${type}/config/${entity.id}`)}} btnTitle="查看"/>,
+                // <TableBtnWithPermission  access={`system.organization.role.${type}.edit`} key="edit" onClick={()=>{navigateTo(`/role/${type}/config/${entity.id}`)}} btnTitle="编辑"/>,
+                // <Divider type="vertical" className="mx-0"  key="div1" />,
+                // <TableBtnWithPermission  access={`system.organization.role.${type}.delete`} key="delete" onClick={()=>{openModal(type as 'system'|'team','delete',entity)}} btnTitle="删除"/>,
             ],
         }
     ]
 
-    const getRoleList = ()=>{
-        return fetchData<BasicResponse<{roles:RoleTableListItem[]}>>('manage/roles',{method:'GET'}).then(response=>{
+    const getRoleList = (group:'team'|'system')=>{
+        return fetchData<BasicResponse<{roles:RoleTableListItem[]}>>(`${group}/roles`,{method:'GET'}).then(response=>{
             const {code,data,msg} = response
-            if(code === STATUS_CODE.SUCCESS){
-                setInit((prev)=>prev ? false : prev)
+                if(code === STATUS_CODE.SUCCESS){
                 return  {data:data.roles, success: true}
             }else{
                 message.error(msg || '操作失败')
@@ -141,25 +72,17 @@ const RoleList = ()=>{
         pageListRef.current?.reload()
     };
 
-    const isActionAllowed = (type:'add'|'edit'|'delete') => {
+    const isActionAllowed = (accessType:'system'|'team', type:'add'|'edit'|'delete') => {
         
-        const permission = `system.role.self.${type}` as keyof typeof PERMISSION_DEFINITION[0] ;
+        const permission = `system.organization.role.${accessType}.${type}` as keyof typeof PERMISSION_DEFINITION[0] ;
         
         return !checkAccess(permission, accessData);
         };
 
-    const openModal = (type:'add'|'edit'|'delete',entity?:RoleTableListItem)=>{
+    const openModal = (accessType:'system'|'team', type:'delete',entity?:RoleTableListItem)=>{
         let title:string = ''
         let content:string|React.ReactNode = ''
         switch (type){
-            case 'add':
-                title='添加角色'
-                content=<RoleModalContent ref={addRef} type={type} />
-                break;
-            case 'edit':
-                title='编辑角色'
-                content=<RoleModalContent ref={editRef} type={type} entity={entity}/>
-                break;
             case 'delete':
                 title='删除'
                 content='该数据删除后将无法找回，请确认是否删除？'
@@ -171,10 +94,6 @@ const RoleList = ()=>{
             content,
             onOk:()=>{
                 switch (type){
-                    case 'add':
-                        return addRef.current?.save().then((res)=>{if(res === true) manualReloadTable()})
-                    case 'edit':
-                        return editRef.current?.save().then((res)=>{if(res === true) manualReloadTable()})
                     case 'delete':
                         return deleteRole(entity!).then((res)=>{if(res === true) manualReloadTable()})
                 }
@@ -182,7 +101,7 @@ const RoleList = ()=>{
             width:600,
             okText:'确认',
             okButtonProps:{
-                disabled:isActionAllowed(type)
+                disabled:isActionAllowed(accessType, type)
             },
             cancelText:'取消',
             closable:true,
@@ -193,28 +112,44 @@ const RoleList = ()=>{
     useEffect(() => {
         setBreadcrumb([
             {
-                title: '自定义角色'}])
+                title: '角色'}])
     }, []);
 
     return (<>
-        <Alert showIcon banner={true}  className="b-none m-btnbase mb-0 rounded" type="info" message="自定义角色用于配置系统下需要参与的角色组成，以下列表为平台可用的角色列表，各个系统的各个角色以及成员组成请到自定义角色入口进行配置。"/>
-        <div className="h-[calc(100%-40px)]">
+        <div className="flex flex-col">
+        <h3 className="pl-btnbase  my-0">系统级别角色</h3>
+            <PageList
+                id="global_role"
+                tableClass="role_table pl-btnbase mb-btnrbase"
+                ref={pageListRef}
+                columns={[...ROLE_TABLE_COLUMNS as ProColumns<RoleTableListItem, "text">[], ...operation('system')]}
+                request={()=>getRoleList('system')}
+                addNewBtnTitle="添加角色"
+                showPagination={false}
+                onAddNewBtnClick={() => {
+                    navigateTo(`/role/system/config`)
+                }}
+                noScroll={true}
+                addNewBtnAccess="system.organization.role.system.add"
+                onRowClick={(row:RoleTableListItem)=>  navigateTo(`/role/system/config/${row.id}`)}
+                tableClickAccess="system.organization.role.system.edit"
+            />
+        <h3 className="pl-btnbase pt-btnbase mb-0">团队级别角色</h3>
         <PageList
             id="global_role"
             ref={pageListRef}
-            columns={[...ROLE_TABLE_COLUMNS, ...operation]}
-            request={()=>getRoleList()}
+            tableClass="role_table pl-btnbase"
+            columns={[...ROLE_TABLE_COLUMNS as ProColumns<RoleTableListItem, "text">[], ...operation('team')]}
+            request={()=>getRoleList('team')}
+            showPagination={false}
             addNewBtnTitle="添加角色"
-            // searchPlaceholder="输入角色名称进行搜索"
             onAddNewBtnClick={() => {
-               openModal('add')
+                navigateTo(`/role/team/config`)
             }}
-            addNewBtnAccess="system.role.self.add"
-            // onSearchWordChange={(e) => {
-            //     setSearchWord(e.target.value)
-            // }}
-            onRowClick={(row:RoleTableListItem)=>openModal('edit',row)}
-            tableClickAccess="system.role.self.edit"
+            noScroll={true}
+            addNewBtnAccess="system.organization.role.team.add"
+            onRowClick={(row:RoleTableListItem)=>  navigateTo(`/role/team/config/${row.id}`)}
+            tableClickAccess="system.organization.role.team.edit"
         />
         </div>
     </>)

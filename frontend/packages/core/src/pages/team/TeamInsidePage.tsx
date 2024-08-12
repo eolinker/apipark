@@ -1,16 +1,10 @@
-/*
- * @Date: 2024-01-31 15:00:11
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 19:12:16
- * @FilePath: \frontend\packages\core\src\pages\team\TeamInsidePage.tsx
- */
+
 import  {FC, useEffect, useMemo, useState} from "react";
 import { Outlet, useLocation, useNavigate, useParams} from "react-router-dom";
 import {RouterParams} from "@core/components/aoplatform/RenderRoutes.tsx";
 import {App, Menu, MenuProps} from "antd";
 import {BasicResponse, STATUS_CODE} from "@common/const/const.ts";
 import {useFetch} from "@common/hooks/http.ts";
-import {OrganizationItem} from "@common/const/type.ts";
 import { TEAM_INSIDE_MENU_ITEMS } from "../../const/team/const.tsx";
 import { useTeamContext } from "../../contexts/TeamContext.tsx";
 import { useGlobalContext } from "@common/contexts/GlobalStateContext.tsx";
@@ -19,10 +13,12 @@ import Paragraph from "antd/es/typography/Paragraph";
 import { MenuItemGroupType, MenuItemType } from "antd/es/menu/hooks/useItems";
 import { cloneDeep } from "lodash-es";
 import { PERMISSION_DEFINITION } from "@common/const/permissions.ts";
+import { SimpleTeamItem } from "@common/const/type.ts";
+import { TeamConfigType } from "@core/const/team/type.ts";
 
 const TeamInsidePage:FC = ()=> {
     const { message } = App.useApp()
-    const {orgId,teamId} = useParams<RouterParams>();
+    const {teamId} = useParams<RouterParams>();
     const {fetchData} = useFetch()
     const location = useLocation()
     const { teamInfo ,setTeamInfo } = useTeamContext()
@@ -60,7 +56,7 @@ const TeamInsidePage:FC = ()=> {
 
     const getTeamInfo = ()=>{
         setTeamInfo?.(undefined)
-        fetchData<BasicResponse<{ team:OrganizationItem }>>('team',{method:'GET',eoParams:{team:teamId}}).then(response=>{
+        fetchData<BasicResponse<{ team:TeamConfigType[] }>>('team',{method:'GET',eoParams:{team:teamId}}).then(response=>{
             const {code,data,msg} = response
             if(code === STATUS_CODE.SUCCESS){
                 setTeamInfo?.(data.team)
@@ -79,7 +75,7 @@ const TeamInsidePage:FC = ()=> {
 
     useEffect(()=>{
         if( activeMenu && teamId === location.pathname.split('/')[location.pathname.split('/').length - 1]){
-            navigateTo(`/team/inside/${orgId}/${teamId}/${activeMenu}`)
+            navigateTo(`/team/inside/${teamId}/${activeMenu}`)
         }
     },[activeMenu])
 

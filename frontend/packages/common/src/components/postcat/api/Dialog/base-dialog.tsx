@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:11
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-04-30 11:01:26
- * @FilePath: \frontend\packages\core\src\components\api\Dialog\base-dialog.tsx
- */
+
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import type { ButtonProps } from '@mui/material'

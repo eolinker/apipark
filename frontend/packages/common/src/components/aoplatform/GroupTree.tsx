@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-06-04 08:54:16
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 11:36:01
- * @FilePath: \frontend\packages\common\src\components\aoplatform\GroupTree.tsx
- */
+
 import DirectoryTree from "antd/es/tree/DirectoryTree";
 import { DataNode, DirectoryTreeProps } from "antd/lib/tree";
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";

@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:10
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-04-30 11:20:11
- * @FilePath: \frontend\packages\core\src\components\api\ApiManager\components\EditableDataGrid\index.tsx
- */
+
 import { Box, SxProps, TextFieldProps, Theme } from '@mui/material'
 import { HTMLAttributes, KeyboardEvent } from 'react'
 

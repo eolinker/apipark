@@ -1,197 +1,199 @@
 system:
-  - name: user_manager
-    cname: '成员管理'
-    desc: '成员管理'
-    - system.member.self.view
-    - system.member.member.add
-    - system.member.member.edit
-    - system.member.member.delete
-    - system.member.member.block
-    - system.member.department.add
-    - system.member.department.edit
-    - system.member.department.delete
-  - name: user_group
-    cname: '用户组管理'
-    desc: '用户组管理'
-     - system.user.self.view
-     - system.user.group.add
-     - system.user.group.edit
-     - system.user.group.delete
-     - system.user.member.add
-     - system.user.member.delete
-  - name: team_manager
-    cname: '团队管理'
-    desc: '团队管理'
-     - system.team.self.view
-     - system.team.self.add
-     - system.team.self.edit
-     - system.team.self.delete
-     - system.team.self.running
-  - name: organization_manager
+  - name: organization
     cname: '组织管理'
-    desc: '组织管理'
-     - system.organization.self.view
-     - system.organization.self.add
-     - system.organization.self.edit
-     - system.organization.self.delete
-  - name: role_manager
-    cname: '角色管理'
-    desc: '角色管理'
-     - system.role.self.view
-     - system.role.self.add
-     - system.role.self.edit
-     - system.role.self.delete
-  - name: system_permission_setting
-    cname: '系统权限设置'
-    desc: '系统权限设置'
-     - system.access.self.view
-     - system.access.self.add
-     - system.access.self.edit
-     - system.access.self.delete
+    value: 'organization'
+    children:
+      - name: member
+        cname: '成员'
+        value: 'member'
+        access:
+          - system.organization.member.view
+          - system.organization.member.add
+          - system.organization.member.edit
+          - system.organization.member.delete
+          - system.organization.member.block
+          - system.organization.member.department.add
+          - system.organization.member.department.edit
+          - system.organization.member.department.delete
+      - name: team_manager
+        cname: '团队管理'
+        desc: '团队管理'
+        - system.organization.team.view
+        - system.organization.team.add
+        - system.organization.team.edit
+        - system.organization.team.delete
+        - system.organization.team.running
+      - name: role_manager
+        cname: '角色管理'
+        desc: '角色管理'
+        - system.organization.role.view
+        - system.organization.role.system.view
+        - system.organization.role.system.add
+        - system.organization.role.system.edit
+        - system.organization.role.system.delete
+        - system.organization.role.team.view
+        - system.organization.role.team.add
+        - system.organization.role.team.edit
+        - system.organization.role.team.delete
+  - name: API Market
+    cname: 'API市场'
+    value: 'api_market'
+    children:
+      - name: service classification
+        cname: '服务分类'
+        value: 'service_classification'
+        children:
+        - system.api_market.service_classification.view
+        - system.api_market.service_classification.add
+        - system.api_market.service_classification.edit
+        - system.api_market.service_classification.delete
   - name: devops
-    cname: '运维管理'
-    desc: '运维管理'
-  - name: environs_setting
-    cname: '环境管理'
-    desc: '环境管理'
-     - system.partition.cluster.view
-     - system.partition.cluster.add
-     - system.partition.cluster.edit
-     - system.partition.cluster.delete
-     - system.partition.cert.view
-     - system.partition.cert.add
-     - system.partition.cert.edit
-     - system.partition.cert.delete
-     - system.partition.self.view
-     - system.partition.self.add
-     - system.partition.self.edit
-     - system.partition.self.delete
+      cname: 运维
+      value: 'devops'
+      children:
+        - name: cluster
+          cname: 集群
+          value: 'cluster'
+          children:
+            - system.devops.cluster.view
+            - system.devops.cluster.add
+            - system.devops.cluster.edit
+            - system.devops.cluster.delete
+        - name: ssl certificate
+          cname: 证书
+          value: 'ssl_certificate'
+          children:
+            - system.devops.ssl_certificate.view
+            - system.devops.ssl_certificate.add
+            - system.devops.ssl_certificate.edit
+            - system.devops.ssl_certificate.delete
+        - name: log configuration
+          cname: 日志
+          value: 'log_configuration'
+          children:
+            - system.devops.log_configuration.view
+            - system.devops.log_configuration.add
+            - system.devops.log_configuration.edit
+            - system.devops.log_configuration.publish
+            - system.devops.log_configuration.delete
+  - name: workspace
+    cname: 工作空间
+    value: 'workspace'
+    children:
+      - name: application
+        cname: 应用
+        value: 'application'
+        children:
+          - system.workspace.application.view_all
+      - name: service
+        cname: 服务
+        value: 'service'
+        children:
+          - system.workspace.service.view_all
+      - name: team
+        cname: 团队
+        value: 'team'
+        children:
+          - system.workspace.team.view_all
+      - name: api market
+        cname: API市场
+        value: 'api_market'
+        children:
+          - system.workspace.api_market.view
 team:
-  - name: project_manager
-    cname: '项目管理'
-    desc: '项目管理'
-     - team.myTeam.system.view
-     - team.myTeam.system.add
-     - team.mySystem.self.view
-     - team.mySystem.self.add
-     - team.mySystem.self.edit
-  - name: project_view
-    cname: '项目查看'
-    desc: '项目查看'
-     - team.myTeam.system.view
-  - name: team_permission_setting
-    cname: '团队权限管理'
-    desc: '团队权限管理'
-     - team.myTeam.access.view
-     - team.myTeam.access.edit
-     - team.myTeam.access.delete
-  - name: team_setting
-    cname: '团队设置'
-    desc: '团队设置'
-     - team.myTeam.self.view
-     - team.myTeam.self.edit
-  - name: member_setting
-    cname: '成员管理'
-    desc: '成员管理'
-     - team.myTeam.member.view
-     - team.myTeam.member.add
-     - team.myTeam.member.edit
-project:
-  - name: project_setting
-    cname: '系统设置'
-    desc: '管理系统设置'
-     - project.mySystem.self.delete
-  - name: member_setting
-    cname: '成员管理'
-    desc: '成员管理'
-     - project.mySystem.member.view
-     - project.mySystem.member.add
-     - project.mySystem.member.edit
-  - name: api_manager
-    cname: 'API管理'
-    desc: 'API管理'
-     - project.mySystem.api.view
-     - project.mySystem.api.add
-     - project.mySystem.api.edit
-     - project.mySystem.api.delete
-     - project.mySystem.api.import  （导入API）
-  - name: api_view
-    cname: 'API查看'
-    desc: 'API查看'
-     - project.mySystem.api.view
-  - name: upstream_manager
-    cname: '上游管理'
-    desc: '上游管理'
-     - project.mySystem.upstream.view
-     - project.mySystem.upstream.add
-     - project.mySystem.upstream.edit
-     - project.mySystem.upstream.delete
-  - name: upstream_view
-    cname: '上游查看'
-    desc: '上游查看'
-     - project.mySystem.upstream.view
-  - name: service_manager
-    cname: '服务管理'
-    desc: '服务管理'
-     - project.mySystem.service.view
-     - project.mySystem.service.add
-     - project.mySystem.service.edit
-     - project.mySystem.service.delete
-     - project.mySystem.service.running （启用/停用服务）
-  - name: service_view
-    cname: '服务查看'
-    desc: '服务查看'
-     - project.mySystem.service.view
-     - project.mySystem.service.add
-  - name: subscribe_view
-    cname: '订阅查看'
-    desc: '查看订阅的第三方服务'
-     - project.mySystem.subservice.view
-  - name: subscribe_apply
-    cname: '申请订阅'
-    desc: '申请订阅第三方服务'
-     - project.mySystem.subservice.view
-     - project.mySystem.subservice.delete
-     - project.mySystem.subservice.subscribe（订阅第三方服务）
-     - project.mySystem.subservice.viewApproval （查看审批详情）
-     - project.mySystem.subservice.cancelSubscribe
-     - project.mySystem.subservice.cancelApply
-  - name: subscribers_manager
-    cname: '订阅方管理'
-    desc: '管理订阅的第三方服务, 新增，删除订阅方'
-     - project.mySystem.subscriber.view
-     - project.mySystem.subscriber.add
-     - project.mySystem.subscriber.delete
-  - name: subscribe_approval
-    cname: '订阅审批'
-    desc: '审批订阅申请'
-     - project.mySystem.subscribeApproval.view
-     - project.mySystem.subscribeApproval.approval
-  - name: authentication_view
-    cname: '查看鉴权'
-    desc: '查看鉴权配置'
-     - project.mySystem.auth.view
-  - name: authentication_manager
-    cname: '鉴权管理'
-    desc: '新增/编辑/删除鉴权信息'
-     - project.mySystem.auth.view
-     - project.mySystem.auth.add
-     - project.mySystem.auth.edit
-     - project.mySystem.auth.delete
-  - name: publish_manager
-    cname: '发布管理'
-    desc: '申请\执行发布, 删除版本'
-      projectt.mySystem.publish.view
-     - project.mySystem.publish.add
-     - project.mySystem.publish.rollback
-     - project.mySystem.publish.delete
-  - name: publish_approve
-    cname: '发布审批'
-    desc: '审批发布申请'
-     - project.mySystem.publish.approval
-  - name: permission_manager
-    cname: '权限管理'
-    desc: '权限管理'
-     - project.mySystem.access.view
-     - project.mySystem.access.edit
-     - project.mySystem.access.delete
+  - name: service
+    cname: 服务
+    value: 'service'
+    children:
+      - name: api
+        cname: API
+        value: 'api'
+        children:
+          - team.service.api.view
+          - team.service.api.add
+          - team.service.api.edit
+          - team.service.api.copy
+          - team.service.api.delete
+          - team.service.api.import
+      - name: upstream
+        cname: 上游
+        value: 'upstream'
+        children:
+          - team.service.upstream.view
+          - team.service.upstream.add
+          - team.service.upstream.edit
+          - team.service.upstream.delete
+      - name: release
+        cname: 发布
+        value: 'release'
+        children:
+          - team.service.release.view
+          - team.service.release.add
+          - team.service.release.rollback
+          - team.service.release.delete
+          - team.service.release.approval
+          - team.service.release.online
+          - team.service.release.cancel
+          - team.service.release.stop
+      - name: subscription management
+        cname: 订阅方管理
+        value: 'subscription'
+        children:
+          - team.service.subscription.view
+          - team.service.subscription.approval
+          - team.service.subscription.add
+          - team.service.subscription.delete
+      - name: service
+        cname: 服务管理
+        value: 'service'
+        children:
+          - team.service.service.view
+          - team.service.service.add
+          - team.service.service.edit
+          - team.service.service.delete
+  - name: application
+    cname: 应用
+    value: 'application'
+    children:
+      - name: subscription Service
+        cname: 订阅服务
+        value: 'subscription'
+        children:
+          - team.application.subscription.view
+          - team.application.subscription.add
+          - team.application.subscription.edit
+          - team.application.subscription.delete
+      - name: authorization
+        cname: 访问授权
+        value: 'authorization'
+        children:
+          - team.application.authorization.view
+          - team.application.authorization.manager
+          - team.application.authorization.add
+          - team.application.authorization.edit
+          - team.application.authorization.delete
+      - name: application
+        cname: 应用
+        value: 'application'
+        children:
+          - team.application.application.view
+          - team.application.application.add
+          - team.application.application.edit
+          - team.application.application.delete
+  - name: team
+    cname: 团队
+    value: 'team'
+    children:
+      - name: member
+        cname: 成员
+        value: 'member'
+        children:
+          - team.team.member.view
+          - team.team.member.add
+          - team.team.member.edit
+      - name: team
+        cname: 团队管理
+        value: 'team'
+        children:
+          - team.team.team.view
+          - team.team.team.edit

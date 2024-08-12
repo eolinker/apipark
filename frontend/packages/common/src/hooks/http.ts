@@ -161,7 +161,6 @@ export function useFetch(){
 
         return fetch(`${options?.eoApiPrefix === undefined? '/api/v1/':options.eoApiPrefix}${url}`, finalOptions)
             .then(async response => {
-                
                 if (response.status === STATUS_CODE.UNANTHORIZED) {
                     // 处理401未登录的逻辑，比如跳转到登录页面或弹出登录框
                     console.log('Unauthorized access, redirecting to login...');

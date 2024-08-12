@@ -29,7 +29,6 @@ const SystemInsideApiList:FC = ()=>{
     const [tableHttpReload, setTableHttpReload] = useState(true);
     const {fetchData} = useFetch()
     const pageListRef = useRef<ActionType>(null);
-    const {systemId,orgId,teamId} = useParams<RouterParams>();
     const copyRef = useRef<SystemInsideApiCreateHandle>(null)
     const {apiPrefix, prefixForce} = useSystemContext()
     const [memberValueEnum, setMemberValueEnum] = useState<{[k:string]:{text:string}}>({})
@@ -38,6 +37,7 @@ const SystemInsideApiList:FC = ()=>{
     const [open, setOpen] = useState(false);
     const drawerEditFormRef = useRef<SystemInsideApiDocumentHandle>(null)
     const drawerAddFormRef = useRef<SystemInsideApiCreateHandle>(null)
+    const {serviceId, teamId}  = useParams<RouterParams>()
 
     const [curApi, setCurApi] = useState<SystemApiTableListItem>()
 
@@ -51,7 +51,7 @@ const SystemInsideApiList:FC = ()=>{
             });
         }
 
-        return fetchData<BasicResponse<{apis:SystemApiTableListItem}>>('project/apis',{method:'GET',eoParams:{project:systemId, keyword:searchWord},eoTransformKeys:['request_path','create_time','update_time','can_delete']}).then(response=>{
+        return fetchData<BasicResponse<{apis:SystemApiTableListItem}>>('service/apis',{method:'GET',eoParams:{service:serviceId,team:teamId, keyword:searchWord},eoTransformKeys:['request_path','create_time','update_time','can_delete']}).then(response=>{
             const {code,data,msg} = response
             if(code === STATUS_CODE.SUCCESS){
                 setTableListDataSource(data.apis)
@@ -69,7 +69,7 @@ const SystemInsideApiList:FC = ()=>{
 
     const deleteApi = (entity:SystemApiTableListItem)=>{
         return new Promise((resolve, reject)=>{
-            fetchData<BasicResponse<null>>('project/api',{method:'DELETE',eoParams:{project:systemId, api:entity!.id}}).then(response=>{
+            fetchData<BasicResponse<null>>('service/api',{method:'DELETE',eoParams:{service:serviceId,team:teamId, api:entity!.id}}).then(response=>{
                 const {code,msg} = response
                 if(code === STATUS_CODE.SUCCESS){
                     message.success(msg || '操作成功！')
@@ -89,10 +89,10 @@ const SystemInsideApiList:FC = ()=>{
             case 'copy':{
                 title='复制 API'
                 message.loading('正在加载数据')
-                const {code,data,msg} = await fetchData<BasicResponse<{api:SystemApiSimpleFieldType}>>('project/api/detail/simple',{method:'GET',eoParams:{project:systemId, api:entity!.id}})
+                const {code,data,msg} = await fetchData<BasicResponse<{api:SystemApiSimpleFieldType}>>('service/api/detail/simple',{method:'GET',eoParams:{service:serviceId,team:teamId, api:entity!.id}})
                 message.destroy()
                 if(code === STATUS_CODE.SUCCESS){
-                    content=<SystemInsideApiCreate ref={copyRef} type={type} entity={{...data.api, path:(data.api.path?.startsWith('/')? data.api.path.substring(1): data.api.path),systemId:systemId}} modalApiPrefix={apiPrefix} modalPrefixForce={prefixForce}/>
+                    content=<SystemInsideApiCreate ref={copyRef} type={type} entity={{...data.api, path:(data.api.path?.startsWith('/')? data.api.path.substring(1): data.api.path),serviceId:serviceId}} serviceId={serviceId!} teamId={teamId!} modalApiPrefix={apiPrefix} modalPrefixForce={prefixForce}/>
                 }else{
                     message.error(msg || '操作失败')
                     return
@@ -120,7 +120,7 @@ const SystemInsideApiList:FC = ()=>{
             width:type==='copy'? 900: 600,
             okText:'确认',
             okButtonProps:{
-                disabled : !checkAccess( `project.mySystem.api.${type}`, accessData )
+                disabled : !checkAccess( `team.service.api.${type}`, accessData )
             },
             cancelText:'取消',
             closable:true,
@@ -136,13 +136,13 @@ const SystemInsideApiList:FC = ()=>{
             fixed:'right',
             valueType: 'option',
             render: (_: React.ReactNode, entity: SystemApiTableListItem) => [
-                <TableBtnWithPermission  access="project.mySystem.api.view" key="view"  onClick={()=>{openDrawer('view',entity)}} btnTitle="详情"/>,
+                <TableBtnWithPermission  access="team.service.api.view" key="view"  onClick={()=>{openDrawer('view',entity)}} btnTitle="详情"/>,
                 <Divider type="vertical" className="mx-0"  key="div1" />,
-                <TableBtnWithPermission  access="project.mySystem.api.copy" key="copy"  onClick={()=>{openModal('copy',entity)}} btnTitle="复制"/>,
+                <TableBtnWithPermission  access="team.service.api.copy" key="copy"  onClick={()=>{openModal('copy',entity)}} btnTitle="复制"/>,
                 <Divider type="vertical" className="mx-0"  key="div2"/>,
-                <TableBtnWithPermission  access="project.mySystem.api.edit" key="edit" onClick={()=>{openDrawer('edit',entity)}}  btnTitle="编辑"/>,
+                <TableBtnWithPermission  access="team.service.api.edit" key="edit" onClick={()=>{openDrawer('edit',entity)}}  btnTitle="编辑"/>,
                 entity.canDelete && <Divider type="vertical" className="mx-0"  key="div3"/>,
-                entity.canDelete && <TableBtnWithPermission  access="project.mySystem.api.delete" key="delete" onClick={()=>{openModal('delete',entity)}} btnTitle="删除"/>,
+                entity.canDelete && <TableBtnWithPermission  access="team.service.api.delete" key="delete" onClick={()=>{openModal('delete',entity)}} btnTitle="删除"/>,
             ],
         }
     ]
@@ -151,7 +151,6 @@ const SystemInsideApiList:FC = ()=>{
         setTableHttpReload(true); // 表格数据需要从后端接口获取
         pageListRef.current?.reload()
     };
-
     
     const getMemberList = async ()=>{
         setMemberValueEnum({})
@@ -177,7 +176,7 @@ const SystemInsideApiList:FC = ()=>{
     useEffect(() => {
         setBreadcrumb([
             {
-                title:<Link to={`/system/list`}>内部数据服务</Link>
+                title:<Link to={`/service/list`}>内部数据服务</Link>
             },
             {
                 title:'API'
@@ -185,7 +184,7 @@ const SystemInsideApiList:FC = ()=>{
         ])
         getMemberList()
         manualReloadTable()
-    }, [systemId]);
+    }, [serviceId]);
 
     const onClose = () => {
         setDrawerType(undefined);
@@ -219,8 +218,9 @@ const SystemInsideApiList:FC = ()=>{
                 addNewBtnTitle="添加 API"
                 searchPlaceholder="输入名称、URL 查找 API"
                 onAddNewBtnClick={()=>{openDrawer('add')}}
-                addNewBtnAccess="project.mySystem.api.add"
-                tableClickAccess="project.mySystem.api.view"
+                addNewBtnAccess="team.service.api.add"
+                tableClickAccess="team.service.api.view"
+                manualReloadTable={manualReloadTable}
                 onSearchWordChange={(e)=>{setSearchWord(e.target.value)}}
                 onChange={() => {
                     setTableHttpReload(false)
@@ -234,9 +234,9 @@ const SystemInsideApiList:FC = ()=>{
                     onSubmit={()=>handlerSubmit()} 
                     showOkBtn={drawerType !== 'view'} 
                     >
-                        {drawerType === 'add' && <SystemInsideApiCreate ref={drawerAddFormRef}  modalApiPrefix={apiPrefix} modalPrefixForce={prefixForce}/>}
-                        {drawerType === 'edit' && <SystemInsideApiDocument ref={drawerEditFormRef} systemId={systemId!} apiId={curApi!.id!}/>}
-                        {drawerType === 'view' && <SystemInsideApiDetail systemId={systemId!} apiId={curApi!.id!}/>}
+                        {drawerType === 'add' && <SystemInsideApiCreate ref={drawerAddFormRef}  modalApiPrefix={apiPrefix} serviceId={serviceId!} teamId={teamId!} modalPrefixForce={prefixForce}/>}
+                        {drawerType === 'edit' && <SystemInsideApiDocument ref={drawerEditFormRef} serviceId={serviceId!} teamId={teamId!} apiId={curApi!.id!}/>}
+                        {drawerType === 'view' && <SystemInsideApiDetail serviceId={serviceId!}  teamId={teamId!}  apiId={curApi!.id!}/>}
                 </DrawerWithFooter>
         </>
     )

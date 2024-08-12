@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-02-04 11:09:11
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 11:20:24
- * @FilePath: \frontend\packages\core\src\const\team\const.tsx
- */
+
 import { ProColumns } from "@ant-design/pro-components";
 import { TeamMemberTableListItem, TeamTableListItem } from "./type";
 import { ColumnsType } from "antd/es/table";
@@ -88,12 +83,6 @@ export const TEAM_SYSTEM_TABLE_COLUMNS: ProColumns<SystemTableListItem>[] = [
         ellipsis:true
     },
     {
-        title: '所属组织',
-        dataIndex: ['organization','name'],
-        copyable: true,
-        ellipsis:true
-    },
-    {
         title: '所属团队',
         dataIndex: ['team','name'],
         copyable: true,
@@ -138,26 +127,20 @@ export const TEAM_SYSTEM_TABLE_COLUMNS: ProColumns<SystemTableListItem>[] = [
 export const TEAM_MEMBER_TABLE_COLUMNS: ProColumns<TeamMemberTableListItem>[] = [
     {
         title: '姓名',
-        dataIndex: ['name','name'],
+        dataIndex: ['user','name'],
         copyable: true,
         ellipsis:true,
         width:160,
         fixed:'left',
         sorter: (a,b)=> {
-            return a.name.name.localeCompare(b.name.name)
+            return a.user.name.localeCompare(b.user.name)
         },
     },
     {
         title: '团队角色',
-        dataIndex: 'role',
+        dataIndex: 'roles',
         copyable: true,
-        ellipsis:true
-    },
-    {
-        title:'用户组',
-        dataIndex:'userGroup',
         ellipsis:true,
-        renderText:(_,entity)=>(entity.userGroup?.map((x)=>x.name).join(',')||'-')
     },
     {
         title: '添加日期',
@@ -185,19 +168,11 @@ export const TEAM_MEMBER_MODAL_TABLE_COLUMNS:ColumnsType<MemberItem> = [
     }}
 ]
 
-
-// export const TEAM_INSIDE_MENU_ITEMS: TabsProps['items'] = [
-//     getTabItem(<span>成员管理</span>, 'member',undefined,undefined,'team.myTeam.member.view'),
-//     getTabItem(<span>权限管理</span>, 'access',undefined,undefined,'team.myTeam.access.view'),
-//     getTabItem(<span>团队设置</span>, 'setting',undefined,undefined,'team.myTeam.self.view')] as TabsProps['items']
-
     export const TEAM_INSIDE_MENU_ITEMS: MenuProps['items'] = [
         getItem('管理', 'grp', null,
             [
-                // getItem(<Link to="system">系统</Link>, 'system'),
-                getItem(<Link to="member">成员</Link>, 'member',undefined, undefined, undefined,'team.myTeam.member.view'),
-                getItem(<Link to="access">权限</Link>, 'access',undefined,undefined,undefined,'team.myTeam.access.view'),
-                getItem(<Link to="setting">设置</Link>, 'setting',undefined,undefined,undefined,['team.myTeam.self.view','system.team.self.edit'])],
+                getItem(<Link to="member">成员</Link>, 'member',undefined, undefined, undefined,'team.team.member.view'),
+                getItem(<Link to="setting">设置</Link>, 'setting',undefined,undefined,undefined,'team.team.team.edit')],
             'group'),
     ];
     

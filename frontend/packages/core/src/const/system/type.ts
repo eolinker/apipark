@@ -1,19 +1,13 @@
-/*
- * @Date: 2024-02-04 16:37:27
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-07-12 10:15:37
- * @FilePath: \frontend\packages\core\src\const\system\type.ts
- */
+
 import { FormInstance, UploadFile } from "antd";
 import { HeaderParamsType, BodyParamsType, QueryParamsType, RestParamsType, ResultListType, ApiBodyType } from "@common/const/api-detail";
-import { EntityItem, MatchItem, PartitionItem } from "@common/const/type";
+import { EntityItem, MatchItem } from "@common/const/type";
 import { SubscribeEnum, SubscribeFromEnum } from "./const";
 import { HTTPMethod, Protocol } from "@common/components/postcat/api/RequestMethod";
 
 export type SystemTableListItem = {
     id:string;
     name: string;
-    organization:EntityItem;
     team: EntityItem;
     apiNum: number;
     serviceNum: number,
@@ -26,16 +20,19 @@ export type SystemConfigFieldType = {
     name?: string;
     id?: string;
     prefix?:string;
+    logo?:string;
+    logoFile?:UploadFile;
+    tags?:Array<string>;
     description?: string;
     team?:string;
     master?:string;
-    partition?:string[]
+    serviceType?:'public'|'inner';
+    catalogue?:string | string[];
 };
 
 export type SystemSubServiceTableListItem = {
     id:string;
     applyStatus:SubscribeEnum;
-    partition:EntityItem[];
     project:EntityItem;
     team:EntityItem
     service:EntityItem
@@ -49,7 +46,6 @@ export type SystemSubServiceTableListItem = {
 export type SystemSubscriberTableListItem = {
     id:string
     service:EntityItem
-    partition:EntityItem[];
     applyStatus:SubscribeEnum
     project:EntityItem
     team:EntityItem;
@@ -63,12 +59,11 @@ export type SystemSubscriberConfigFieldType = {
     service:string
     subscriber:string
     applier:string
-    partition:string
 };
 
 export type SystemSubscriberConfigProps = {
-    systemId:string
-    partitionList:PartitionItem[]
+    serviceId:string
+    teamId:string
 }
 
 export type SystemSubscriberConfigHandle = {
@@ -166,6 +161,8 @@ export type SystemInsideApiCreateProps = {
     entity?:SystemApiProxyFieldType &{systemId:string}
     modalApiPrefix?:string
     modalPrefixForce?:boolean
+    serviceId:string
+    teamId:string
 }
 
 export type SystemInsideApiCreateHandle = {
@@ -213,20 +210,6 @@ export type EditAuthFieldType  = {
 }
 
 
-export type SystemAuthorityConfigProps = {
-    type:'add'|'edit'
-    data?:EditAuthFieldType
-    systemId:string
-}
-
-export type SystemAuthorityConfigHandle = {
-    save:()=>Promise<boolean|string>
-}
-
-export type SystemAuthorityViewProps = {
-    entity:Array<{key:string, value:string}>
-}
-
 export type SystemUpstreamTableListItem = {
     name: string;
     id:string;
@@ -262,7 +245,6 @@ export type DiscoverItem = {
 }
 
 export type ServiceUpstreamFieldType = {
-    _apinto_show?:boolean
     driver:string
     nodes:GlobalNodeItem[],
     discover?:DiscoverItem
@@ -281,14 +263,8 @@ export type MyServiceFieldType = {
     name?: string;
     id?: string;
     description?: string;
-    logo?:string;
-    logoFile?:UploadFile;
-    tags?:Array<string>;
-    serviceType?:'public'|'inner';
     team?:string;
     project?:string;
-    partition?:Array<string>;
-    group?:string | string[];
     status?:'off'|'on'
 };
 
@@ -296,8 +272,6 @@ export type SimpleSystemItem = {
     id:string
     name:string
     team:EntityItem
-    organization:EntityItem
-    partition:EntityItem[]
 }
 
 export type ServiceApiTableListItem = {
@@ -330,8 +304,6 @@ export type SystemAuthorityTableListItem = {
 export type MyServiceTableListItem = {
     id:string;
     name: string;
-    partition:EntityItem[];
-    partitionId:string;
     serviceType:'public'|'inner';
     apiNum:number;
     status:string;
@@ -341,7 +313,8 @@ export type MyServiceTableListItem = {
 
 
 export type SystemInsideApiDetailProps = {
-    systemId:string;
+    serviceId:string;
+    teamId:string;
     apiId:string;
 }
 
@@ -351,14 +324,16 @@ export type SystemInsideApiDocumentHandle  = {
 }
 
 export type SystemInsideApiDocumentProps = {
-    systemId:string
+    serviceId:string
+    teamId:string
     apiId:string
 }
 
 
 export type SystemInsideApiProxyProps = {
     className?:string
-    systemId:string
+    service:string
+    teamId:string
     initProxyValue?:SystemApiProxyType
     value?:SystemApiProxyType
     onChange?: (newConfigItems: SystemApiProxyType) => void; // 当配置项变化时，外部传入的回调函数
@@ -374,7 +349,7 @@ export interface MyServiceInsideConfigHandle {
 }
 
 export interface MyServiceInsideConfigProps {
-    systemId:string,
+
     teamId:string
     serviceId?:string
     closeDrawer?:() => void
@@ -384,7 +359,8 @@ export interface MyServiceInsideConfigProps {
 export type SubSubscribeApprovalModalProps = {
     type:'reApply'|'view'
     data?:SystemSubServiceTableListItem
-    systemId?:string
+    teamId:string
+    serviceId?:string
 }
 
 export type SubSubscribeApprovalModalHandle = {
@@ -392,14 +368,12 @@ export type SubSubscribeApprovalModalHandle = {
 }
 
 export type SubSubscribeApprovalModalFieldType = {
-    partitions?:string[]
     reason?:string;
     opinion?:string;
 };
 
 export type SystemInsideUpstreamConfigProps = {
     upstreamNameForm:FormInstance
-    partitionId:string
     setLoading:(loading:boolean) => void
 }
 
@@ -460,8 +434,6 @@ export enum SystemReleaseStatus {
     }>
     upstream: Array<{
         name: "",
-        partition: EntityItem,
-        cluster: EntityItem,
         type: "",
         addr: [],
         status: ""

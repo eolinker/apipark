@@ -4,559 +4,444 @@
 
 export const PERMISSION_DEFINITION = [
     {
-      "system.member.self.view": {
+      "system.organization.member.view": {
         "granted": {
-          "anyOf": [{ "backend": ["system.user_manager"] }]
+          "anyOf": [{ "backend": ["system.organization.member.view"] }]
         }
       },
-      "system.member.member.add": {
+      "system.organization.member.add": {
         "granted": {
-          "anyOf": [{ "backend": ["system.user_manager"] }]
+          "anyOf": [{ "backend": ["system.organization.member.manager"] }]
         }
       },
-      "system.member.member.edit": {
+      "system.organization.member.edit": {
         "granted": {
-          "anyOf": [{ "backend": ["system.user_manager"] }]
+          "anyOf": [{ "backend": ["system.organization.member.manager"] }]
         }
       },
-      "system.member.member.remove": {
+      "system.organization.member.remove": {
         "granted": {
-          "anyOf": [{ "backend": ["system.user_manager"] }]
+          "anyOf": [{ "backend": ["system.organization.member.manager"] }]
         }
       },
-      "system.member.member.delete": {
+      "system.organization.member.delete": {
         "granted": {
-          "anyOf": [{ "backend": ["system.user_manager"] }]
+          "anyOf": [{ "backend": ["system.organization.member.manager"] }]
         }
       },
-      "system.member.member.block": {
+      "system.organization.member.block": {
         "granted": {
-          "anyOf": [{ "backend": ["system.user_manager"] }]
+          "anyOf": [{ "backend": ["system.organization.member.manager"] }]
         }
       },
-      "system.member.department.add": {
+      "system.organization.member.department.add": {
         "granted": {
-          "anyOf": [{ "backend": ["system.user_manager"] }]
+          "anyOf": [{ "backend": ["system.organization.member.manager"] }]
         }
       },
-      "system.member.department.edit": {
+      "system.organization.member.department.edit": {
         "granted": {
-          "anyOf": [{ "backend": ["system.user_manager"] }]
+          "anyOf": [{ "backend": ["system.organization.member.manager"] }]
         }
       },
-      "system.member.department.delete": {
+      "system.organization.member.department.delete": {
         "granted": {
-          "anyOf": [{ "backend": ["system.user_manager"] }]
+          "anyOf": [{ "backend": ["system.organization.member.manager"] }]
         }
       },
-      "system.user.self.view": {
+      "system.organization.team.view": {
         "granted": {
-          "anyOf": [{ "backend": ["system.user_group"] }]
+          "anyOf": [{ "backend": ["system.organization.team.view"] }]
         }
       },
-      "system.user.group.add": {
+      "system.organization.team.add": {
         "granted": {
-          "anyOf": [{ "backend": ["system.user_group"] }]
+          "anyOf": [{ "backend": ["system.organization.team.manager"] }]
         }
       },
-      "system.user.group.edit": {
+      "system.organization.team.edit": {
         "granted": {
-          "anyOf": [{ "backend": ["system.user_group"] }]
+          "anyOf": [{ "backend": ["system.organization.team.manager"] }]
         }
       },
-      "system.user.group.delete": {
+      "system.organization.team.delete": {
         "granted": {
-          "anyOf": [{ "backend": ["system.user_group"] }]
+          "anyOf": [{ "backend": ["system.organization.team.manager"] }]
         }
       },
-      "system.user.member.add": {
+      "system.organization.team.running": {
         "granted": {
-          "anyOf": [{ "backend": ["system.user_group"] }]
+          "anyOf": [{ "backend": ["system.organization.team.manager"] }]
         }
       },
-      "system.user.member.delete": {
+      "system.organization.role.view": {
         "granted": {
-          "anyOf": [{ "backend": ["system.user_group"] }]
+          "anyOf": [{ "backend": ["system.organization.role.view_system_role","system.organization.role.view_team_role"] }]
         }
       },
-      "system.team.self.view": {
+      "system.organization.role.system.view": {
         "granted": {
-          "anyOf": [{ "backend": ["system.team_manager"] }]
+          "anyOf": [{ "backend": ["system.organization.role.view_system_role"] }]
         }
       },
-      "system.team.self.add": {
+      "system.organization.role.system.add": {
         "granted": {
-          "anyOf": [{ "backend": ["system.team_manager"] }]
+          "anyOf": [{ "backend": ["system.organization.role.manager_system_role"] }]
         }
       },
-      "system.team.self.edit": {
+      "system.organization.role.system.edit": {
         "granted": {
-          "anyOf": [{ "backend": ["system.team_manager"] }]
+          "anyOf": [{ "backend": ["system.organization.role.manager_system_role"] }]
         }
       },
-      "system.team.self.delete": {
+      "system.organization.role.system.delete": {
         "granted": {
-          "anyOf": [{ "backend": ["system.team_manager"] }]
+          "anyOf": [{ "backend": ["system.organization.role.manager_system_role"] }]
         }
       },
-      "system.team.self.running": {
+      "system.organization.role.team.view": {
         "granted": {
-          "anyOf": [{ "backend": ["system.team_manager"] }]
+          "anyOf": [{ "backend": ["system.organization.role.view_team_role"] }]
         }
       },
-      "system.organization.self.view": {
+      "system.organization.role.team.add": {
         "granted": {
-          "anyOf": [{ "backend": ["system.organization_manager"] }]
+          "anyOf": [{ "backend": ["system.organization.role.manager_team_role"] }]
         }
       },
-      "system.organization.self.add": {
+      "system.organization.role.team.edit": {
         "granted": {
-          "anyOf": [{ "backend": ["system.organization_manager"] }]
+          "anyOf": [{ "backend": ["system.organization.role.manager_team_role"] }]
         }
       },
-      "system.organization.self.edit": {
+      "system.organization.role.team.delete": {
         "granted": {
-          "anyOf": [{ "backend": ["system.organization_manager"] }]
+          "anyOf": [{ "backend": ["system.organization.role.manager_team_role"] }]
         }
       },
-      "system.organization.self.delete": {
+      "system.api_market.service_classification.view": {
         "granted": {
-          "anyOf": [{ "backend": ["system.organization_manager"] }]
+          "anyOf": [{ "backend": ["system.api_market.service_classification.view"] }]
         }
       },
-      "system.role.self.view": {
+      "system.api_market.service_classification.add": {
         "granted": {
-          "anyOf": [{ "backend": ["system.role_manager"] }]
+          "anyOf": [{ "backend": ["system.api_market.service_classification.manager"] }]
         }
       },
-      "system.role.self.add": {
+      "system.api_market.service_classification.edit": {
         "granted": {
-          "anyOf": [{ "backend": ["system.role_manager"] }]
+          "anyOf": [{ "backend": ["system.api_market.service_classification.manager"] }]
         }
       },
-      "system.role.self.edit": {
+      "system.api_market.service_classification.delete": {
         "granted": {
-          "anyOf": [{ "backend": ["system.role_manager"] }]
+          "anyOf": [{ "backend": ["system.api_market.service_classification.manager"] }]
         }
       },
-      "system.role.self.delete": {
+      "system.devops.cluster.view": {
         "granted": {
-          "anyOf": [{ "backend": ["system.role_manager"] }]
+          "anyOf": [{ "backend": ["system.devops.cluster.view"] }]
         }
       },
-      "system.access.self.view": {
+      "system.devops.cluster.add": {
         "granted": {
-          "anyOf": [{ "backend": ["system.system_permission_setting"] }]
+          "anyOf": [{ "backend": ["system.devops.cluster.manager"] }]
         }
       },
-      "system.access.self.add": {
+      "system.devops.cluster.edit": {
         "granted": {
-          "anyOf": [{ "backend": ["system.system_permission_setting"] }]
+          "anyOf": [{ "backend": ["system.devops.cluster.manager"] }]
         }
       },
-      "system.access.self.edit": {
+      "system.devops.cluster.delete": {
         "granted": {
-          "anyOf": [{ "backend": ["system.system_permission_setting"] }]
+          "anyOf": [{ "backend": ["system.devops.cluster.manager"] }]
         }
       },
-      "system.access.self.delete": {
+      "system.devops.ssl_certificate.view": {
         "granted": {
-          "anyOf": [{ "backend": ["system.system_permission_setting"] }]
+          "anyOf": [{ "backend": ["system.devops.ssl_certificate.view"] }]
         }
       },
-      "system.partition.cluster.view": {
+      "system.devops.ssl_certificate.add": {
         "granted": {
-          "anyOf": [{ "backend": ["system.environs_setting"] }]
+          "anyOf": [{ "backend": ["system.devops.ssl_certificate.manager"] }]
         }
       },
-      "system.partition.cluster.add": {
+      "system.devops.ssl_certificate.edit": {
         "granted": {
-          "anyOf": [{ "backend": ["system.environs_setting"] }]
+          "anyOf": [{ "backend": ["system.devops.ssl_certificate.manager"] }]
         }
       },
-      "system.partition.cluster.edit": {
+      "system.devops.ssl_certificate.delete": {
         "granted": {
-          "anyOf": [{ "backend": ["system.environs_setting"] }]
+          "anyOf": [{ "backend": ["system.devops.ssl_certificate.manager"] }]
         }
       },
-      "system.partition.cluster.delete": {
+      "system.devops.log_configuration.view": {
         "granted": {
-          "anyOf": [{ "backend": ["system.environs_setting"] }]
+          "anyOf": [{ "backend": ["system.devops.log_configuration.view"] }]
         }
       },
-      "system.partition.cert.view": {
+      "system.devops.log_configuration.add": {
         "granted": {
-          "anyOf": [{ "backend": ["system.environs_setting"] }]
+          "anyOf": [{ "backend": ["system.devops.log_configuration.manager"] }]
         }
       },
-      "system.partition.cert.add": {
+      "system.devops.log_configuration.edit": {
         "granted": {
-          "anyOf": [{ "backend": ["system.environs_setting"] }]
+          "anyOf": [{ "backend": ["system.devops.log_configuration.manager"] }]
         }
       },
-      "system.partition.cert.edit": {
+      "system.devops.log_configuration.publish": {
         "granted": {
-          "anyOf": [{ "backend": ["system.environs_setting"] }]
+          "anyOf": [{ "backend": ["system.devops.log_configuration.manager"] }]
         }
       },
-      "system.partition.cert.delete": {
+      "system.devops.log_configuration.delete": {
         "granted": {
-          "anyOf": [{ "backend": ["system.environs_setting"] }]
+          "anyOf": [{ "backend": ["system.devops.log_configuration.manager"] }]
         }
       },
-      "system.partition.self.view": {
+      "system.workspace.application.view_all": {
         "granted": {
-          "anyOf": [{ "backend": ["system.environs_setting"] }]
+          "anyOf": [{ "backend": ["system.workspace.application.view_all"] }]
         }
       },
-      "system.partition.self.add": {
+      "system.workspace.service.view_all": {
         "granted": {
-          "anyOf": [{ "backend": ["system.environs_setting"] }]
+          "anyOf": [{ "backend": ["system.workspace.service.view_all"] }]
         }
       },
-      "system.partition.self.edit": {
+      "system.workspace.team.view_all": {
         "granted": {
-          "anyOf": [{ "backend": ["system.environs_setting"] }]
+          "anyOf": [{ "backend": ["system.workspace.team.view_all"] }]
         }
       },
-      "system.partition.self.delete": {
+      "system.workspace.api_market.view": {
         "granted": {
-          "anyOf": [{ "backend": ["system.environs_setting"] }]
+          "anyOf": [{ "backend": ["system.workspace.api_market.view"] }]
         }
       },
-      "system.openapi.self.view": {
+      "team.service.api.view": {
         "granted": {
-          "anyOf": [{ "backend": ["system.environs_setting"] }]
+          "anyOf": [{ "backend": ["team.service.api.view"] }]
         }
       },
-      "system.logRetrieval.self.view":{
+      "team.service.api.add": {
         "granted": {
-          "anyOf": [{ "backend": ["system.environs_setting"] }]
+          "anyOf": [{ "backend": ["team.service.api.manager"] }]
         }
       },
-      "system.openapi.self.add": {
+      "team.service.api.edit": {
         "granted": {
-          "anyOf": [{ "backend": ["system.environs_setting"] }]
+          "anyOf": [{ "backend": ["team.service.api.manager"] }]
         }
       },
-      "system.openapi.self.edit": {
+      "team.service.api.copy": {
         "granted": {
-          "anyOf": [{ "backend": ["system.environs_setting"] }]
+          "anyOf": [{ "backend": ["team.service.api.manager"] }]
         }
       },
-      "system.openapi.self.updateToken": {
+      "team.service.api.delete": {
         "granted": {
-          "anyOf": [{ "backend": ["system.environs_setting"] }]
+          "anyOf": [{ "backend": ["team.service.api.manager"] }]
         }
       },
-      "system.openapi.self.delete": {
+      "team.service.api.import": {
         "granted": {
-          "anyOf": [{ "backend": ["system.environs_setting"] }]
+          "anyOf": [{ "backend": ["team.service.api.manager"] }]
         }
       },
-      "system.auditLog.self.view": {
+      "team.service.upstream.view": {
         "granted": {
-          "anyOf": [{ "backend": ["system.environs_setting"] }]
+          "anyOf": [{ "backend": ["team.service.upstream.view"] }]
         }
       },
-      "system.serviceHub.category.add": {
+      "team.service.upstream.add": {
         "granted": {
-          "anyOf": [{ "backend": ["system.service_categories_setting"] }]
+          "anyOf": [{ "backend": ["team.service.upstream.manager"] }]
         }
       },
-      "system.serviceHub.category.edit": {
+      "team.service.upstream.edit": {
         "granted": {
-          "anyOf": [{ "backend": ["system.service_categories_setting"] }]
+          "anyOf": [{ "backend": ["team.service.upstream.manager"] }]
         }
       },
-      "system.serviceHub.category.delete": {
+      "team.service.upstream.delete": {
         "granted": {
-          "anyOf": [{ "backend": ["system.service_categories_setting"] }]
+          "anyOf": [{ "backend": ["team.service.upstream.manager"] }]
         }
       },
-      "team.myTeam.system.view": {
+      "team.service.release.view": {
         "granted": {
-          "anyOf": [{ "backend": ["team.project_manager"] }]
+          "anyOf": [{ "backend": ["team.service.release.view"] }]
         }
       },
-      "team.myTeam.system.add": {
+      "team.service.release.add": {
         "granted": {
-          "anyOf": [{ "backend": ["team.project_manager"] }]
+          "anyOf": [{ "backend": ["team.service.release.manager"] }]
         }
       },
-      "team.mySystem.self.view": {
+      "team.service.release.online": {
         "granted": {
-          "anyOf": [{ "backend": ["team.project_manager","team.project_view"] }]
+          "anyOf": [{ "backend": ["team.service.release.manager"] }]
         }
       },
-      "team.mySystem.self.add": {
+      "team.service.release.stop": {
         "granted": {
-          "anyOf": [{ "backend": ["team.project_manager"] }]
+          "anyOf": [{ "backend": ["team.service.release.manager"] }]
         }
       },
-      "team.mySystem.self.edit": {
+      "team.service.release.cancel": {
         "granted": {
-          "anyOf": [{ "backend": ["team.project_manager"] }]
+          "anyOf": [{ "backend": ["team.service.release.manager"] }]
         }
       },
-      "team.myTeam.access.view": {
+      "team.service.release.rollback": {
         "granted": {
-          "anyOf": [{ "backend": ["team.team_permission_setting"] }]
+          "anyOf": [{ "backend": ["team.service.release.manager"] }]
         }
       },
-      "team.myTeam.access.edit": {
+      "team.service.release.delete": {
         "granted": {
-          "anyOf": [{ "backend": ["team.team_permission_setting"] }]
+          "anyOf": [{ "backend": ["team.service.release.manager"] }]
         }
       },
-      "team.myTeam.access.delete": {
+      "team.service.release.approval": {
         "granted": {
-          "anyOf": [{ "backend": ["team.team_permission_setting"] }]
+          "anyOf": [{ "backend": ["team.service.release.manager"] }]
         }
       },
-      "team.myTeam.self.view": {
+      "team.service.subscription.view": {
         "granted": {
-          "anyOf": [{ "backend": ["team.team_setting"] }]
+          "anyOf": [{ "backend": ["team.service.subscription.view"] }]
         }
       },
-      "team.myTeam.self.edit": {
+      "team.service.subscription.approval": {
         "granted": {
-          "anyOf": [{ "backend": ["team.team_setting"] }]
+          "anyOf": [{ "backend": ["team.service.subscription.manager"] }]
         }
       },
-      "team.myTeam.member.view": {
+      "team.service.subscription.add": {
         "granted": {
-          "anyOf": [{ "backend": ["team.member_setting"] }]
+          "anyOf": [{ "backend": ["team.service.subscription.manager"] }]
         }
       },
-      "team.myTeam.member.add": {
+      "team.service.subscription.delete": {
         "granted": {
-          "anyOf": [{ "backend": ["team.member_setting"] }]
+          "anyOf": [{ "backend": ["team.service.subscription.manager"] }]
         }
       },
-      "team.myTeam.member.edit": {
+      "team.service.service.view": {
         "granted": {
-          "anyOf": [{ "backend": ["team.member_setting"] }]
+          "anyOf": [{ "backend": [""] }]
         }
       },
-      "project.mySystem.self.delete": {
+      "team.service.service.add": {
         "granted": {
-          "anyOf": [{ "backend": ["project.project_setting"] }]
+          "anyOf": [{ "backend": ["team.service.service.manager"] }]
         }
       },
-      "project.mySystem.member.view": {
+      "team.service.service.edit": {
         "granted": {
-          "anyOf": [{ "backend": ["project.member_setting"] }]
+          "anyOf": [{ "backend": ["team.service.service.manager"] }]
         }
       },
-      "project.mySystem.member.add": {
+      "team.service.service.delete": {
         "granted": {
-          "anyOf": [{ "backend": ["project.member_setting"] }]
+          "anyOf": [{ "backend": ["team.service.service.manager"] }]
         }
       },
-      "project.mySystem.member.edit": {
+      "team.application.subscription.view": {
         "granted": {
-          "anyOf": [{ "backend": ["project.member_setting"] }]
+          "anyOf": [{ "backend": ["team.application.subscription.view"] }]
         }
       },
-      "project.mySystem.api.view": {
+      "team.application.subscription.add": {
         "granted": {
-          "anyOf": [{ "backend": ["project.api_manager","project.api_view"] }]
+          "anyOf": [{ "backend": ["team.application.subscription.manager"] }]
         }
       },
-      "project.mySystem.api.add": {
+      "team.application.subscription.edit": {
         "granted": {
-          "anyOf": [{ "backend": ["project.api_manager"] }]
+          "anyOf": [{ "backend": ["team.application.subscription.manager"] }]
         }
       },
-      "project.mySystem.api.edit": {
+      "team.application.subscription.delete": {
         "granted": {
-          "anyOf": [{ "backend": ["project.api_manager"] }]
+          "anyOf": [{ "backend": ["team.application.subscription.manager"] }]
         }
       },
-      "project.mySystem.api.copy": {
+      "team.application.application.view": {
         "granted": {
-          "anyOf": [{ "backend": ["project.api_manager"] }]
+          "anyOf": [{ "backend": ["team.application.application.view"] }]
         }
       },
-      "project.mySystem.api.delete": {
+      "team.application.application.add": {
         "granted": {
-          "anyOf": [{ "backend": ["project.api_manager"] }]
+          "anyOf": [{ "backend": ["team.application.application.manager"] }]
         }
       },
-      "project.mySystem.api.import": {
+      "team.application.application.edit": {
         "granted": {
-          "anyOf": [{ "backend": ["project.api_manager"] }]
+          "anyOf": [{ "backend": ["team.application.application.manager"] }]
         }
       },
-      "project.mySystem.upstream.view": {
+      "team.application.application.delete": {
         "granted": {
-          "anyOf": [{ "backend": ["project.upstream_manager","project.upstream_view"] }]
+          "anyOf": [{ "backend": ["team.application.application.manager"] }]
         }
       },
-      "project.mySystem.upstream.add": {
+      "team.application.authorization.view": {
         "granted": {
-          "anyOf": [{ "backend": ["project.upstream_manager"] }]
+          "anyOf": [{ "backend": ["team.application.authorization.view"] }]
         }
       },
-      "project.mySystem.upstream.edit": {
+      "team.application.authorization.add": {
         "granted": {
-          "anyOf": [{ "backend": ["project.upstream_manager"] }]
+          "anyOf": [{ "backend": ["team.application.authorization.manager"] }]
         }
       },
-      "project.mySystem.upstream.delete": {
+      "team.application.authorization.edit": {
         "granted": {
-          "anyOf": [{ "backend": ["project.upstream_manager"] }]
+          "anyOf": [{ "backend": ["team.application.authorization.manager"] }]
         }
       },
-      "project.mySystem.service.view": {
+      "team.application.authorization.delete": {
         "granted": {
-          "anyOf": [{ "backend": ["project.service_manager","project.service_view"] }]
+          "anyOf": [{ "backend": ["team.application.authorization.manager"] }]
         }
       },
-      "project.mySystem.service.add": {
+      "team.team.team.view": {
         "granted": {
-          "anyOf": [{ "backend": ["project.service_manager","project.service_view"] }]
+          "anyOf": [{ "backend": ["team.team.team.view"] }]
         }
       },
-      "project.mySystem.service.edit": {
+      "team.team.team.edit": {
         "granted": {
-          "anyOf": [{ "backend": ["project.service_manager"] }]
+          "anyOf": [{ "backend": ["team.team.team.manager"] }]
         }
       },
-      "project.mySystem.service.delete": {
+      "team.team.member.view": {
         "granted": {
-          "anyOf": [{ "backend": ["project.service_manager"] }]
+          "anyOf": [{ "backend": ["team.team.member.view"] }]
         }
       },
-      "project.mySystem.service.running": {
+      "team.team.member.add": {
         "granted": {
-          "anyOf": [{ "backend": ["project.service_manager"] }]
+          "anyOf": [{ "backend": ["team.team.member.manager"] }]
         }
       },
-      "project.mySystem.subservice.view": {
+      "team.team.member.edit": {
         "granted": {
-          "anyOf": [{ "backend": ["project.subscribe_view","project.subscribe_apply"] }]
-        }
-      },
-      "project.mySystem.subservice.delete": {
-        "granted": {
-          "anyOf": [{ "backend": ["project.subscribe_apply"] }]
-        }
-      },
-      "project.mySystem.subservice.subscribe": {
-        "granted": {
-          "anyOf": [{ "backend": ["project.subscribe_apply"] }]
-        }
-      },
-      "project.mySystem.subservice.viewApproval": {
-        "granted": {
-          "anyOf": [{ "backend": ["project.subscribe_apply"] }]
-        }
-      },
-      "project.mySystem.subservice.cancelSubscribe": {
-        "granted": {
-          "anyOf": [{ "backend": ["project.subscribe_apply"] }]
-        }
-      },
-      "project.mySystem.subservice.cancelApply": {
-        "granted": {
-          "anyOf": [{ "backend": ["project.subscribe_apply"] }]
-        }
-      },
-      "project.mySystem.subscriber.view": {
-        "granted": {
-          "anyOf": [{ "backend": ["project.subscribers_manager"] }]
-        }
-      },
-      "project.mySystem.subscriber.add": {
-        "granted": {
-          "anyOf": [{ "backend": ["project.subscribers_manager"] }]
-        }
-      },
-      "project.mySystem.subscriber.delete": {
-        "granted": {
-          "anyOf": [{ "backend": ["project.subscribers_manager"] }]
-        }
-      },
-      "project.mySystem.subscribeApproval.view": {
-        "granted": {
-          "anyOf": [{ "backend": ["project.subscribe_approval"] }]
-        }
-      },
-      "project.mySystem.subscribeApproval.approval": {
-        "granted": {
-          "anyOf": [{ "backend": ["project.subscribe_approval"] }]
-        }
-      },
-      "project.mySystem.statistics.view": {
-        "granted": {
-          "anyOf": [{ "backend": ["project.subscribe_approval"] }]
+          "anyOf": [{ "backend": ["team.team.member.manager"] }]
         }
       },
       "project.mySystem.topology.view": {
         "granted": {
           "anyOf": [{ "backend": ["project.subscribe_approval"] }]
-        }
-      },
-      "project.mySystem.auth.view": {
-        "granted": {
-          "anyOf": [{ "backend": ["project.authentication_view","project.authentication_manager"] }]
-        }
-      },
-      "project.mySystem.auth.add": {
-        "granted": {
-          "anyOf": [{ "backend": ["project.authentication_manager"] }]
-        }
-      },
-      "project.mySystem.auth.edit": {
-        "granted": {
-          "anyOf": [{ "backend": ["project.authentication_manager"] }]
-        }
-      },
-      "project.mySystem.auth.delete": {
-        "granted": {
-          "anyOf": [{ "backend": ["project.authentication_manager"] }]
-        }
-      },
-      "project.mySystem.publish.view": {
-        "granted": {
-          "anyOf": [{ "backend": ["project.publish_manager"] }]
-        }
-      },
-      "project.mySystem.publish.add": {
-        "granted": {
-          "anyOf": [{ "backend": ["project.publish_manager"] }]
-        }
-      },
-      "project.mySystem.publish.online": {
-        "granted": {
-          "anyOf": [{ "backend": ["project.publish_manager"] }]
-        }
-      },
-      "project.mySystem.publish.stop": {
-        "granted": {
-          "anyOf": [{ "backend": ["project.publish_manager"] }]
-        }
-      },
-      "project.mySystem.publish.cancel": {
-        "granted": {
-          "anyOf": [{ "backend": ["project.publish_manager"] }]
-        }
-      },
-      "project.mySystem.publish.rollback": {
-        "granted": {
-          "anyOf": [{ "backend": ["project.publish_manager"] }]
-        }
-      },
-      "project.mySystem.publish.delete": {
-        "granted": {
-          "anyOf": [{ "backend": ["project.publish_manager"] }]
-        }
-      },
-      "project.mySystem.publish.approval": {
-        "granted": {
-          "anyOf": [{ "backend": ["project.publish_approve"] }]
         }
       },
       "project.mySystem.access.view": {

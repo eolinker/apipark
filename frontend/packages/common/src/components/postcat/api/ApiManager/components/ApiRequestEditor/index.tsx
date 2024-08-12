@@ -52,7 +52,6 @@ export function ApiRequestEditor({ editorRef ,apiInfo=null,loaded}: { editorRef?
   }))
 
   useEffect(() => {
-    //console.log(loaded, apiInfo)
     if (loaded && (apiInfo || apiInfo === null)) {
       setApiQuery(apiInfo?.requestParams?.queryParams || [])
       setApiRest(apiInfo?.requestParams?.restParams || [])

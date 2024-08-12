@@ -1,7 +1,7 @@
 /*
  * @Date: 2024-06-04 15:05:05
  * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 17:29:19
+ * @LastEditTime: 2024-08-01 17:59:56
  * @FilePath: \frontend\packages\common\tailwind.config.js
  */
 /** @type {import('tailwindcss').Config} */
@@ -59,6 +59,10 @@ module.exports = {
           status_offline:"#8f8e93",
           A_HOVER:'var(--button-primary-hover-background-color)'
         },
+        backgroundImage:{
+          LAYOUT_BG:'linear-gradient(107.97deg, rgba(32,41,117,1) 4.41%,rgba(16,13,27,1) 86.11%)',
+          LAYOUT_BG_DARK:'#fff',
+        },
         spacing: {
           mbase: 'var(--FORM_SPAN)',
           label: '12px', // 选择器和label之间的间距，待删
@@ -69,14 +73,23 @@ module.exports = {
           icon: '5px',
           blockbase: '40px',
           DEFAULT_BORDER_RADIUS: 'var(--border-radius)',
-          TREE_TITLE:'var(--small-padding) var(--LAYOUT_PADDING);'
+          TREE_TITLE:'var(--small-padding) var(--LAYOUT_PADDING);',
+          'navbar-height': 'var(--layout-header-height)',
         },
         borderColor: {
           'color-base': 'var(--border-color)'
         }
       }
     },
-  plugins: [],
+  plugins: [
+    function({ addUtilities }) {
+      addUtilities({
+        '.h-calc-100vh-minus-navbar': {
+          height: 'calc(100vh - var(--layout-header-height))',
+        },
+      }, ['responsive', 'hover']);
+    }
+  ],
   corePlugins: {
     preflight: false,
   },

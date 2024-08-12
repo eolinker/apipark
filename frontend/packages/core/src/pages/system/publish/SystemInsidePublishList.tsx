@@ -29,7 +29,7 @@ const SystemInsidePublicList:FC = ()=>{
     const [init, setInit] = useState<boolean>(true)
     const {fetchData} = useFetch()
     const [tableListDataSource, setTableListDataSource] = useState<MemberTableListItem[]>([]);
-    const {systemId,orgId, teamId} = useParams<RouterParams>();
+    const {serviceId, teamId} = useParams<RouterParams>();
     const drawerRef = useRef<PublishApprovalModalHandle>(null)
     // const approvalRef = useRef<PublishApprovalModalHandle>(null)
     // const addRef = useRef<PublishApprovalModalHandle>(null)
@@ -60,8 +60,8 @@ const SystemInsidePublicList:FC = ()=>{
             });
         }
         return fetchData<BasicResponse<{releases?:PublishVersionTableListItem[],publishs?:PublishTableListItem[]}>>(
-            pageStatus === 0 ? 'project/releases':'project/publishs',
-            {method:'GET',eoParams:(pageType !== 'insideSystem' && pageStatus !== 0 )  ? {project:systemId,page:params?.current,page_size:params?.pageSize}:{project:systemId},eoTransformKeys:['pageSize','apply_time','approve_time','release_status','is_valid','fail_msg','create_time','can_rollback','flow_id','can_delete']}).then(response=>{
+            pageStatus === 0 ? 'service/releases':'service/publishs',
+            {method:'GET',eoParams:(pageType !== 'insideSystem' && pageStatus !== 0 )  ? {service:serviceId,team:teamId,page:params?.current,page_size:params?.pageSize}:{service:serviceId,team:teamId},eoTransformKeys:['pageSize','apply_time','approve_time','release_status','is_valid','fail_msg','create_time','can_rollback','flow_id','can_delete']}).then(response=>{
             const {code,data,msg} = response
             if(code === STATUS_CODE.SUCCESS){
                 const finalRes = pageStatus === 0 ? data.releases.map((x:PublishVersionTableListItem)=>{if(!x.status|| x.status === 'close'){x.status = 'none'} return x}):data.publishs
@@ -79,22 +79,22 @@ const SystemInsidePublicList:FC = ()=>{
     }
 
     const handlePublishAction = (type:'rollback'|'delete'|'stop',entity:PublishTableListItem | PublishVersionTableListItem)=>{
-        let url:string  ='project/release'
+        let url:string  ='service/release'
         let method:string
         let params:{[k:string]:unknown} = {}
         switch(type){
             case 'rollback':
                 method = 'POST'
-                params = {project:systemId, id:entity.id}
+                params = {service:serviceId,team:teamId, id:entity.id}
                 break;
             case 'delete':
                 method = 'DELETE'
-                params = {project:systemId,id:entity.id}
+                params = {service:serviceId,team:teamId,id:entity.id}
                 break;
             case 'stop':
-                url = 'project/publish/stop'
+                url = 'service/publish/stop'
                 method = 'DELETE'
-                params = {project:systemId,id:(entity as PublishVersionTableListItem).flowId}
+                params = {service:serviceId,team:teamId,id:(entity as PublishVersionTableListItem).flowId}
                 break;
         }
 
@@ -113,14 +113,14 @@ const SystemInsidePublicList:FC = ()=>{
 
         
     const isActionAllowed = (type:'view' | 'delete' | 'add' |'stop'|'online'|'cancel'|'approval' | 'rollback'|'publish') => {
-        const permission :keyof typeof PERMISSION_DEFINITION[0]= `project.mySystem.publish.${type === 'publish'? 'add' : type}`;
+        const permission :keyof typeof PERMISSION_DEFINITION[0]= `team.service.release.${type === 'publish'? 'add' : type}`;
         return !checkAccess(permission, accessData);
         };
 
     const handleOnline = (entity:PublishTableListItem | PublishVersionTableListItem)=>{
         modal.confirm({
-            title:'上线中',
-            content:<SystemInsidePublishOnline systemId={systemId!} id={(entity as PublishVersionTableListItem).flowId}/>,
+            title:'发布结果',
+            content:<SystemInsidePublishOnline serviceId={serviceId!} teamId={teamId!} id={(entity as PublishVersionTableListItem).id}/>,
             width: 600,
             closable: true,
             wrapClassName:'ant-modal-without-footer',
@@ -139,8 +139,8 @@ const SystemInsidePublicList:FC = ()=>{
                 message.loading('正在加载数据');
                 const viewPublish:boolean =  pageStatus !== 0 || ((entity as PublishVersionTableListItem)?.status && (entity as PublishVersionTableListItem)?.status !== 'none') 
                 const { code, data, msg } = await fetchData<BasicResponse<{ publish: PublishApprovalInfoType } | { release:SystemPublishReleaseItem}>>(
-                    viewPublish ? 'project/publish':'project/release',
-                    { method: 'GET', eoParams:{id: (entity as PublishVersionTableListItem)?.[viewPublish && pageStatus === 0  ? 'flowId':'id'],project:systemId },eoTransformKeys:['cluster_publish_status','upstream_status','doc_status','proxy_status','version_remark'] }
+                    viewPublish ? 'service/publish':'service/release',
+                    { method: 'GET', eoParams:{id: (entity as PublishVersionTableListItem)?.[viewPublish && pageStatus === 0  ? 'flowId':'id'],service:serviceId,team:teamId },eoTransformKeys:['cluster_publish_status','upstream_status','doc_status','proxy_status','version_remark'] }
                 );
                 message.destroy();
                 if (code === STATUS_CODE.SUCCESS) {
@@ -155,8 +155,8 @@ const SystemInsidePublicList:FC = ()=>{
             case 'online':{
                 message.loading('正在加载数据');
                 const { code, data, msg } = await fetchData<BasicResponse<{ publish: PublishApprovalInfoType }>>(
-                    'project/publish',
-                    { method: 'GET', eoParams:{ id: (entity as PublishVersionTableListItem)?.flowId,project:systemId },eoTransformKeys:['version_remark'] }
+                    'service/publish',
+                    { method: 'GET', eoParams:{ id: (entity as PublishVersionTableListItem)?.flowId,service:serviceId,team:teamId },eoTransformKeys:['version_remark'] }
                 );
                 message.destroy();
                 if (code === STATUS_CODE.SUCCESS) {
@@ -173,8 +173,8 @@ const SystemInsidePublicList:FC = ()=>{
             case 'approval':{
                 message.loading('正在加载数据');
                 const { code, data, msg } = await fetchData<BasicResponse<{ publish: PublishApprovalInfoType }>>(
-                    'project/publish',
-                    { method: 'GET', eoParams:{ id: (entity as PublishVersionTableListItem)?.flowId,project:systemId },eoTransformKeys:['version_remark'] }
+                    'service/publish',
+                    { method: 'GET', eoParams:{ id: (entity as PublishVersionTableListItem)?.flowId,service:serviceId,team:teamId },eoTransformKeys:['version_remark'] }
                 );
                 message.destroy();
                 if (code === STATUS_CODE.SUCCESS) {
@@ -192,8 +192,8 @@ const SystemInsidePublicList:FC = ()=>{
             case 'add':{
                     message.loading('正在加载数据');
                     const { code, data, msg } = await fetchData<BasicResponse<{ diffs: PublishApprovalInfoType }>>(
-                        'project/publish/check',
-                        { method: 'GET', eoParams:{project:systemId, ...(type === 'publish' ?{ release:entity?.id }:{})},eoTransformKeys:['version_remark'] }
+                        'service/publish/check',
+                        { method: 'GET', eoParams:{service:serviceId,team:teamId, ...(type === 'publish' ?{ release:entity?.id }:{})},eoTransformKeys:['version_remark'] }
                     );
                     message.destroy();
                     if (code === STATUS_CODE.SUCCESS) {
@@ -270,7 +270,7 @@ const SystemInsidePublicList:FC = ()=>{
     };
 
     const tableOperation = (entity:PublishTableListItem | PublishVersionTableListItem)=>{
-        const viewBtn = <TableBtnWithPermission  access="project.mySystem.publish.view" key="view"  onClick={()=>{openDrawer('view',entity)}} btnTitle="查看详情"/>
+        const viewBtn = <TableBtnWithPermission  access="team.service.release.view" key="view"  onClick={()=>{openDrawer('view',entity)}} btnTitle="查看详情"/>
         let btnArr:React.ReactNode[] = []
         if(pageType !== 'insideSystem' && pageStatus !== 0){
             btnArr =  [
@@ -281,11 +281,11 @@ const SystemInsidePublicList:FC = ()=>{
 
         if((entity as PublishVersionTableListItem).status === 'accept'){
             btnArr =  [
-                    <TableBtnWithPermission  access="project.mySystem.publish.online" key="online"  onClick={()=>{openDrawer('online',entity)}} btnTitle="上线"/>,
+                    <TableBtnWithPermission  access="team.service.release.online" key="online"  onClick={()=>{openDrawer('online',entity)}} btnTitle="上线"/>,
                     <Divider type="vertical" className="mx-0"  key="div1"/>,
                     viewBtn,
                     <Divider type="vertical" className="mx-0"  key="div2"/>,
-                    <TableBtnWithPermission  access="project.mySystem.publish.stop" key="stop"  onClick={()=>{openModal('stop',entity)}} btnTitle="终止发布"/>
+                    <TableBtnWithPermission  access="team.service.release.stop" key="stop"  onClick={()=>{openModal('stop',entity)}} btnTitle="终止发布"/>
                 ]
         }
 
@@ -294,17 +294,17 @@ const SystemInsidePublicList:FC = ()=>{
             btnArr =  [
                     viewBtn,
                     <Divider type="vertical" className="mx-0"  key="div2"/>,
-                    <TableBtnWithPermission  access="project.mySystem.publish.stop" key="stop"  onClick={()=>{openModal('stop',entity)}} btnTitle="终止发布"/>
+                    <TableBtnWithPermission  access="team.service.release.stop" key="stop"  onClick={()=>{openModal('stop',entity)}} btnTitle="终止发布"/>
                 ]
         }
 
         if((entity as PublishVersionTableListItem).status === 'apply'){
             btnArr =  [
-                    <TableBtnWithPermission  access="project.mySystem.publish.approval" key="approval"  onClick={()=>{openDrawer('approval',entity)}} btnTitle="审批"/>,
+                    <TableBtnWithPermission  access="team.service.release.approval" key="approval"  onClick={()=>{openDrawer('approval',entity)}} btnTitle="审批"/>,
                     <Divider type="vertical" className="mx-0"  key="div1"/>,
                     viewBtn,
                     <Divider type="vertical" className="mx-0"  key="div2"/>,
-                    <TableBtnWithPermission  access="project.mySystem.publish.cancel" key="cancel"  onClick={()=>{openModal('cancel',entity)}} btnTitle="撤回申请"/>
+                    <TableBtnWithPermission  access="team.service.release.cancel" key="cancel"  onClick={()=>{openModal('cancel',entity)}} btnTitle="撤回申请"/>
                 ]
         }
 
@@ -314,15 +314,17 @@ const SystemInsidePublicList:FC = ()=>{
         //             ...(btnArr.length > 0  ?  [<Divider type="vertical" className="mx-0" />]:
         //             [viewBtn,
         //             <Divider type="vertical" className="mx-0" />]),
-        //             <WithPermission access="project.mySystem.publish.rollback"><Button  className="h-[22px] border-none p-0 flex items-center bg-transparent " key="rollback" onClick={()=>openModal('rollback',entity)}>回滚版本</Button></WithPermission>
+        //             <WithPermission access="team.service.release.rollback"><Button  className="h-[22px] border-none p-0 flex items-center bg-transparent " key="rollback" onClick={()=>openModal('rollback',entity)}>回滚版本</Button></WithPermission>
         //         ]
         // }
 
         if( ['close','refuse','none'].indexOf((entity as PublishVersionTableListItem).status as string) !== -1 || !(entity as PublishVersionTableListItem).flowId){
             btnArr =  [...btnArr,
                     ...(btnArr.length > 0  ? [<Divider type="vertical" className="mx-0"  key="div1" />]:
-                    [viewBtn,<Divider type="vertical" className="mx-0"  key="div1"/>]),
-                    <TableBtnWithPermission  access="project.mySystem.publish.add" key="publish"  onClick={()=>{openDrawer('publish',entity)}} btnTitle="申请发布"/>
+                    [viewBtn,
+                    // <Divider type="vertical" className="mx-0"  key="div1"/>
+                ]),
+                    // <TableBtnWithPermission  access="team.service.release.add" key="publish"  onClick={()=>{openDrawer('publish',entity)}} btnTitle="申请发布"/>
                 ]
         }
 
@@ -331,7 +333,7 @@ const SystemInsidePublicList:FC = ()=>{
         }
 
         if((entity as PublishVersionTableListItem).canDelete){
-            btnArr = [...btnArr, btnArr.length > 0 && <Divider type="vertical" className="mx-0"  key="div5"/>,<TableBtnWithPermission  access="project.mySystem.publish.delete" key="delete"  onClick={()=>{openModal('delete',entity)}} btnTitle="删除"/> ]
+            btnArr = [...btnArr, btnArr.length > 0 && <Divider type="vertical" className="mx-0"  key="div5"/>,<TableBtnWithPermission  access="team.service.release.delete" key="delete"  onClick={()=>{openModal('delete',entity)}} btnTitle="删除"/> ]
         }
 
         return btnArr
@@ -352,7 +354,7 @@ const SystemInsidePublicList:FC = ()=>{
     useEffect(() => {
         setBreadcrumb([
             {
-                title:<Link to={`/system/list`}>内部数据服务</Link>
+                title:<Link to={`/service/list`}>内部数据服务</Link>
             },
             {
                 title:'发布'
@@ -360,7 +362,7 @@ const SystemInsidePublicList:FC = ()=>{
         ])
         getMemberList()
         manualReloadTable()
-    }, [systemId]);
+    }, [serviceId]);
 
     
     const getMemberList = async ()=>{
@@ -391,7 +393,7 @@ const SystemInsidePublicList:FC = ()=>{
     }, [query]);
 
     useEffect(()=>{
-        setPageType(currLocation.split('/')[0] === 'system' ? 'insideSystem' : 'global')
+        setPageType(currLocation.split('/')[0] === 'service' ? 'insideSystem' : 'global')
     },[currLocation])
 
     const manualReloadTable = () => {
@@ -411,11 +413,13 @@ const SystemInsidePublicList:FC = ()=>{
         const action = drawerActions[drawerType as keyof typeof drawerActions];
         if (action) {
             return action()?.then((res) => {
-                if (res === true && drawerType !== 'online') {
-                    manualReloadTable();
+                if(drawerType === 'add' && res){
+                    handleOnline((res as unknown as Record<string, unknown>)?.data?.publish)
                 }
-                if (res === true && drawerType === 'online') {
+                if (res === true && (drawerType === 'online' || drawerType === 'add')) {
                     handleOnline(drawerData)
+                }else if(res === true){
+                    manualReloadTable();
                 }
                 return res;
             });
@@ -434,14 +438,14 @@ const SystemInsidePublicList:FC = ()=>{
                     current?: number | undefined;
                     keyword?: string | undefined;
                 })=>getSystemPublishList(params)}
-                addNewBtnTitle={pageStatus === 0 ? "发布新版本":''}
+                addNewBtnTitle={pageStatus === 0 ? "新建版本":''}
                 onAddNewBtnClick={()=>{openDrawer('add')}}
-                addNewBtnAccess="project.mySystem.publish.add"
+                addNewBtnAccess="team.service.release.add"
                 onChange={() => {
                     setTableHttpReload(false)
                 }}
                 onRowClick={(row:PublishTableListItem|PublishVersionTableListItem)=>openDrawer('view',row)}
-                tableClickAccess="project.mySystem.publish.view"
+                tableClickAccess="team.service.release.view"
             />
             <DrawerWithFooter 
               destroyOnClose={true} 
@@ -451,11 +455,11 @@ const SystemInsidePublicList:FC = ()=>{
               open={drawerVisible}
               okBtnTitle={drawerOkTitle}
               submitDisabled={drawerType === 'add' ? !isOkToPublish : false}
-              submitAccess={`project.mySystem.publish.${drawerType === 'publish'? 'add' : drawerType}`}
+              submitAccess={`team.service.release.${drawerType === 'publish'? 'add' : drawerType}`}
               cancelBtnTitle={drawerType === 'online' ? '关闭' : undefined}
               showOkBtn={drawerType !== 'view'}
               onSubmit={onSubmit}
-              extraBtn={(drawerType === 'approval'||drawerType === 'online')  ? <WithPermission access={`project.mySystem.publish.${drawerType === 'approval'? 'approval' : 'stop'}`}>
+              extraBtn={(drawerType === 'approval'||drawerType === 'online')  ? <WithPermission access={`team.service.release.${drawerType === 'approval'? 'approval' : 'stop'}`}>
                     <Button
                         type={drawerType === 'approval'? "primary" : 'default'}
                         danger={drawerType === 'approval'}
@@ -487,7 +491,7 @@ const SystemInsidePublicList:FC = ()=>{
                     </WithPermission> :undefined}
               >
                 <PublishApprovalModalContent insideSystem ref={drawerRef}
-                                                        data={drawerData} type={drawerType} systemId={systemId!} />
+                                                        data={drawerData as PublishVersionTableListItem } type={drawerType} serviceId={serviceId!} teamId={teamId!} />
             </DrawerWithFooter>
         </>
     )

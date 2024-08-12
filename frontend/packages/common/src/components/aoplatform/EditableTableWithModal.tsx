@@ -95,7 +95,7 @@ const EditableTableWithModal = <T extends { _id?: string }>({
         width:117,
         render: (_: unknown, record: T) => (
             <>
-            <div className="flex">
+            <div className="flex items-center">
                 <Button key="edit" disabled={disabled} onClick={()=>{showModal(record)}} className={`h-[22px] border-none p-0 flex items-center bg-transparent`}>编辑</Button>
                 <Divider key="div1" type="vertical" />
                 <Button  key="delete" disabled={disabled} onClick={()=>{handleDelete(record._id || '')}} className={`h-[22px] border-none p-0 flex items-center bg-transparent`} >删除</Button>

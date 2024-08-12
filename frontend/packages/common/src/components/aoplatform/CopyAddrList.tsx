@@ -1,12 +1,8 @@
-/*
- * @Date: 2024-02-04 14:06:22
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-05 15:48:54
- * @FilePath: \frontend\packages\common\src\components\aoplatform\CopyAddrList.tsx
- */
+
 import { useState,FC } from 'react';
 import { Tooltip, Button } from 'antd';
 import useCopyToClipboard from '@common/hooks/copy';
+import { Icon } from '@iconify/react/dist/iconify.js';
 
 type AddressItem = {
   expand?: boolean;
@@ -54,7 +50,7 @@ const CopyAddrList: FC<CopyAddrListProps> = ({ addrItem, onAddrItemChange, keyNa
                 {(localAddrItem[keyName] as string[]).join(',')}
               </span>
               {(localAddrItem[keyName] as string[]).length === 1 && (
-                <Button  type="primary"  className="border-none ant-typography-copy text-theme hover:text-A_HOVER "  ghost onClick={() => copyToClipboard((localAddrItem[keyName] as string))} icon={<iconpark-icon name="fuzhi1"></iconpark-icon>} size="small" />
+                <Button  type="primary"  className="border-none ant-typography-copy text-theme hover:text-A_HOVER "  ghost onClick={() => copyToClipboard((localAddrItem[keyName] as string))} icon={<Icon icon="ic:baseline-file-copy" width="14" height="14"/>} size="small" />
               )}
               {(localAddrItem[keyName] as string[]).length !== 1 && (
                 <Button  className="border-none bg-transparent w-[16px] h-[22px] text-table_text p-[0px]" icon={<iconpark-icon name="zhankai" style={{marginTop:'4px'}}></iconpark-icon>} onClick={toggleExpand} />
@@ -70,7 +66,7 @@ const CopyAddrList: FC<CopyAddrListProps> = ({ addrItem, onAddrItemChange, keyNa
             {(localAddrItem[keyName] as string[])?.map((addr: string, index: number) => (
               <div key={index} className="block w-full">
                 <span className="leading-6">{addr}</span>
-                <Button type="primary"  className="border-none bg-transparent w-[16px] h-[22px]  p-[0px] ml-2 text-theme hover:text-A_HOVER"  ghost onClick={() => copyToClipboard(addr)} icon={<iconpark-icon name="fuzhi1"></iconpark-icon>} size="small"  />
+                <Button type="primary"  className="border-none bg-transparent w-[16px] h-[22px]  p-[0px] ml-2 text-theme hover:text-A_HOVER"  ghost onClick={() => copyToClipboard(addr)} icon={<Icon icon="ic:baseline-file-copy" width="14" height="14"/>} size="small"  />
               </div>
             ))}
           </div>

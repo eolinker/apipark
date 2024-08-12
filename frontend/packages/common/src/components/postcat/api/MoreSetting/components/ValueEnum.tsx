@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:11
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 18:18:05
- * @FilePath: \frontend\packages\common\src\components\postcat\api\MoreSetting\components\ValueEnum.tsx
- */
+
 import { TextField, useTheme } from '@mui/material'
 import {
   DataGridPro,

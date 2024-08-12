@@ -1,18 +1,11 @@
-/*
- * @Date: 2024-05-30 12:07:53
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-06 17:01:16
- * @FilePath: \frontend\packages\market\src\pages\serviceHub\ServiceHubGroup.tsx
- */
 import {debounce} from "lodash-es";
 import {SearchOutlined} from "@ant-design/icons";
 import {App, Divider, Input, TreeDataNode} from "antd";
 import  {useCallback, useEffect, useState} from "react";
-import Tree, {DataNode, TreeProps} from "antd/es/tree";
+import Tree, {DataNode} from "antd/es/tree";
 import {BasicResponse, STATUS_CODE} from "@common/const/const.ts";
 import {useFetch} from "@common/hooks/http.ts";
 import { CategorizesType, TagType } from "../../const/serviceHub/type.ts";
-import { PartitionItem } from "@common/const/type.ts";
 import { filterServiceList, initialServiceHubListState, SERVICE_HUB_LIST_ACTIONS, ServiceHubListActionType } from "./ServiceHubList.tsx";
 
 type ServiceHubGroup = {
@@ -24,23 +17,9 @@ type ServiceHubGroup = {
 export const ServiceHubGroup = ({children,filterOption,dispatch}:ServiceHubGroup)=>{
     const {message} = App.useApp()
     const {fetchData} = useFetch()
-    // const [treeHeight, setTreeHeight] = useState<number>(Math.ceil((window.innerHeight - 50 - 20 * 2 - (32 + 4 + 20) - ( 12 * 2 + 1 ) * 2 - ( 25 + 15 ) * 3) /3) )
     
     useEffect(() => {
         getTagAndServiceClassifyList()
-        getPartitionList()
-        // const handleResize = () => {
-        //     setTreeHeight(Math.ceil((window.innerHeight - 50 - 20 * 2 - (32 + 4 + 20) - ( 12 * 2 + 1 ) * 2 - ( 25 + 15 ) * 3) /3))
-        // };
-    
-        // const debouncedHandleResize = debounce(handleResize, 200);
-    
-        // // 监听窗口大小变化
-        // window.addEventListener('resize', debouncedHandleResize);
-        // handleResize();
-        // return () => {
-        // window.removeEventListener('resize', debouncedHandleResize);
-        // };
     }, []);
 
     const onSearchWordChange = (e:string)=>{
@@ -64,22 +43,8 @@ export const ServiceHubGroup = ({children,filterOption,dispatch}:ServiceHubGroup
         })
     }
     
-    const getPartitionList = ()=>{
-        return fetchData<BasicResponse<{partitions:PartitionItem[]}>>('simple/partitions',{method:'GET'}).then(response=>{
-            const {code,data,msg} = response
-            if(code === STATUS_CODE.SUCCESS){
-                dispatch({type:SERVICE_HUB_LIST_ACTIONS.GET_PARTITIONS,payload:data.partitions})
-                dispatch({type:SERVICE_HUB_LIST_ACTIONS.SET_SELECTED_PARTITION,payload:data.partitions.map((x:PartitionItem)=>x.id)})
-                return Promise.resolve(data.partitions)
-            }else{
-                message.error(msg || '操作失败')
-                return Promise.reject(msg || '操作失败')
-            }
-        })
-    }
-
-    const transferToTreeData = useCallback((data:CategorizesType[] | TagType[] | PartitionItem[]):TreeDataNode[]=>{
-        const loop = (data: CategorizesType[] | TagType[] | PartitionItem[]): DataNode[] =>
+    const transferToTreeData = useCallback((data:CategorizesType[] | TagType[] ):TreeDataNode[]=>{
+        const loop = (data: CategorizesType[] | TagType[] ): DataNode[] =>
             data?.map((item) => {
                 if ((item as CategorizesType).children) {
                     return {
@@ -135,21 +100,6 @@ export const ServiceHubGroup = ({children,filterOption,dispatch}:ServiceHubGroup
                                 checkedKeys={filterOption.selectedTag}
                                 onCheck={onCheckHandler('SET_SELECTED_TAG')}
                                 treeData={transferToTreeData(filterOption.tagsList)}
-                                showLine={false}
-                                showIcon={false}
-                                selectable={false}
-                                />
-                        </div>
-                        <Divider className="my-[20px]" />
-                        <div className="ml-[20px] pr-[10px]">
-                        <p className="text-[18px] h-[25px] leading-[25px] font-bold mb-[15px]">环境</p>
-                            <Tree
-                                className="no-first-switch-tree no-selected-tree"
-                                checkable
-                                blockNode={true}
-                                checkedKeys={filterOption.selectedPartition}
-                                onCheck={onCheckHandler('SET_SELECTED_PARTITION')}
-                                treeData={transferToTreeData(filterOption.partitionList)}
                                 showLine={false}
                                 showIcon={false}
                                 selectable={false}
