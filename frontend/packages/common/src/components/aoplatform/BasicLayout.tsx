@@ -35,18 +35,11 @@ const themeToken = {
      const navigator = useNavigate()
      const location = useLocation()
      const currentUrl = location.pathname
-    const query =new URLSearchParams(useLocation().search)
-    const [isServiceHub,setIsServiceHub] = useState<boolean>(false)
-    const [,setIsRentMng] = useState<boolean>(false)
-    const [isMng,setIsMng] = useState<boolean>(false)
     const { accessData,checkPermission} = useGlobalContext()
     const [pathname, setPathname] = useState(currentUrl);
      const mainPage = project === 'core' ?'/service/list':'/serviceHub/list'
 
      useEffect(() => {
-        setIsServiceHub(currentUrl.includes('/serviceHub'))
-        setIsRentMng(currentUrl.includes('/tenantManagement'))
-         setIsMng(project === 'core' && !currentUrl.includes('/serviceHub') && !currentUrl.includes('/tenantManagement'))
          if(currentUrl === '/'){
              navigator(mainPage)
          }
@@ -87,20 +80,7 @@ const themeToken = {
         // 返回处理后的数据
         return { path: '/', routes: res.map(x=> ({...x, routes: x.routes?.filter(x=> (x.access || x.routes?.length > 0))})).filter(x=> (x.access || x.routes?.length > 0)) };
     }, [accessData]);
-    
 
-
-     const openServiceHub =()=>{
-        isMng ? window.open(`/serviceHub/list`,'_blank') :  navigator('/serviceHub/list')
-     }
-
-     const backToPage =()=>{
-        // const backUrl = query.get('callbackUrl') 
-        // navigator(backUrl&& backUrl !== 'null' ?backUrl : '/')
-        isServiceHub?window.open(`/tenantManagement/list`,'_blank') :  navigator('/serviceHub/list')
-     }
-
-     
     const { modal,message } = App.useApp()
     const { dispatch,resetAccess,getGlobalAccessData} = useGlobalContext()
     const [userInfo,setUserInfo] = useState<UserInfoType>()

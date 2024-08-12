@@ -218,8 +218,6 @@ export default function AuditLog(){
     }, []);
 
     const getAuditLogList =(params:unknown, sorter?:Record<string, SortOrder>,filter?:Record<string, (string | number)[] | null>): Promise<{ data: AuditLogTableListItem[], success: boolean }>=> {
-        //console.log(params,sorter,filter)
-        //console.log(moment(params.operateTime[0],'YYYY-MM-DD HH:mm:ss').valueOf() / 1000)
         const eoParams = {
             ...(params.operateTime?.length > 0 ? {
                 startTime:moment(params.operateTime[0],'YYYY-MM-DD HH:mm:ss').valueOf() / 1000,
