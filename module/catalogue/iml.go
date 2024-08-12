@@ -273,6 +273,7 @@ func (i *imlCatalogueModule) ServiceDetail(ctx context.Context, sid string) (*ca
 			Catalogue:  auto.UUID(s.Catalogue),
 			Version:    r.Version,
 			UpdateTime: auto.TimeLabel(r.CreateAt),
+			Logo:       s.Logo,
 		},
 		Apis: apis,
 	}, nil

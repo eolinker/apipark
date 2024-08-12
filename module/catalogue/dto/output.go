@@ -35,6 +35,7 @@ type ServiceBasic struct {
 	Catalogue  auto.Label     `json:"catalogue" aolabel:"catalogue"`
 	Version    string         `json:"version"`
 	UpdateTime auto.TimeLabel `json:"update_time"`
+	Logo       string         `json:"logo"`
 }
 
 type ServiceApiBasic struct {
