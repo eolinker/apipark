@@ -8,16 +8,12 @@
   "description": "",
   "scripts": {
     "test": "jest",
-    "build:all": "set NODE_OPTIONS=--max-old-space-size=16384 && lerna run build --scope=core --scope=market  --stream",
-    "build:pro:all": "set NODE_OPTIONS=--max-old-space-size=16384 && lerna run build --scope=businessEntry --scope=market --stream",
     "build": "set NODE_OPTIONS=--max-old-space-size=4096  && lerna run build --scope=core --stream  --verbose ",
     "build:pro": "set NODE_OPTIONS=--max-old-space-size=4096 && lerna run build --scope=business-entry --stream  --verbose ",
-    "build:tenant": "set NODE_OPTIONS=--max-old-space-size=16384 && lerna run build --scope=market --stream",
     "serve": "lerna run preview --parallel",
     "serve:remotes": "lerna run serve --scope=remote --parallel",
     "dev": "lerna run dev --scope=core --stream",
     "dev:pro": "lerna run dev --scope=business-entry --stream",
-    "dev:tenant": "lerna run dev --scope=market --stream",
     "stop": "kill-port --port 5000,5001"
   },
   "keywords": [],

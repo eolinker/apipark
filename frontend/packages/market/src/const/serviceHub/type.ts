@@ -15,6 +15,7 @@ export type ServiceBasicInfoType = {
     tags:EntityItem[]
     updateTime:string
     version:string
+    logo?:string
 }
 
 export type ServiceDetailType = {

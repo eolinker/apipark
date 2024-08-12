@@ -12,10 +12,6 @@
     
 ## 编译
 ### 开源版本
-        仅编译管理后台（打包目录为dist）：`pnpm run build`
-        仅编译租户端（打包目录为tenant_dist）：`pnpm run build:tenant`
-        同时编译管理后台和租户端:`pnpm run build:all`
+        `pnpm run build`
 ### 企业版本
-        仅编译管理后台（打包目录为dist）：`pnpm run build:pro`
-        仅编译租户端（租户端暂时不区分企业版和开源版，打包目录为tenant_dist）：`pnpm run build:tenant`
-        同时编译管理后台和租户端:`pnpm run build:pro:all`
+        `pnpm run build:pro`

@@ -125,10 +125,10 @@ const ServiceHubDetail = ()=>{
                     <div className="flex">
                         {/* <Avatar shape="square" size={50} className=" bg-[linear-gradient(135deg,white,#f0f0f0)] text-[#333] rounded-[12px]" > {service?.name?.substring(0,1)}</Avatar> */}
                         <Avatar shape="square" size={50} 
-                            className={ `rounded-[12px] border-none rounded-[12px] ${ serviceBasicInfo.logo ? 'bg-[linear-gradient(135deg,white,#f0f0f0)]' : 'bg-[linear-gradient(135deg,#7F83F7,#4E54FF)]'}`} 
-                            src={ serviceBasicInfo.logo ?  <img src={serviceBasicInfo.logo} alt="Logo" style={{  maxWidth: '200px', width:'45px',height:'45px',objectFit:'unset'}} 
+                            className={ `rounded-[12px] border-none rounded-[12px] ${ serviceBasicInfo?.logo ? 'bg-[linear-gradient(135deg,white,#f0f0f0)]' : 'bg-[linear-gradient(135deg,#7F83F7,#4E54FF)]'}`} 
+                            src={ serviceBasicInfo?.logo ?  <img src={serviceBasicInfo?.logo} alt="Logo" style={{  maxWidth: '200px', width:'45px',height:'45px',objectFit:'unset'}} 
                             /> : undefined}
-                            icon={serviceBasicInfo.logo ? '' :<iconpark-icon  className="" name="auto-generate-api"></iconpark-icon>}> </Avatar>
+                            icon={serviceBasicInfo?.logo ? '' :<iconpark-icon  className="" name="auto-generate-api"></iconpark-icon>}> </Avatar>
 
                         <div className="pl-[20px] w-[calc(100%-50px)]">
                             <p className="text-[14px] h-[20px] leading-[20px] truncate font-bold">{serviceName}</p>

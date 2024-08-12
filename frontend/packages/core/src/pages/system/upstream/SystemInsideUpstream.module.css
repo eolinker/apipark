@@ -1,6 +1,0 @@
-.upstream-tabs{
-   :global(.ant-tabs-content-holder){
-        overflow:auto;
-        height:100%;
-    }
-}
