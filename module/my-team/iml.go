@@ -45,6 +45,9 @@ func (m *imlTeamModule) UpdateMemberRole(ctx context.Context, id string, input *
 		return err
 	}
 	return m.transaction.Transaction(ctx, func(ctx context.Context) error {
+		if len(input.Roles) < 1 {
+			return errors.New("at least one role")
+		}
 		err = m.roleMemberService.RemoveUserRole(ctx, role.TeamTarget(id), input.Users...)
 		if err != nil {
 			return err
