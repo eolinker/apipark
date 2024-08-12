@@ -1,9 +1,3 @@
-/*
- * @Date: 2024-05-30 18:19:04
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-06 17:08:00
- * @FilePath: \frontend\packages\market\src\pages\serviceHub\management\ManagementInsideAuth.tsx
- */
 import { MoreOutlined } from "@ant-design/icons"
 import { message, Card, Button, Tag, Dropdown, App, Empty } from "antd"
 import { useState, useEffect, forwardRef, useRef } from "react"
@@ -11,26 +5,29 @@ import { VirtuosoGrid } from "react-virtuoso"
 import { BasicResponse, STATUS_CODE } from "@common/const/const"
 import { useBreadcrumb } from "@common/contexts/BreadcrumbContext"
 import { useFetch } from "@common/hooks/http"
-import { EditAuthFieldType, SystemAuthorityConfigHandle, SystemAuthorityTableListItem } from "@core/const/system/type"
+import { EditAuthFieldType, SystemAuthorityTableListItem } from "@core/const/system/type"
 import { Link, useParams } from "react-router-dom"
 import { RouterParams } from "@core/components/aoplatform/RenderRoutes"
 import moment from "moment"
-import { SystemAuthorityConfig } from "@core/pages/system/authority/SystemAuthorityConfig"
-import { SystemAuthorityView } from "@core/pages/system/authority/SystemAuthorityView"
 import { useTenantManagementContext } from "../../../contexts/TenantManagementContext"
+import { ManagementAuthorityConfig, ManagementAuthorityConfigHandle } from "./ManagementAuthorityConfig"
+import { ManagementAuthorityView } from "./ManagementAuthorityView"
+import { checkAccess } from "@common/utils/permission"
+import { useGlobalContext } from "@common/contexts/GlobalStateContext"
 
 export default function ManagementInsideAuth(){
     const {modal} = App.useApp()
     const {fetchData} = useFetch()
     const [authList, setAuthList] = useState<SystemAuthorityTableListItem[]>([])
     const {appId,teamId}  = useParams<RouterParams>()
-    const addRef = useRef<SystemAuthorityConfigHandle>(null)
-    const editRef = useRef<SystemAuthorityConfigHandle>(null)
+    const addRef = useRef<ManagementAuthorityConfigHandle>(null)
+    const editRef = useRef<ManagementAuthorityConfigHandle>(null)
     const {appName} = useTenantManagementContext()
+    const {accessData} = useGlobalContext()
 
 
     const getSystemAuthority = ()=>{
-        return fetchData<BasicResponse<{authorizations:SystemAuthorityTableListItem[]}>>('project/authorizations',{method:'GET',eoParams:{project:appId},eoTransformKeys:['hide_credential','create_time','update_time','expire_time']}).then(response=>{
+        return fetchData<BasicResponse<{authorizations:SystemAuthorityTableListItem[]}>>('app/authorizations',{method:'GET',eoParams:{app:appId, team:teamId},eoTransformKeys:['hide_credential','create_time','update_time','expire_time']}).then(response=>{
             const {code,data,msg} = response
             if(code === STATUS_CODE.SUCCESS){
                 setAuthList(data.authorizations)
@@ -49,7 +46,7 @@ export default function ManagementInsideAuth(){
     
     const deleteAuthority = (entity:SystemAuthorityTableListItem)=>{
         return new Promise((resolve, reject)=>{
-            fetchData<BasicResponse<null>>('project/authorization',{method:'DELETE',eoParams:{authorization:entity!.id,project:appId}}).then(response=>{
+            fetchData<BasicResponse<null>>('app/authorization',{method:'DELETE',eoParams:{authorization:entity!.id,app:appId, team:teamId}}).then(response=>{
                 const {code,msg} = response
                 if(code === STATUS_CODE.SUCCESS){
                     message.success(msg || '操作成功！')
@@ -70,10 +67,10 @@ export default function ManagementInsideAuth(){
             case 'view':{
                 title='鉴权详情'
                 message.loading('正在加载数据')
-                const {code,data,msg} = await fetchData<BasicResponse<{details:{[k:string]:string}}>>('project/authorization/details',{method:'GET',eoParams:{authorization:entity!.id,project:appId}})
+                const {code,data,msg} = await fetchData<BasicResponse<{details:{[k:string]:string}}>>('app/authorization/details',{method:'GET',eoParams:{authorization:entity!.id,app:appId, team:teamId}})
                 message.destroy()
                 if(code === STATUS_CODE.SUCCESS){
-                    content=<SystemAuthorityView entity={data.details}/>
+                    content=<ManagementAuthorityView entity={data.details}/>
                 }else{
                     message.error(msg || '操作失败')
                     return
@@ -81,15 +78,15 @@ export default function ManagementInsideAuth(){
                 break;
             case 'add':
                 title='添加鉴权'
-                content=<SystemAuthorityConfig ref={addRef} type={type} systemId={appId!}/>
+                content=<ManagementAuthorityConfig ref={addRef} type={type} appId={appId!} teamId={teamId!}/>
                 break;
             case 'edit':{
                 title='编辑鉴权'
                 message.loading('正在加载数据')
-                const {code,data,msg} = await fetchData<BasicResponse<{authorization:EditAuthFieldType}>>('project/authorization',{method:'GET',eoParams:{authorization:entity!.id,project:appId},eoTransformKeys:['hide_credential','token_name','expire_time','user_name','public_key','user_path','claims_to_verify','signature_is_base64']})
+                const {code,data,msg} = await fetchData<BasicResponse<{authorization:EditAuthFieldType}>>('app/authorization',{method:'GET',eoParams:{authorization:entity!.id,app:appId, team:teamId},eoTransformKeys:['hide_credential','token_name','expire_time','user_name','public_key','user_path','claims_to_verify','signature_is_base64']})
                 message.destroy()
                 if(code === STATUS_CODE.SUCCESS){
-                    content=<SystemAuthorityConfig ref={editRef} type={type} data={data.authorization} systemId={appId!} />
+                    content=<ManagementAuthorityConfig ref={editRef} type={type} data={data.authorization} appId={appId!} teamId={teamId!}/>
                 }else{
                     message.error(msg || '操作失败')
                     return
@@ -119,7 +116,7 @@ export default function ManagementInsideAuth(){
             width:600,
             okText: '确认',
             okButtonProps:{
-                // disabled : !checkAccess( `project.mySystem.auth.${type}`, accessData)
+                disabled : !checkAccess( `team.application.authorization.${type}`, accessData)
             },
             cancelText:type === 'view'? '关闭':'取消',
             closable:true,
@@ -139,7 +136,7 @@ export default function ManagementInsideAuth(){
         {
             key: 'edit',
             label: (
-                // <WithPermission access="system.member.department.add" key="addChildPermission">
+                // <WithPermission access="system.organization.member.department.add" key="addChildPermission">
                     <Button key="edit" type="text" className="h-[32px] border-none p-0 flex items-center bg-transparent " onClick={()=>openModal('edit',entity)}>
                     修改
                 </Button>
@@ -149,7 +146,7 @@ export default function ManagementInsideAuth(){
         {
             key: 'delete',
             label: (
-                // <WithPermission access="system.member.department.delete"  key="deletePermission">
+                // <WithPermission access="system.organization.member.department.delete"  key="deletePermission">
                     <Button key="delete" type="text" className="h-[32px] border-none p-0 flex items-center bg-transparent " onClick={()=>openModal('delete',entity)}>
                     删除
                 </Button>
@@ -158,7 +155,7 @@ export default function ManagementInsideAuth(){
         },
     ]
 
-    return (<div className="w-[70%] mx-auto h-full pt-[32px]">
+    return (<div className=" h-full pt-[32px]">
         <div className="flex items-center justify-between w-full  ml-[10px] text-[18px] leading-[25px] pb-[16px]" ><span className="font-bold">访问授权</span></div>
         <div><Button className="mb-[20px] ml-[10px]" type="primary" onClick={()=>openModal('add')}>添加授权</Button></div>
         {authList && authList.length > 0 ? <VirtuosoGrid
@@ -200,6 +197,6 @@ export default function ManagementInsideAuth(){
                         {children}</>
                     )
                 }}
-            /> : <div className="bg-[#fafafa] overflow-hidden rounded-[10px]" ><Empty className="m-[50px] "image={Empty.PRESENTED_IMAGE_SIMPLE}/></div>}
+            /> : <div className="bg-[#fafafa] overflow-hidden rounded-[10px]" ><Empty className="m-navbar-height "image={Empty.PRESENTED_IMAGE_SIMPLE}/></div>}
     </div>)
 }

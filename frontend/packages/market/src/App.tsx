@@ -1,9 +1,4 @@
-/*
- * @Date: 2023-11-27 17:18:27
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 19:01:59
- * @FilePath: \frontend\packages\market\src\App.tsx
- */
+
 import './App.css'
 import { ConfigProvider } from 'antd';
 import RenderRoutes from '@market/components/aoplatform/RenderRoutes';

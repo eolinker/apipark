@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-02-02 14:35:03
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 11:20:13
- * @FilePath: \frontend\packages\core\src\const\partitions\types.ts
- */
+
 import { EntityItem } from "@common/const/type";
 
 export type PartitionConfigFieldType = {
@@ -35,7 +30,6 @@ export type PartitionCertConfigFieldType = {
 export type PartitionCertConfigProps = {
    type:'add'|'edit'
    entity?:PartitionCertConfigFieldType
-   partitionId?:string
 }
 
 export type PartitionCertConfigHandle = {
@@ -90,9 +84,6 @@ export type NodeModalFieldType = {
     address:string
 }
 
-export type NodeModalProps = {
-    partitionId:string
-}
 
 export type NodeModalHandle = {
     save:()=>Promise<boolean|string>

@@ -72,7 +72,6 @@ export const Codebox =  memo((props: CodeboxProps) => {
       const DefaultLineHeight = 18
       const renderHeight = Math.max(editorRef.current?.getContentHeight() || DefaultLineHeight * 5)
       setEditorHeight(`${renderHeight}px`)
-      //console.log(renderHeight)
     }
   }, [])
 

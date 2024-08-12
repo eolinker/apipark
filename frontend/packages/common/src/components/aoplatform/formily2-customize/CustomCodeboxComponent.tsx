@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:11
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 18:15:06
- * @FilePath: \frontend\packages\common\src\components\aoplatform\formily2-customize\CustomCodeboxComponent.tsx
- */
+
 import {forwardRef, useImperativeHandle, useState} from 'react'
 import { Codebox } from '@common/components/postcat/api/Codebox'
 

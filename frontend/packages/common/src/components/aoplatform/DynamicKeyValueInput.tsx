@@ -1,12 +1,7 @@
-/*
- * @Date: 2024-01-31 15:00:10
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-05-06 10:20:59
- * @FilePath: \frontend\packages\core\src\components\DynamicKeyValueInput.tsx
- */
 
 import  {FC } from 'react';
 import { Input, Space } from 'antd';
+import { Icon } from '@iconify/react/dist/iconify.js';
 
 type KeyValueInput = {
   key: string;
@@ -85,8 +80,8 @@ export const DynamicKeyValueInput: FC<DynamicKeyValueInputProps> = ({value = [{k
                   style={{ width: 162 }} />
               {index !== value.length - 1 && (
                   <>
-                    <iconpark-icon name="shanchu-2"  onClick={() => removePair(index)}></iconpark-icon>
-                    <iconpark-icon name="tianjia-2"  onClick={addNewPair}></iconpark-icon>
+                  <Icon icon="ic:baseline-delete" onClick={() => removePair(index)} width="14" height="14"/>
+                  <Icon icon="ic:baseline-add" onClick={addNewPair} width="14" height="14"/>
                   </>
               )}
             </Space>

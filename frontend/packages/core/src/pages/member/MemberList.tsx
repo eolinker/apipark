@@ -1,16 +1,10 @@
-/*
- * @Date: 2024-01-31 15:00:11
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 19:07:47
- * @FilePath: \frontend\packages\core\src\pages\member\MemberList.tsx
- */
 import PageList from "@common/components/aoplatform/PageList.tsx";
 import  {forwardRef, useEffect, useImperativeHandle, useRef, useState} from "react";
 import {  useOutletContext, useParams} from "react-router-dom";
 import {RouterParams} from "@core/components/aoplatform/RenderRoutes.tsx";
 import {ActionType, ProColumns } from "@ant-design/pro-components";
 import {useBreadcrumb} from "@common/contexts/BreadcrumbContext.tsx";
-import {Alert, App, Button, Tree, TreeProps} from "antd";
+import {Alert, App, Button, Select, Tree, TreeProps} from "antd";
 import {DataNode} from "antd/es/tree";
 import {FolderOpenOutlined, FolderOutlined} from "@ant-design/icons";
 import {MemberDropdownModal} from "./MemberDropdownModal.tsx";
@@ -26,6 +20,7 @@ import TableBtnWithPermission from "@common/components/aoplatform/TableBtnWithPe
 import { useGlobalContext } from "@common/contexts/GlobalStateContext.tsx";
 import { checkAccess } from "@common/utils/permission.ts";
 import { PERMISSION_DEFINITION } from "@common/const/permissions.ts";
+import { EntityItem } from "@common/const/type.ts";
 
 const AddToDepartment = forwardRef<AddToDepartmentHandle,AddToDepartmentProps>((props,ref)=>{
     const {selectedUserIds} = props
@@ -124,6 +119,7 @@ const MemberList = ()=>{
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
     const [departmentValueEnum,setDepartmentValueEnum] = useState<ColumnFilterItem[] >([])
     const {accessData} = useGlobalContext()
+    const [columns,setColumns] = useState<ProColumns<MemberTableListItem>[]>([])
 
     const operation:ProColumns<MemberTableListItem>[] =[
         {
@@ -133,7 +129,7 @@ const MemberList = ()=>{
             fixed:'right',
             valueType: 'option',
             render: (_: React.ReactNode, entity: MemberTableListItem) => [
-                <TableBtnWithPermission  access="" key="editMember" onClick={()=>{openModal('editMember',entity)}} btnTitle="编辑"/>,
+                <TableBtnWithPermission  access="system.organization.role.system.edit" key="editMember" onClick={()=>{openModal('editMember',entity)}} btnTitle="编辑"/>,
             ],
         }
     ]
@@ -231,7 +227,7 @@ const MemberList = ()=>{
         };
         
         const action = actionToPermissionMap[type];
-        const permission :keyof typeof PERMISSION_DEFINITION[0]= `system.member.member.${action}`;
+        const permission :keyof typeof PERMISSION_DEFINITION[0]= `system.organization.member.${action}`;
         
         return !checkAccess(permission, accessData);
     };
@@ -311,6 +307,7 @@ const MemberList = ()=>{
     }, [memberGroupId]);
 
     useEffect(()=>{
+        getRoleList()
         setBreadcrumb([{ title: '成员与部门'}])
         getDepartmentList()
     },[])
@@ -325,29 +322,69 @@ const MemberList = ()=>{
             message.error(msg || '操作失败')
         }
     }
+    
+    const changeMemberInfo = (value:string[],entity:MemberTableListItem )=>{
+        //console.log(value)
+        return new Promise((resolve, reject) => {
+            fetchData<BasicResponse<null>>(`account/role`, {method: 'PUT',eoBody:({roles:value, users:[entity.id]})}).then(response => {
+                const {code, msg} = response
+                if (code === STATUS_CODE.SUCCESS) {
+                    message.success(msg || '操作成功！')
+                    resolve(true)
+                } else {
+                    message.error(msg || '操作失败')
+                    reject(msg || '操作失败')
+                }
+            }).catch((errorInfo)=> reject(errorInfo))
+        })
+    }
 
-
-    // const columns = useMemo(()=>{
-    //     return MEMBER_TABLE_COLUMNS
-    //     .map(x=>{if((x.dataIndex as string[])?.indexOf('department') !== -1 ){
-    //         x.filters = departmentValueEnum
-    //         x.onFilter = (value: string, record) => {
-    //             return value ? record.department?.filter(x=>x.id === value).length > 0 : true
-    //         }
-    //     } return x})
-    // },[departmentValueEnum])
+    const getRoleList = ()=>{
+        fetchData<BasicResponse<{roles:Array<{id:string,name:string}>}>>('simple/roles', {method: 'GET', eoParams: {group:'system'}}).then(response => {
+            const {code, data,msg} = response
+            if (code === STATUS_CODE.SUCCESS) {
+                const newCol = [...MEMBER_TABLE_COLUMNS]
+                for(const col of newCol){
+                    if(col.dataIndex === 'roles'){
+                        col.render = (_,entity)=>(
+                            <WithPermission access="system.organization.member.edit">
+                                <Select
+                                    className="w-full"
+                                    mode="multiple"
+                                    value={entity.roles?.map((x:EntityItem)=>x.id)}
+                                    options={data.roles?.map((x:{id:string,name:string})=>({label:x.name, value:x.id}))}
+                                    onChange={(value)=>{
+                                        changeMemberInfo(value,entity ).then((res)=>{
+                                            if(res) manualReloadTable()
+                                        })
+                                    }}
+                                />
+                            </WithPermission>
+                        )
+                        col.filters = data.roles?.map((x:{id:string,name:string})=>({text:x.name, value:x.id}))
+                        col.onFilter = (value: unknown, record:MemberTableListItem) =>{
+                            return record.roles ? record.roles?.map((x)=>x.id).indexOf(value as string) !== -1 : false;}
+                    }
+                }
+                setColumns(newCol)
+                return
+            } else {
+                message.error(msg || '操作失败')
+            }
+        })
+    }
 
     return ( <PageList
         id="global_member"
         ref={pageListRef}
-        columns={[...MEMBER_TABLE_COLUMNS, ...operation]}
+        columns={[...columns, ...operation]}
         request={()=>getMemberList()}
         addNewBtnTitle={(!memberGroupId ||['unknown','disable'].indexOf(memberGroupId?.toString()) === -1)?"添加账号" : ""}
         searchPlaceholder="输入用户名、邮箱查找成员"
         onAddNewBtnClick={() => {
            openModal('addMember')
         }}
-        addNewBtnAccess="system.member.member.add"
+        addNewBtnAccess="system.organization.member.add"
         rowSelection={{
             // selections: [Table.SELECTION_ALL, Table.SELECTION_INVERT],
             selectedRowKeys,
@@ -359,13 +396,13 @@ const MemberList = ()=>{
             }),
         }}
         onRowClick={handleRowClick}
-        tableClickAccess="system.member.member.edit"
+        tableClickAccess="system.organization.member.edit"
         afterNewBtn={[
-            memberGroupId &&<WithPermission key="removeFromDepPermission" access="system.member.member.edit"><Button className="mr-btnbase" disabled={selectedRowKeys.length === 0} key="removeFromDep" onClick={()=>openModal('removeFromDep')}>移出当前部门</Button></WithPermission>,
-            memberGroupId &&<WithPermission key="addToDepPermission" access="system.member.member.edit"><Button className="mr-btnbase" disabled={selectedRowKeys.length === 0} key="addToDep" onClick={()=>openModal('addToDep')}>加入部门</Button></WithPermission>,
-            memberGroupId !== 'disable' &&<WithPermission key="blockedPermission" access="system.member.member.block"><Button className="mr-btnbase" disabled={selectedRowKeys.length === 0 || memberGroupId === 'unknown'} key="blocked" onClick={()=>openModal('blocked')}>禁用成员</Button></WithPermission>,
-             <WithPermission key="activatePermission" access="system.member.member.block"><Button className="mr-btnbase" disabled={selectedRowKeys.length === 0} key="activate" onClick={()=>openModal('activate')}>启用成员</Button></WithPermission>,
-           <WithPermission key="deletePermission" access="system.member.member.delete"><Button className="mr-btnbase" disabled={selectedRowKeys.length === 0} key="delete" onClick={()=>openModal('delete')}>删除成员</Button></WithPermission>,
+            memberGroupId &&<WithPermission key="removeFromDepPermission" access="system.organization.member.edit"><Button className="mr-btnbase" disabled={selectedRowKeys.length === 0} key="removeFromDep" onClick={()=>openModal('removeFromDep')}>移出当前部门</Button></WithPermission>,
+            memberGroupId &&<WithPermission key="addToDepPermission" access="system.organization.member.edit"><Button className="mr-btnbase" disabled={selectedRowKeys.length === 0} key="addToDep" onClick={()=>openModal('addToDep')}>加入部门</Button></WithPermission>,
+            memberGroupId !== 'disable' &&<WithPermission key="blockedPermission" access="system.organization.member.block"><Button className="mr-btnbase" disabled={selectedRowKeys.length === 0 || memberGroupId === 'unknown'} key="blocked" onClick={()=>openModal('blocked')}>禁用成员</Button></WithPermission>,
+             <WithPermission key="activatePermission" access="system.organization.member.block"><Button className="mr-btnbase" disabled={selectedRowKeys.length === 0} key="activate" onClick={()=>openModal('activate')}>启用成员</Button></WithPermission>,
+           <WithPermission key="deletePermission" access="system.organization.member.delete"><Button className="mr-btnbase" disabled={selectedRowKeys.length === 0} key="delete" onClick={()=>openModal('delete')}>删除成员</Button></WithPermission>,
         ]}
         onSearchWordChange={(e) => {
             setSearchWord(e.target.value)

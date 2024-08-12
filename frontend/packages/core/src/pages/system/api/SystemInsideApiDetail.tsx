@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:11
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 11:59:23
- * @FilePath: \frontend\packages\core\src\pages\system\api\SystemInsideApiDetail.tsx
- */
+
 import  {useEffect, useRef, useState} from "react";
 import {BasicResponse, STATUS_CODE} from "@common/const/const.ts";
 import {useFetch} from "@common/hooks/http.ts";
@@ -23,7 +18,7 @@ import { LoadingOutlined } from "@ant-design/icons";
 
 const SystemInsideApiDetail = (props:SystemInsideApiDetailProps)=>{
     const { message } = App.useApp()
-    const {systemId, apiId} = props
+    const {serviceId, teamId, apiId} = props
     const {fetchData} = useFetch()
     const [apiDetail, setApiDetail] = useState<SystemApiDetail>()
     const [open, setOpen] = useState(false);
@@ -32,7 +27,7 @@ const SystemInsideApiDetail = (props:SystemInsideApiDetailProps)=>{
     
     const getApiDetail = ()=>{
         setLoading(true)
-        fetchData<BasicResponse<{api:SystemApiDetail}>>('project/api/detail',{method:'GET',eoParams:{project:systemId, api:apiId},eoTransformKeys:['create_time','update_time','match_type','upstream_id','opt_type']}).then(response=>{
+        fetchData<BasicResponse<{api:SystemApiDetail}>>('service/api/detail',{method:'GET',eoParams:{service:serviceId,team:teamId, api:apiId},eoTransformKeys:['create_time','update_time','match_type','upstream_id','opt_type']}).then(response=>{
             const {code,data,msg} = response
             if(code === STATUS_CODE.SUCCESS){
                 const newApiDetail = {
@@ -67,7 +62,7 @@ const SystemInsideApiDetail = (props:SystemInsideApiDetailProps)=>{
                     apiDetail !== undefined && <>
                     <div className="flex justify-between">
                     <ApiBasicInfoDisplay apiName={apiDetail?.name} protocol={apiDetail?.protocol || 'HTTP'} method={apiDetail?.method} uri={apiDetail?.path} />
-                    <WithPermission access="project.mySystem.api.edit"><Button type="primary" onClick={()=>setOpen(true)}>编辑文档</Button></WithPermission>
+                    <WithPermission access="team.service.api.edit"><Button type="primary" onClick={()=>setOpen(true)}>编辑文档</Button></WithPermission>
                         </div>
                     <p className="text-[14px] leading-[22px] text-[#999999]">
                         <span className="mr-[20px]">创建者:{apiDetail?.creator.name || '-'}</span>
@@ -95,7 +90,7 @@ const SystemInsideApiDetail = (props:SystemInsideApiDetailProps)=>{
             onSubmit={()=>drawerFormRef.current?.save()?.then((res)=>{res&& getApiDetail();return res})} 
             showLastStep={true}
             >
-                <SystemInsideApiDocument ref={drawerFormRef} systemId={systemId} apiId={apiId}/>
+                <SystemInsideApiDocument ref={drawerFormRef} serviceId={serviceId} teamId={teamId} apiId={apiId}/>
             </DrawerWithFooter>
         </div>
         </Spin>)

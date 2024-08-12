@@ -4,7 +4,7 @@ import {Link, useLocation, useParams} from "react-router-dom";
 import {RouterParams} from "@core/components/aoplatform/RenderRoutes.tsx";
 import { v4 as uuidv4 } from 'uuid'
 import {BasicResponse, STATUS_CODE} from "@common/const/const.ts";
-import {MemberItem, OrganizationItem} from "@common/const/type.ts";
+import {MemberItem} from "@common/const/type.ts";
 import {useFetch} from "@common/hooks/http.ts";
 import {DefaultOptionType} from "antd/es/cascader";
 import { TeamConfigFieldType } from "../../const/team/type.ts";
@@ -31,11 +31,10 @@ const TeamConfig= forwardRef<TeamConfigHandle,TeamConfigProps>((props,ref) => {
     const currentUrl = location.pathname
     const {fetchData} = useFetch()
     const [managerOption, setManagerOption] = useState<DefaultOptionType[]>([])
-    const [orgOption, setOrgOption] = useState<DefaultOptionType[]>([])
     const { setBreadcrumb} = useBreadcrumb()
     const { setTeamInfo } =useTeamContext()
     const {checkPermission} = useGlobalContext()
-    const pageType= checkPermission('system.team.self.view') ? 'manage' : 'myteam'
+    const pageType= checkPermission('system.organization.team.view') ? 'manage' : 'myteam'
     const [canDelete, setCanDelete] = useState<boolean>(false)
     useImperativeHandle(ref, () => ({
         save:onFinish
@@ -49,7 +48,7 @@ const TeamConfig= forwardRef<TeamConfigHandle,TeamConfigProps>((props,ref) => {
             }else{
                 params = {team:teamId!}
             }
-            return fetchData<BasicResponse<{team:TeamConfigFieldType}>>(pageType === 'manage'?'manager/team' : 'team',{method:onEdit ? 'PUT' : 'POST', eoParams:params,eoBody:(value),eoTransformKeys:['teamId','orgId']}).then(response=>{
+            return fetchData<BasicResponse<{team:TeamConfigFieldType}>>(pageType === 'manage'?'manager/team' : 'team',{method:onEdit ? 'PUT' : 'POST', eoParams:params,eoBody:(value),eoTransformKeys:['teamId']}).then(response=>{
                 const {code,data,msg} = response
                 if(code === STATUS_CODE.SUCCESS){
                     message.success(msg || '操作成功！')
@@ -71,26 +70,12 @@ const TeamConfig= forwardRef<TeamConfigHandle,TeamConfigProps>((props,ref) => {
             const {code,data,msg} = response
             if(code === STATUS_CODE.SUCCESS){
                 setCanDelete(data.team.canDelete)
-                setTimeout(()=>{form.setFieldsValue({...data.team,organization:data.team.organization.id, master:data.team.master.id})},0)
+                setTimeout(()=>{form.setFieldsValue({...data.team})},0)
             }else{
                 message.error(msg || '操作失败')
             }
         })
     };
-
-    const getOrgList = ()=>{
-        setOrgOption([])
-        fetchData<BasicResponse<{ organizations: OrganizationItem[] }>>('simple/organizations',{method:'GET'}).then(response=>{
-            const {code,data,msg} = response
-            if(code === STATUS_CODE.SUCCESS){
-                setOrgOption(data.organizations?.map((x:MemberItem)=>{return {
-                    label:x.name, value:x.id
-                }}) || [])
-            }else{
-                message.error(msg || '操作失败')
-            }
-        })
-    }
 
     const getManagerList = ()=>{
         setManagerOption([])
@@ -123,7 +108,6 @@ const TeamConfig= forwardRef<TeamConfigHandle,TeamConfigProps>((props,ref) => {
 
     useEffect(() => {
         getManagerList()
-        getOrgList()
         if(entity){
             setOnEdit(true);
             form.setFieldsValue(entity)
@@ -145,7 +129,7 @@ const TeamConfig= forwardRef<TeamConfigHandle,TeamConfigProps>((props,ref) => {
     return (
         <>
             <div className='overflow-auto h-full w-full min-w-[560px]'>
-                <WithPermission access={onEdit ?(currentUrl.split('/')[1] === 'myteam'? 'team.myTeam.self.edit':'system.team.self.edit') : 'system.team.self.add'}>
+                <WithPermission access={onEdit ?(currentUrl.split('/')[1] === 'myteam'? 'team.team.team.edit':'system.organization.team.edit') : 'system.organization.team.add'}>
                     <Form
             layout='vertical'
             labelAlign='left'
@@ -175,16 +159,7 @@ const TeamConfig= forwardRef<TeamConfigHandle,TeamConfigProps>((props,ref) => {
                             <Input className="w-INPUT_NORMAL" disabled={onEdit} placeholder="请输入团队ID"/>
                         </Form.Item>
 
-                        {/* {!onEdit && <> */}
-                        <Form.Item<TeamConfigFieldType>
-                            label="所属组织"
-                            name="organization"
-                            rules={[{ required: true, message: '必填项' }]}
-                        >
-                            <Select className="w-INPUT_NORMAL" disabled={onEdit} placeholder="请选择" options={orgOption}>
-                            </Select>
-                        </Form.Item>
-
+                        {!onEdit &&
                         <Form.Item<TeamConfigFieldType>
                             label="团队负责人"
                             name="master"
@@ -193,8 +168,7 @@ const TeamConfig= forwardRef<TeamConfigHandle,TeamConfigProps>((props,ref) => {
                         >
                             <Select className="w-INPUT_NORMAL" placeholder="请选择负责人" options={managerOption}>
                             </Select>
-                        </Form.Item>
-                        {/* </>} */}
+                        </Form.Item>}
 
 
                         <Form.Item<TeamConfigFieldType>
@@ -208,7 +182,7 @@ const TeamConfig= forwardRef<TeamConfigHandle,TeamConfigProps>((props,ref) => {
                     <Row className="mb-[10px]" 
                     // wrapperCol={{ offset: 5, span: 19 }}
                     >
-                        <WithPermission access={['system.team.self.edit','team.myTeam.self.edit']}><Button type="primary" htmlType="submit">
+                        <WithPermission access={['system.organization.team.edit','team.team.team.edit']}><Button type="primary" htmlType="submit">
                                 保存
                             </Button></WithPermission>
                     </Row>
@@ -218,7 +192,7 @@ const TeamConfig= forwardRef<TeamConfigHandle,TeamConfigProps>((props,ref) => {
                         <Divider />
                         <p className="text-center"><span className="font-bold">删除团队：</span>删除操作不可恢复，请谨慎操作！</p>
                         <div className="text-center">
-                            <WithPermission access="system.team.self.delete" disabled={!canDelete}  tooltip={canDelete ? '':'服务数据清除后，方可删除'}><Button className="m-auto mt-[16px] mb-[20px]" type="default"  onClick={()=>deleteTeam(entity!)}>删除</Button></WithPermission>
+                            <WithPermission access="system.organization.team.delete" disabled={!canDelete}  tooltip={canDelete ? '':'服务数据清除后，方可删除'}><Button className="m-auto mt-[16px] mb-[20px]" type="default"  onClick={()=>deleteTeam(entity!)}>删除</Button></WithPermission>
                         </div>
                     </div>
                     }

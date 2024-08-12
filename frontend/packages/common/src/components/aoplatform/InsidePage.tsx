@@ -1,15 +1,9 @@
-/*
- * @Date: 2023-11-28 11:54:17
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-05-15 15:03:46
- * @FilePath: \frontend\packages\core\src\components\InsidePage.tsx
- * @Description:内页（带顶部导航与描述、tag、右侧按钮-可选）
- */
 
 import { Button, Tag } from "antd"
 import {useNavigate} from "react-router-dom";
 import WithPermission from "@common/components/aoplatform/WithPermission";
 import { FC, ReactNode } from "react";
+import { LeftOutlined } from "@ant-design/icons";
 
 
 class InsidePageProps {
@@ -35,7 +29,7 @@ const InsidePage:FC<InsidePageProps> = ({showBanner=true,pageTitle,tagList,showB
         // <div className="h-full flex flex-col flex-1 overflow-hidden bg-[#f7f8fa]">
         <div className="h-full flex flex-col flex-1 overflow-hidden  ">
             { showBanner &&  <div className="p-btnbase  mx-[4px] border-[0px] border-b-[1px] border-solid border-BORDER">
-                {backUrl && <p className="mb-[16px] h-[20px] "><a className="leading-[20px] inline-block "onClick={goBack}> {"<  返回"}</a></p>}
+                {backUrl && <p className="mb-[16px] h-[20px] "><a className="leading-[20px] inline-block "onClick={goBack}> <LeftOutlined /> 返回</a></p>}
                 <div className="flex justify-between">
                     <div className="flex items-center">
                         <span className="text-[20px] mr-[8px] leading-[32px]">{pageTitle}</span>

@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:10
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-04-11 16:02:18
- * @FilePath: \frontend\packages\core\src\components\api\ApiPreview\components\ApiBasicInfoDisplay\index.tsx
- */
+
 import { Box, Chip, Stack, Typography, Skeleton } from '@mui/material'
 import {HTTPMethod, Protocol,RequestMethod} from "../../../RequestMethod";
 import {Clipboard} from "../../../Clipboard"

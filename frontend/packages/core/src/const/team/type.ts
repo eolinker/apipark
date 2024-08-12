@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-02-04 11:09:15
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-04-24 18:17:56
- * @FilePath: \frontend\packages\core\src\const\team\type.ts
- */
+
 import { EntityItem } from "@common/const/type";
 
 export type TeamTableListItem = {
@@ -14,7 +9,6 @@ export type TeamTableListItem = {
     creator:EntityItem;
     createTime:string;
     canDelete:boolean
-    organization:EntityItem
 };
 
 export type TeamConfigProps = {
@@ -28,9 +22,7 @@ export type TeamConfigType = {
     name: string;
     id?: string;
     description: string;
-    organization?:EntityItem;
     master:EntityItem;
-    orgId?:string;
     canDelete:boolean
 };
 
@@ -38,16 +30,13 @@ export type TeamConfigFieldType = {
     name: string;
     id?: string;
     description: string;
-    organization?:string;
     master:string;
-    orgId?:string
 };
 
 export type TeamMemberTableListItem = {
-    userId:string;
-    name: EntityItem;
-    role:string;
+    user:EntityItem;
+    roles:EntityItem[];
     userGroup:EntityItem;
     attachTime:string;
-    canDelete:boolean
+    isDelete:boolean
 };

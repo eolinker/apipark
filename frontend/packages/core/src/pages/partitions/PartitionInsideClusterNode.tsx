@@ -1,19 +1,13 @@
-/*
- * @Date: 2024-04-19 15:22:46
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-06 17:58:01
- * @FilePath: \frontend\packages\core\src\pages\partitions\PartitionInsideClusterNode.tsx
- */
+
 import  {forwardRef, useImperativeHandle, useState} from "react";
 import {App, Button, Form, Input, Table} from "antd";
 import {useFetch} from "@common/hooks/http.ts";
 import {BasicResponse, STATUS_CODE} from "@common/const/const.ts";
 import { NODE_MODAL_COLUMNS } from "../../const/partitions/const.tsx";
-import { NodeModalHandle, NodeModalProps, PartitionClusterNodeModalTableListItem, PartitionClusterNodeTableListItem, NodeModalFieldType, ClusterConfigHandle, PartitionClusterFieldType } from "../../const/partitions/types.ts";
+import { NodeModalHandle, PartitionClusterNodeModalTableListItem, PartitionClusterNodeTableListItem, NodeModalFieldType } from "../../const/partitions/types.ts";
 import WithPermission from "@common/components/aoplatform/WithPermission.tsx";
 
-export const ClusterNodeModal = forwardRef<NodeModalHandle,NodeModalProps>((props,ref)=>{
-    const {partitionId} = props
+export const ClusterNodeModal = forwardRef<NodeModalHandle>((_,ref)=>{
     const { message } = App.useApp()
     const [form] = Form.useForm();
     const [dataSource,setDataSource] = useState<PartitionClusterNodeModalTableListItem[]>([])
@@ -23,7 +17,7 @@ export const ClusterNodeModal = forwardRef<NodeModalHandle,NodeModalProps>((prop
         setDataSource([])
         return new Promise((resolve, reject)=>{
             form.validateFields().then((value)=> {
-                fetchData<BasicResponse<{ nodes: PartitionClusterNodeTableListItem[] }>>('partition/cluster/check', {method: 'POST', eoBody: (value),eoTransformKeys:['manager_address','service_address','peer_address']}).then(response => {
+                fetchData<BasicResponse<{ nodes: PartitionClusterNodeTableListItem[] }>>('cluster/check', {method: 'POST', eoBody: (value),eoTransformKeys:['manager_address','service_address','peer_address']}).then(response => {
                     const {code,data, msg} = response
                     if (code === STATUS_CODE.SUCCESS) {
                         message.success(msg || '操作成功')
@@ -38,7 +32,7 @@ export const ClusterNodeModal = forwardRef<NodeModalHandle,NodeModalProps>((prop
     const save:()=>Promise<boolean | string> =  ()=>{
         return new Promise((resolve, reject)=>{
             form.validateFields().then(()=> {
-            fetchData<BasicResponse<null>>('partition/cluster/reset',{method:'PUT' ,eoBody:({managerAddress:form.getFieldValue('address')}), eoTransformKeys:['managerAddress'],eoParams:{partition:partitionId}}).then(response=>{
+            fetchData<BasicResponse<null>>('cluster/reset',{method:'PUT' ,eoBody:({managerAddress:form.getFieldValue('address')}), eoTransformKeys:['managerAddress']}).then(response=>{
                 const {code,msg} = response
                 if(code === STATUS_CODE.SUCCESS){
                     message.success(msg || '操作成功！')
@@ -58,7 +52,7 @@ export const ClusterNodeModal = forwardRef<NodeModalHandle,NodeModalProps>((prop
     )
 
     return (
-    <WithPermission access="system.partition.cluster.edit">
+    <WithPermission access="system.devops.cluster.edit">
         <Form
             layout='vertical'
             labelAlign='left'
@@ -68,17 +62,17 @@ export const ClusterNodeModal = forwardRef<NodeModalHandle,NodeModalProps>((prop
             autoComplete="off"
             name="partitionInsideClusterNode"
         >
-            <div className="flex items-start justify-between bg-[#fafafa] p-[10px] border-[1px] border-solid border-[#f2f2f2] rounded-[10px]">
-            <Form.Item<NodeModalFieldType>
-                label="集群地址"
-                name="address"
-                className="p-0 bg-transparent rounded-none border-none w-[calc(100%-72px)]"
-                rules={[{ required: true, message: '必填项' }]}
-            >  
-                   <Input placeholder="请输入" onPressEnter={()=>test()}/>
-            </Form.Item>
-            <div className="pt-[28px]">
-            <Button type='primary' className="mb-[10px]" onClick={()=>test()}>测试</Button>
+            <div className="flex items-end justify-between bg-[#fafafa] p-[10px] border-[1px] border-solid border-[#f2f2f2] rounded-[10px] gap-btnbase ">
+                <Form.Item<NodeModalFieldType>
+                    label="集群地址"
+                    name="address"
+                    className="p-0 bg-transparent rounded-none border-none  flex-1"
+                    rules={[{ required: true, message: '必填项' }]}
+                >  
+                        <Input placeholder="请输入" onPressEnter={()=>test()}/>
+                </Form.Item>
+                <div className="">
+                    <Button type='primary' className="mb-[10px]" onClick={()=>test()}>测试</Button>
             </div>
             </div>
             {

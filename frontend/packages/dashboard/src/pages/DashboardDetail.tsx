@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-03-14 15:28:53
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 10:31:47
- * @FilePath: \frontend\packages\core\src\pages\dashboard\DashboardDetail.tsx
- */
+
 import MonitorDetailPage from "../component/MonitorDetailPage"
 import { BasicResponse } from "@common/const/const"
 import { SearchBody, MonitorApiData, InvokeData, MonitorSubscriberData } from "@dashboard/const/type"
@@ -16,14 +11,14 @@ export type DashboardDetailInvokeType = {
   tendency:InvokeData, timeInterval:string
 }
 
-export default function DashboardDetail({fullScreen,name,queryData,partitionId,dashboardDetailId,dashboardType}:{fullScreen?:boolean,name:string,queryData:(MonitorApiQueryData|MonitorSubQueryData)&{timeButton:TimeRangeButton},partitionId:string,dashboardDetailId:string,dashboardType:'api'|'subscriber'|'provider'}){
+export default function DashboardDetail({fullScreen,name,queryData,dashboardDetailId,dashboardType}:{fullScreen?:boolean,name:string,queryData:(MonitorApiQueryData|MonitorSubQueryData)&{timeButton:TimeRangeButton},dashboardDetailId:string,dashboardType:'api'|'subscriber'|'provider'}){
   const {fetchData } = useFetch()
   
   const fetchTableData:(body:SearchBody)=>Promise<BasicResponse<{statistics:(MonitorApiData|MonitorSubscriberData)[]}>>
     = (body:SearchBody) =>fetchData<BasicResponse<{statistics:(MonitorApiData|MonitorSubscriberData)[]}>>(
-      `monitor/${getType(dashboardType,body)}/statistics/${getType(dashboardType,body,true)}`,{
+      `monitor/${getType(dashboardType as ("api" | "subscriber"),body)}/statistics/${getType(dashboardType as ("api" | "subscriber"),body,true)}`,{
         method:'POST', 
-        eoParams:{partition:partitionId, id:dashboardDetailId},
+        eoParams:{id:dashboardDetailId},
         eoBody:({...body}), 
         eoTransformKeys:['dataType','request_total','request_success','request_rate','proxy_total','proxy_success','proxy_rate','status_fail','avg_resp','max_resp','min_resp','avg_traffic','max_traffic','min_traffic','min_traffic']})
 
@@ -32,7 +27,7 @@ export default function DashboardDetail({fullScreen,name,queryData,partitionId,d
     = (body:SearchBody) =>fetchData<BasicResponse<DashboardDetailInvokeType>>(
       `monitor/${getType(dashboardType,body)}/trend`,{
         method:'POST', 
-        eoParams:{partition:partitionId,id:dashboardDetailId},
+        eoParams:{id:dashboardDetailId},
         eoBody:({...body}), 
         eoTransformKeys:['dataType','request_total','request_rate','proxy_total','proxy_rate','time_interval']})
 
@@ -41,7 +36,7 @@ export default function DashboardDetail({fullScreen,name,queryData,partitionId,d
     = (params:{[k:string]:string},body:SearchBody) =>fetchData<BasicResponse<DashboardDetailInvokeType>>(
       `monitor/${getType(dashboardType,body)}/trend/${getType(dashboardType,body,true)}`,{
         method:'POST', 
-        eoParams:{partition:partitionId,[getType(dashboardType,body)]:dashboardDetailId,[getType(dashboardType,body,true)]:params.id},
+        eoParams:{[getType(dashboardType,body)]:dashboardDetailId,[getType(dashboardType,body,true)]:params.id},
         eoBody:({...body}), 
         eoTransformKeys:['dataType','request_total','request_rate','proxy_total','proxy_rate','time_interval']})
 

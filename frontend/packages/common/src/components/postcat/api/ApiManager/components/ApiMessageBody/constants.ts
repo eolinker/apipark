@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-06-04 08:54:16
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 10:04:28
- * @FilePath: \frontend\packages\common\src\components\postcat\api\ApiManager\components\ApiMessageBody\constants.ts
- */
+
 import { ApiBodyType, ApiParamsType } from "@common/const/api-detail"
 
 export type ApiBodyTypeLabel = 'Form-Data' | 'JSON' | 'XML' | 'Raw' | 'Binary'

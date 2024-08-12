@@ -1,10 +1,8 @@
 import  { FC, useEffect,  useRef, useState} from "react";
-import {Link, useParams} from "react-router-dom";
 import {useBreadcrumb} from "@common/contexts/BreadcrumbContext.tsx";
 import {App, Button, Col, Collapse, Empty, Row, Spin, Tag} from "antd";
 import {BasicResponse, STATUS_CODE} from "@common/const/const.ts";
 import {useFetch} from "@common/hooks/http.ts";
-import {RouterParams} from "@core/components/aoplatform/RenderRoutes.tsx";
 import {  NodeModalHandle, PartitionClusterNodeTableListItem } from "../../const/partitions/types.ts";
 import WithPermission from "@common/components/aoplatform/WithPermission.tsx";
 import { useGlobalContext } from "@common/contexts/GlobalStateContext.tsx";
@@ -16,7 +14,6 @@ const PartitionInsideCluster:FC = ()=> {
     const {setBreadcrumb} = useBreadcrumb()
     const {modal, message} = App.useApp()
     const {fetchData} = useFetch()
-    const {partitionId} = useParams<RouterParams>();
     const [nodesList, setNodesList] = useState<PartitionClusterNodeTableListItem[]>()
     const [loading, setLoading] = useState<boolean>(false)
     const {accessData} = useGlobalContext()
@@ -26,7 +23,7 @@ const PartitionInsideCluster:FC = ()=> {
     const getPartitionClusterInfo = () => {
         setNodesList([])
         setLoading(true)
-        return fetchData<BasicResponse<{ nodes:PartitionClusterNodeTableListItem[] }>>('partition/cluster/nodes', {method: 'GET', eoParams: {partition: partitionId},eoTransformKeys:['manager_address','service_address','peer_address']}).then(response => {
+        return fetchData<BasicResponse<{ nodes:PartitionClusterNodeTableListItem[] }>>('cluster/nodes', {method: 'GET',eoTransformKeys:['manager_address','service_address','peer_address']}).then(response => {
             const {code, data, msg} = response
             if (code === STATUS_CODE.SUCCESS) {
                 setNodesList(data.nodes)
@@ -42,14 +39,13 @@ const PartitionInsideCluster:FC = ()=> {
     }
 
     const openModal = async (type:'editNode')=>{
-
         let title:string = ''
         let content:string|React.ReactNode = ''
 
         switch(type){
             case 'editNode': {
                 title = '重置配置'
-                content = <ClusterNodeModal ref={editNodeRef} partitionId={partitionId!}/>
+                content = <ClusterNodeModal ref={editNodeRef} />
                 }
                 break;
         }
@@ -66,7 +62,7 @@ const PartitionInsideCluster:FC = ()=> {
             width:type === 'editNode' ? 900 : 600,
             okText:'确认',
             okButtonProps:{
-                disabled:!checkAccess('system.partition.cluster.edit', accessData)
+                disabled:!checkAccess('system.devops.cluster.edit', accessData)
             },
             cancelText:'取消',
             closable:true,
@@ -76,7 +72,6 @@ const PartitionInsideCluster:FC = ()=> {
 
     useEffect(() => {
         setBreadcrumb([
-            {title: <Link to="/partition/list">部署管理</Link>},
             {title: '集群'}
         ])
         getPartitionClusterInfo()
@@ -85,7 +80,7 @@ const PartitionInsideCluster:FC = ()=> {
     return (
         <>
             <div className="p-btnbase overflow-hidden h-full">
-                <div className="pb-btnbase"> <WithPermission access="system.partition.cluster.edit" key="changeClusterConfig"><Button type="primary" onClick={() => openModal('editNode')}>修改集群配置</Button></WithPermission></div>
+                <div className="pb-btnbase"> <WithPermission access="system.devops.cluster.edit" key="changeClusterConfig"><Button type="primary" onClick={() => openModal('editNode')}>修改集群配置</Button></WithPermission></div>
                 <Spin wrapperClassName=" h-[calc(100%-44px)] flex-1 overflow-auto" indicator={<LoadingOutlined style={{ fontSize: 24 }} spin/>} spinning={loading}>
                     <div className="h-full overflow-auto ">
                     {nodesList && nodesList.length > 0  ? 

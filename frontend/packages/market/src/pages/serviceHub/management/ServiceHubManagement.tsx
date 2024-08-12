@@ -1,5 +1,4 @@
-import {  ApiOutlined, PlusOutlined } from "@ant-design/icons";
-import { MenuProps, Menu, App, Avatar, Card, Tooltip } from "antd";
+import { MenuProps, Menu, App, Avatar, Card, Tooltip, Empty } from "antd";
 import { useState, forwardRef, useEffect, useRef } from "react";
 import { VirtuosoGrid } from "react-virtuoso";
 import { BasicResponse, STATUS_CODE } from "@common/const/const";
@@ -11,6 +10,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { RouterParams } from "@core/components/aoplatform/RenderRoutes";
 import { SimpleTeamItem } from "@common/const/type";
 import { useTenantManagementContext } from "../../../contexts/TenantManagementContext";
+import { Icon } from "@iconify/react/dist/iconify.js";
+import { useGlobalContext } from "@common/contexts/GlobalStateContext";
 
 export default function ServiceHubManagement() {
     const { message ,modal} = App.useApp()
@@ -24,16 +25,17 @@ export default function ServiceHubManagement() {
     const [teamList, setTeamList] = useState<MenuItem[]>([])
     const {setAppName} = useTenantManagementContext()
     const navigateTo = useNavigate()
-type MenuItem = Required<MenuProps>['items'][number];
+    const {getTeamAccessData,cleanTeamAccessData} = useGlobalContext()
+    type MenuItem = Required<MenuProps>['items'][number];
 
 
 const getServiceList = ()=>{
     //console.log(pagination,sorter,categoryId,tagId)
     setServiceLoading(true)
-     fetchData<BasicResponse<{projects:ServiceHubAppListItem}>>('my_apps',{method:'GET', eoParams:{ team:teamId,keyword:''},eoTransformKeys:['api_num','subscribe_num','subscribe_verify_num']}).then(response=>{
+     fetchData<BasicResponse<{apps:ServiceHubAppListItem}>>('my_apps',{method:'GET', eoParams:{ team:teamId,keyword:''},eoTransformKeys:['api_num','subscribe_num','subscribe_verify_num']}).then(response=>{
         const {code,data,msg} = response
         if(code === STATUS_CODE.SUCCESS){
-            setServiceList([...data.projects,{type:'addNewItem'}])
+            setServiceList([...data.apps,{type:'addNewItem'}])
         }else{
             message.error(msg || '操作失败')
         }
@@ -53,7 +55,7 @@ const getServiceList = ()=>{
         const {code,data,msg} = response
         if(code === STATUS_CODE.SUCCESS){
             setTeamList(data.teams.map((x:SimpleTeamItem)=>({label:<div className="flex items-center justify-between "><span  className="w-[calc(100%-42px)] truncate" title={x.name}>{x.name}</span><span className="bg-[#fff] rounded-[5px] h-[20px] w-[30px] flex items-center justify-center">{x.appNum || 0}</span></div>, key:x.id})))
-            if(!teamId){
+            if(!teamId && data.teams?.[0]?.id){
                 navigateTo(data.teams[0].id)
             }
         }else{
@@ -114,7 +116,13 @@ const getServiceList = ()=>{
 }
 
 useEffect(()=>{
-    teamId && getServiceList()
+    if(teamId ){
+        getTeamAccessData(teamId)
+        getServiceList()
+    }
+    return ()=>{
+        cleanTeamAccessData()
+    }
 },[teamId])
 
 useEffect(() => {
@@ -125,10 +133,10 @@ useEffect(() => {
     )
     getTeamsList()
     setAppName('')
-    // getServiceList()
 }, []);
 
-    return (<>
+    return (<>{
+        teamList && teamList.length > 0 ?
         <div className="flex flex-1 h-full">
             <div className="w-[224px] border-0 border-solid border-r-[1px] border-r-BORDER h-full overflow-hidden">
             <div className="text-[18px] leading-[25px] pl-[20px] pt-[20px] pb-[10px] font-bold">团队</div>
@@ -152,8 +160,8 @@ useEffect(() => {
                 return (
                 <div className="pt-[20px]">{
                 item.type === 'addNewItem' ?<Card className="shadow-[0_5px_10px_0_rgba(0,0,0,0.05)] rounded-[10px] overflow-visible cursor-pointer h-[180px]  transition duration-500 hover:shadow-[0_5px_20px_0_rgba(0,0,0,0.15)] hover:scale-[1.05]" classNames={{body:'h-[180px] flex items-center justify-center cursor-pointer'}} onClick={()=>{openModal('add')}}>
-                        <div><PlusOutlined />添加应用</div>
-                  </Card> : <Card title={CardTitle(item)} className="shadow-[0_5px_10px_0_rgba(0,0,0,0.05)] rounded-[10px] overflow-visible cursor-pointer h-[180px]  transition duration-500 hover:shadow-[0_5px_20px_0_rgba(0,0,0,0.15)] hover:scale-[1.05]" classNames={{header:'border-b-[0px] p-[20px] ', body:"pt-0"}} onClick={()=>{setAppName(item.name);navigateTo(`/tenantManagement/${teamId}/inside/${item.id}`)}}>
+                        <div className="flex items-center"><Icon icon="ic:baseline-add" width="18" height="18"/><span>添加应用</span></div>
+                  </Card> : <Card title={CardTitle(item)} className="shadow-[0_5px_10px_0_rgba(0,0,0,0.05)] rounded-[10px] overflow-visible cursor-pointer h-[180px]  transition duration-500 hover:shadow-[0_5px_20px_0_rgba(0,0,0,0.15)] hover:scale-[1.05]" classNames={{header:'border-b-[0px] p-[20px] ', body:"pt-0"}} onClick={()=>{setAppName(item.name);navigateTo(`/tenantManagement/${teamId}/inside/${item.id}/service`)}}>
                    <span className="line-clamp-3 break-all">{item.description || '暂无服务描述'}</span> 
 
                     </Card>}</div>
@@ -183,13 +191,15 @@ useEffect(() => {
                 }}
             />
         </div>
-    </div></>)
+    </div> :
+        <Empty className="mt-[100px]" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+    }
+    </>)
 }
 
 const CardTitle = (service:ServiceHubAppListItem)=>{
     return(
         <div className="flex">
-            {/* <Avatar shape="square" size={50} className=" bg-[linear-gradient(135deg,white,#f0f0f0)] text-[#333] rounded-[12px]" > {service?.name?.substring(0,1)}</Avatar> */}
             <Avatar shape="square" size={50}  className=" bg-[linear-gradient(135deg,#7F83F7,#4E54FF)] rounded-[12px]" icon={<iconpark-icon  className="" name="auto-generate-api"></iconpark-icon>} />
             <div className="pl-[20px] w-[calc(100%-50px)]">
                 <p className="text-[14px] h-[20px] leading-[20px] truncate">{service.name}</p>

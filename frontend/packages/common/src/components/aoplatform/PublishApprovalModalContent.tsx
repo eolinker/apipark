@@ -57,12 +57,6 @@ const apiColumns = [
 
 const upstreamColumns = [
     {
-        title:'环境',
-        dataIndex:['partition','name'],
-        copyable: true,
-        ellipsis:true
-    },
-    {
         title:'上游类型',
         dataIndex:'type',
         ellipsis:true,
@@ -101,19 +95,20 @@ type PublishApprovalModalProps = {
     type:'approval'|'view'|'add'|'publish'|'online'
     data:PublishApprovalInfoType | PublishApprovalInfoType &{id?:string} | PublishVersionTableListItem
     insideSystem?:boolean
-    systemId:string
+    serviceId:string
+    teamId:string
     clusterPublishStatus?:SystemInsidePublishOnlineItems[]
 }
 
 export type PublishApprovalModalHandle = {
     save:(operate:'pass'|'refuse') =>Promise<boolean|string>
-    publish:(notSave?:boolean)=>Promise<boolean|string>
+    publish:(notSave?:boolean)=>Promise<boolean|string|Record<string, unknown>>
     online:()=>Promise<boolean|string>
 }
 
 export const PublishApprovalModalContent = forwardRef<PublishApprovalModalHandle,PublishApprovalModalProps>((props, ref) => {
     const { message } = App.useApp()
-    const { type,data,insideSystem = false,systemId} = props
+    const { type,data,insideSystem = false,serviceId, teamId} = props
     const [form] = Form.useForm();
     const {fetchData} = useFetch()
 
@@ -129,7 +124,7 @@ export const PublishApprovalModalContent = forwardRef<PublishApprovalModalHandle
                     form.scrollToField('opinion')
                     return Promise.reject('未填写审核意见')
                 }
-                return fetchData<BasicResponse<null>>(`project/publish/${operate === 'pass' ? 'accept' : 'refuse'}`,{method: 'PUT',eoBody:({comments:value.opinion}), eoParams:{id:data!.id, project:systemId},eoTransformKeys:['versionRemark']}).then(response=>{
+                return fetchData<BasicResponse<null>>(`service/publish/${operate === 'pass' ? 'accept' : 'refuse'}`,{method: 'PUT',eoBody:({comments:value.opinion}), eoParams:{id:data!.id, project:serviceId},eoTransformKeys:['versionRemark']}).then(response=>{
                     const {code,msg} = response
                     if(code === STATUS_CODE.SUCCESS){
                         message.success(msg || '操作成功！')
@@ -142,20 +137,20 @@ export const PublishApprovalModalContent = forwardRef<PublishApprovalModalHandle
             }).catch((err)=> {form.scrollToField(err.errorFields[0].name[0]); return Promise.reject(err)})
     }
 
-    const publish:(notSave?:boolean)=>Promise<boolean | string> =  (notSave)=>{
+    const publish:(notSave?:boolean)=>Promise<boolean | string | Record<string, unknown>> =  (notSave)=>{
         return new Promise((resolve, reject)=>{
             form.validateFields().then((value)=>{
                 const body = {...value, ...(type === 'publish'&&{release:data.id})}
                 fetchData<BasicResponse<null>>(
-                    notSave ? 'project/publish/apply' : 'project/publish/release',{method: 'POST',eoBody:body, eoParams:{project:systemId},eoTransformKeys:['versionRemark']}).then(response=>{
-                const {code,msg} = response
-                if(code === STATUS_CODE.SUCCESS){
-                    message.success(msg || '操作成功！')
-                    resolve(true)
-                }else{
-                    message.error(msg || '操作失败')
-                    reject(msg || '操作失败')
-                }
+                    notSave ? 'service/publish/apply' : 'service/publish/release/do',{method: 'POST',eoBody:body, eoParams:{service:serviceId, team:teamId},eoTransformKeys:['versionRemark']}).then(response=>{
+                    const {code,msg} = response
+                    if(code === STATUS_CODE.SUCCESS){
+                        message.success(msg || '操作成功！')
+                        resolve(response)
+                    }else{
+                        message.error(msg || '操作失败')
+                        reject(msg || '操作失败')
+                    }
             }).catch((errorInfo)=> reject(errorInfo))
         }).catch((errorInfo)=> reject(errorInfo))
     })
@@ -164,7 +159,7 @@ export const PublishApprovalModalContent = forwardRef<PublishApprovalModalHandle
     const online:()=>Promise<boolean | string> =  ()=>{
         return new Promise((resolve, reject)=>{
             form.validateFields().then(()=>{
-                fetchData<BasicResponse<null>>('project/publish/execute',{method: 'PUT', eoParams:{project:systemId,id:(data as PublishVersionTableListItem).flowId},eoTransformKeys:['versionRemark']}).then(response=>{
+                fetchData<BasicResponse<null>>('service/publish/execute',{method: 'PUT', eoParams:{project:serviceId,id:(data as PublishVersionTableListItem).flowId},eoTransformKeys:['versionRemark']}).then(response=>{
                 const {code,msg} = response
                 if(code === STATUS_CODE.SUCCESS){
                     message.success(msg || '操作成功！')

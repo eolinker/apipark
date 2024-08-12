@@ -1,70 +1,160 @@
+
 import  {forwardRef, useEffect, useImperativeHandle, useState} from "react";
-import {App, Button, Checkbox, CheckboxOptionType, Divider, Form, Input, Row, Select} from "antd";
+import {App, Button, Divider, Form, Input, Radio, Row, Select, TagType, TreeSelect, Upload} from "antd";
 import { Link, useNavigate, useParams} from "react-router-dom";
 import {RouterParams} from "@core/components/aoplatform/RenderRoutes.tsx";
 import {BasicResponse, STATUS_CODE} from "@common/const/const.ts";
 import {useFetch} from "@common/hooks/http.ts";
 import {DefaultOptionType} from "antd/es/cascader";
-import { MemberItem, SimpleTeamItem, EntityItem, TeamSimpleMemberItem} from "@common/const/type.ts";
+import { MemberItem, SimpleTeamItem} from "@common/const/type.ts";
 import { v4 as uuidv4 } from 'uuid'
 import { SystemConfigFieldType, SystemConfigHandle } from "../../const/system/type.ts";
 import { validateUrlSlash } from "@common/utils/validate.ts";
-// import WithPermission from "@common/components/aoplatform/WithPermission.tsx";
+import { compressImage, normFile } from "@common/utils/uploadPic.ts"; 
 import { useBreadcrumb } from "@common/contexts/BreadcrumbContext.tsx";
 import { useSystemContext } from "../../contexts/SystemContext.tsx";
+import { visualizations } from "@core/const/system/const.tsx";
+import { RcFile, UploadChangeParam, UploadFile, UploadProps } from "antd/es/upload/interface";
+import { LoadingOutlined } from "@ant-design/icons";
+import { getImgBase64 } from "@common/utils/dataTransfer.ts";
+import { CategorizesType } from "@market/const/serviceHub/type.ts";
+import WithPermission from "@common/components/aoplatform/WithPermission.tsx";
+import { Icon } from "@iconify/react/dist/iconify.js";
+
+const MAX_SIZE = 2 * 1024; // 1KB
 
 const SystemConfig = forwardRef<SystemConfigHandle>((_,ref) => {
     const { message,modal } = App.useApp()
-    const { teamId, systemId } = useParams<RouterParams>();
+    const { teamId, serviceId } = useParams<RouterParams>();
     const [onEdit, setOnEdit] = useState<boolean>(!!teamId)
     const [form] = Form.useForm();
     const {fetchData} = useFetch()
     const [teamOptionList, setTeamOptionList] = useState<DefaultOptionType[]>()
-    const [memberOptionList, setMemberOptionList] = useState<DefaultOptionType[]>()
     const navigate = useNavigate();
-    const [partitionOption,setPartitionOption] = useState<CheckboxOptionType[]>([])
-    const [currentTeamId, setCurrentTeamId] = useState<string>(teamId || '')
     const {setBreadcrumb} = useBreadcrumb()
-    const { setSystemInfo,setPartitionList} = useSystemContext()
+    const { setSystemInfo} = useSystemContext()
+    const [showClassify, setShowClassify] = useState<boolean>()
+    const [imageBase64, setImageBase64] = useState<string | null>(null);
+    const [tagOptionList, setTagOptionList] = useState<DefaultOptionType[]>([])
+    const [serviceClassifyOptionList, setServiceClassifyOptionList] = useState<DefaultOptionType[]>()
+    const [uploadLoading, setUploadLoading] = useState<boolean>(false)
 
     useImperativeHandle(ref, () => ({
         save:onFinish
     }));
 
-    // 获取表单默认值
-    const getSystemInfo = () => {
-        fetchData<BasicResponse<{ project: SystemConfigFieldType }>>('project/info',{method:'GET',eoParams:{project:systemId},eoTransformKeys:['team_id']}).then(response=>{
+    const beforeUpload = async (file: RcFile) => {
+        if (!['image/png', 'image/jpeg', 'image/svg+xml'].includes(file.type)) {
+            alert('只允许上传PNG、JPG或SVG格式的图片');
+            return false;
+          }
+      
+          if (file.size > MAX_SIZE) {
+            try {
+              const compressedBase64 = await compressImage(file, MAX_SIZE);
+              setImageBase64(`data:${file.type};base64,${compressedBase64}`);
+              form.setFieldValue('logo', `data:${file.type};base64,${compressedBase64}`);
+            } catch (error) {
+              console.error('压缩图片时出错', error);
+            }
+          } else {
+            const reader = new FileReader();
+            reader.onload = (e: ProgressEvent<FileReader>) => {
+              setImageBase64(e.target?.result as string);
+              form.setFieldValue('logo', e.target?.result);
+            };
+            reader.readAsDataURL(file);
+          }
+            return false;
+        };
+    
+
+    const handleChange: UploadProps['onChange'] = (info: UploadChangeParam<UploadFile>) => {
+        if (info.file.status === 'uploading') {
+            setUploadLoading(true);
+            return;
+        }
+        if (info.file.status === 'done') {
+            getImgBase64(info.file.originFileObj as RcFile, () => {
+                setUploadLoading(false);
+            });
+        }
+        if (info.fileList.length === 0) {
+            form.setFieldValue( "logo", null );
+        }
+    };
+
+    const uploadButton = ( 
+        <div>
+            {uploadLoading ? <LoadingOutlined /> : <Icon icon="ic:baseline-add" width="24" height="24"/>}
+        </div>
+        );
+    
+    const getTagAndServiceClassifyList = ()=>{
+        setTagOptionList([])
+        setServiceClassifyOptionList([])
+        fetchData<BasicResponse<{ catalogues:CategorizesType[],tags:TagType[]}>>('catalogues',{method:'GET'}).then(response=>{
             const {code,data,msg} = response
             if(code === STATUS_CODE.SUCCESS){
-                setTimeout(()=>{form.setFieldsValue({...data.project,organization:data.project.organization.id,team:data.project.team.id,master:data.project.master.id,partition:data.project.partition?.map((x:EntityItem)=>x.id)})},0)
-                setCurrentTeamId(data.project.team.id)
+                setTagOptionList(data.tags?.map((x:TagType)=>{return {
+                    label:x.name, value:x.name
+                }})||[])
+                setServiceClassifyOptionList(data.catalogues)
+
+            }else{
+                message.error(msg || '操作失败')
+            }
+        })
+    }
+
+    // 获取表单默认值
+    const getSystemInfo = () => {
+        fetchData<BasicResponse<{ service: SystemConfigFieldType }>>('service/info',{method:'GET',eoParams:{team:teamId, service:serviceId},eoTransformKeys:['team_id','service_type']}).then(response=>{
+            const {code,data,msg} = response
+            if(code === STATUS_CODE.SUCCESS){
+                setTimeout(()=>{
+                    form.setFieldsValue({
+                        ...data.service,
+                        team:data.service.team.id,
+                        catalogue:data.service.catalogue?.id,
+                         logoFile:[
+                            {
+                                uid: '-1', // 文件唯一标识
+                                name: 'image.png', // 文件名
+                                status: 'done', // 状态有：uploading, done, error, removed
+                                url: data.service?.logo || '', // 图片 Base64 数据
+                            }
+                        ]
+                    })
+                    console.log({
+                        ...data.service,
+                        team:data.service.team.id,
+                        catalogue:data.service.catalogue?.id,
+                         logoFile:[
+                            {
+                                uid: '-1', // 文件唯一标识
+                                name: 'image.png', // 文件名
+                                status: 'done', // 状态有：uploading, done, error, removed
+                                url: data.service?.logo || '', // 图片 Base64 数据
+                            }
+                        ]
+                    })
+                    setImageBase64(data.service.logo)
+                    setShowClassify(data.service.serviceType === 'public')
+                            },0)
             }else{
                 message.error(msg || '操作失败')
             }
         })
     };
 
-    useEffect(()=>{
-        const newPartitions = (teamOptionList as (Array<(DefaultOptionType & { id: string; availablePartitions: EntityItem[] })>) )?.find(x => x.id === currentTeamId)?.availablePartitions?.map((p: EntityItem) => ({ label: p.name, value: p.id })) || []
-        setPartitionOption(newPartitions)
-        if(!newPartitions || newPartitions.length === 0){
-            form.setFieldValue('partition',[])
-            return
-        }
-        const selectedPartitions =form.getFieldValue('partition')
-        if(selectedPartitions && selectedPartitions?.length > 0 ){
-            form.setFieldValue('partition',newPartitions.filter(x=> selectedPartitions.indexOf(x.value) !== -1).map(x=>x.value))
-        }
-    },[currentTeamId,teamOptionList])
-
     const onFinish:()=>Promise<boolean|string> = () => {
         return form.validateFields().then((value)=>{
-            return fetchData<BasicResponse<{project:{id:string}}>>(systemId === undefined? 'team/project':'project/info',{method:systemId === undefined? 'POST' : 'PUT',eoParams: {...(systemId === undefined ? {team:value.team} :{project:systemId})},eoBody:({...value,prefix:value.prefix?.trim()})}).then(response=>{
+            return fetchData<BasicResponse<{service:{id:string}}>>(serviceId === undefined? 'team/service':'service/info',{method:serviceId === undefined? 'POST' : 'PUT',eoParams: {...(serviceId === undefined ? {team:value.team} :{service:serviceId,team:teamId})},eoBody:({...value,prefix:value.prefix?.trim()}), eoTransformKeys:['serviceType']},).then(response=>{
                 const {code,data,msg} = response
                 if(code === STATUS_CODE.SUCCESS){
                     message.success(msg || '操作成功！')
-                    setSystemInfo(data.project)
-                    setPartitionList(data.project.partition)
+                    setSystemInfo(data.service)
                     return Promise.resolve(true)
                 }else{
                     message.error(msg || '操作失败')
@@ -76,23 +166,6 @@ const SystemConfig = forwardRef<SystemConfigHandle>((_,ref) => {
         })
     };
 
-    useEffect(()=>{
-        currentTeamId && getMemberOptionList()
-    },[currentTeamId])
-
-    const getMemberOptionList = ()=>{
-        setMemberOptionList([])
-        fetchData<BasicResponse<{ teams: TeamSimpleMemberItem[] }>>('team/members/simple',{method:'GET',eoParams:{team:currentTeamId}}).then(response=>{
-            const {code,data,msg} = response
-            if(code === STATUS_CODE.SUCCESS){
-                setMemberOptionList(data.teams?.map((x:TeamSimpleMemberItem)=>{return {
-                    label:x.user.name, value:x.user.id
-                }}))
-            }else{
-                message.error(msg || '操作失败')
-            }
-        })
-    }
 
     const getTeamOptionList = ()=>{
         setTeamOptionList([])
@@ -109,11 +182,11 @@ const SystemConfig = forwardRef<SystemConfigHandle>((_,ref) => {
     }
 
     const deleteSystem = ()=>{
-        fetchData<BasicResponse<null>>('team/project',{method:'DELETE',eoParams:{team:teamId,project:systemId}}).then(response=>{
+        fetchData<BasicResponse<null>>('team/service',{method:'DELETE',eoParams:{team:teamId,service:serviceId}}).then(response=>{
             const {code,msg} = response
             if(code === STATUS_CODE.SUCCESS){
                 message.success(msg || '操作成功！')
-                navigate(`/system/list`)
+                navigate(`/service/list`)
             }else{
                 message.error(msg || '操作失败')
             }
@@ -121,18 +194,14 @@ const SystemConfig = forwardRef<SystemConfigHandle>((_,ref) => {
     }
 
     useEffect(() => {
-        
-        // getMemberOptionList()
         getTeamOptionList()
-        // getPartitionList()
-
-        if (systemId !== undefined) {
+        getTagAndServiceClassifyList()
+        if (serviceId !== undefined) {
             setOnEdit(true);
             getSystemInfo();
-            
             setBreadcrumb([
                 {
-                    title: <Link to={`/system/list`}>内部数据服务</Link>
+                    title: <Link to={`/service/list`}>内部数据服务</Link>
                 },
                 {
                     title: '设置'
@@ -140,29 +209,12 @@ const SystemConfig = forwardRef<SystemConfigHandle>((_,ref) => {
 
         } else {
             setOnEdit(false);
-            form.setFieldValue('id',uuidv4()); // 清空 initialValues
-            form.setFieldValue('team',teamId); // 清空 initialValues
+            form.setFieldValue('id',uuidv4());
+            form.setFieldValue('team',teamId); 
+            form.setFieldValue('serviceType','inner'); 
         }
         return (form.setFieldsValue({}))
-    }, [systemId]);
-
-
-    // const getPartitionList = ()=>{
-    //     setPartitionOption([])
-    //     fetchData<BasicResponse<{partitions:PartitionItem[]}>>('simple/organization/partitions',{method:'GET',eoParams:{organization:orgId}}).then(response=>{
-    //         const {code,data,msg} = response
-    //         if(code === STATUS_CODE.SUCCESS){
-    //             setPartitionOption(data.partitions?.map((x:PartitionItem)=>{return {
-    //                 label:x.name,value:x.id
-    //             }}))
-    //             if(systemId === undefined && data.partitions?.length === 1){
-    //                 form.setFieldValue('partition',[data.partitions[0].id])
-    //             }
-    //         }else{
-    //             message.error(msg || '操作失败')
-    //         }
-    //     })
-    // }
+    }, [serviceId]);
 
     
     const deleteSystemModal = async ()=>{
@@ -183,11 +235,10 @@ const SystemConfig = forwardRef<SystemConfigHandle>((_,ref) => {
         })
     }
 
-
     return (
         <>
             <div className={`h-full min-w-[570px]`}>
-                {/* <WithPermission access={onEdit ? 'team.mySystem.self.edit' :'team.mySystem.self.add'}> */}
+                <WithPermission access={onEdit ? 'team.service.service.edit' :''}>
                 <Form
                     layout='vertical'
                     labelAlign='left'
@@ -195,8 +246,6 @@ const SystemConfig = forwardRef<SystemConfigHandle>((_,ref) => {
                     form={form}
                     className="mx-auto  flex flex-col justify-between h-full"
                     name="systemConfig"
-                    // labelCol={{ offset:1, span: 4 }}
-                    // wrapperCol={{ span: 19}}
                     onFinish={onFinish}
                     autoComplete="off"
                 >
@@ -231,10 +280,38 @@ const SystemConfig = forwardRef<SystemConfigHandle>((_,ref) => {
                         </Form.Item>
 
                         <Form.Item<SystemConfigFieldType>
+                            label="图标"
+                            name="logoFile"
+                            extra="仅支持 .png .jpg .jpeg .svg 格式的图片文件, 大于 1KB 的文件将被压缩"
+                            valuePropName="fileList" getValueFromEvent={normFile}
+                        >
+                            <Upload
+                                listType="picture"
+                                beforeUpload={beforeUpload}
+                                onChange={handleChange}
+                                showUploadList={false}
+                                maxCount={1}
+                                accept=".png, .jpg, .jpeg, .svg"
+                            >
+                                <div className="h-[68px] w-[68px] border-[1px] border-dashed border-BORDER flex items-center justify-center rounded bg-bar-theme cursor-pointer" style={{ marginTop: 8 }}>
+                                    {imageBase64 ? <img src={imageBase64} alt="Logo" style={{  maxWidth: '200px', width:'68px',height:'68px'}} /> : uploadButton}
+                                </div>
+                            </Upload>
+
+                        </Form.Item>
+
+                        <Form.Item<SystemConfigFieldType>
                             label="描述"
                             name="description"
                         >
                             <Input.TextArea className="w-INPUT_NORMAL" placeholder="请输入描述"/>
+                        </Form.Item>
+
+                        <Form.Item<SystemConfigFieldType>
+                            label="Logo"
+                            name="logo"
+                            hidden
+                        >
                         </Form.Item>
 
                         {!onEdit && <Form.Item<SystemConfigFieldType>
@@ -242,51 +319,74 @@ const SystemConfig = forwardRef<SystemConfigHandle>((_,ref) => {
                             name="team"
                             rules={[{ required: true, message: '必填项' }]}
                         >
-                            <Select className="w-INPUT_NORMAL" disabled={onEdit} placeholder="请选择" options={teamOptionList} onChange={(x)=>{setCurrentTeamId(x)}}>
+                            <Select className="w-INPUT_NORMAL" disabled={onEdit} placeholder="请选择" options={teamOptionList} >
                             </Select>
                         </Form.Item>}
 
+
                         <Form.Item<SystemConfigFieldType>
-                            label="负责人"
-                            name="master"
-                            extra="负责人对服务内的服务、服务、成员有管理权限"
-                            rules={[{required: true, message: '必填项'}]}
+                            label="标签"
+                            name="tags"
                         >
-                            <Select className="w-INPUT_NORMAL" placeholder="请选择负责人" options={memberOptionList}>
+                            <Select 
+                                className="w-INPUT_NORMAL" 
+                                mode="tags" 
+                                placeholder="请选择" 
+                                options={tagOptionList}>
                             </Select>
                         </Form.Item>
 
                         <Form.Item<SystemConfigFieldType>
-                            label="环境权限"
-                            name="partition"
-                            rules={[{ required: true, message: '必填项' }]}
+                            label="服务类型"
+                            name="serviceType"
+                            rules={[{required: true, message: '必填项'}]}
                         >
-                            <Checkbox.Group className="flex flex-col gap-[8px] mt-[5px]" options={partitionOption} />{partitionOption.length === 0 && <span className="text-status_fail block h-[27px]">暂无可选环境，请检查所属团队可用环境</span>}
+                            <Radio.Group className="flex flex-col" options={visualizations} onChange={(e)=>{setShowClassify(e.target.value === 'public')}} />
                         </Form.Item>
+
+                        {showClassify &&
+                        <Form.Item<SystemConfigFieldType>
+                            label="所属服务分类"
+                            name="catalogue"
+                            extra="设置服务展示在服务市场中的哪个分类下"
+                            rules={[{required: true, message: '必填项'}]}
+                        >
+                            <TreeSelect
+                                className="w-INPUT_NORMAL"
+                                fieldNames={{label:'name',value:'id',children:'children'}}
+                                showSearch
+                                dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+                                placeholder="请选择"
+                                allowClear
+                                treeDefaultExpandAll
+                                treeData={serviceClassifyOptionList}
+                            />
+                        </Form.Item>
+                        }
                         {onEdit && <>
                         <Row className="mb-[10px]"
                             // wrapperCol={{ offset: 5, span: 19 }}
                             >
-                        {/* <WithPermission access={onEdit ? 'team.mySystem.self.edit' :'team.mySystem.self.add'}> */}
+                        <WithPermission access={onEdit ? 'team.service.service.edit' :''}>
                             <Button type="primary" htmlType="submit">
                                 保存
                             </Button>
-                            {/* </WithPermission> */}
+                            </WithPermission>
                         </Row></>}
                     </div>
                     {onEdit && <>
                         <div>
                             <Divider />
-                            <p className="text-center">删除服务前，需要先删除所有服务内的服务，删除服务之后将无法找回，请谨慎操作！</p>
+                            <p className="text-center">删除服务之后将无法找回，请谨慎操作！</p>
                             <div className="text-center">
-                                {/* <WithPermission access="project.mySystem.self.delete"> */}
+                                <WithPermission access="team.service.service.delete">
                                     <Button className="m-auto mt-[16px] mb-[20px]" type="default" danger={true} onClick={deleteSystemModal}>删除服务</Button>
-                                    {/* </WithPermission> */}
+                                    </WithPermission>
                             </div>
                         </div>
                     </>}
                 </Form>
-                {/* </WithPermission> */}
+                </WithPermission>
                 </div>
         </>
     )

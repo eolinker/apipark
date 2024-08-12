@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:11
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-06 14:28:34
- * @FilePath: \frontend\packages\market\src\contexts\TenantManagementContext.tsx
- */
+
 import  { createContext, useContext, useState, ReactNode, FC } from 'react';
 
 interface TenantManagementContextProps {

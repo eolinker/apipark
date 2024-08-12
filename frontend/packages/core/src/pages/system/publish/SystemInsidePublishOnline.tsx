@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-04-22 10:45:49
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 13:45:47
- * @FilePath: \frontend\packages\core\src\pages\system\publish\SystemInsidePublishOnline.tsx
- */
+
 import { App, Table } from "antd";
 import { SYSTEM_PUBLISH_ONLINE_COLUMNS } from "../../../const/system/const";
 import { useEffect, useState } from "react";
@@ -12,25 +7,25 @@ import { BasicResponse, STATUS_CODE } from "@common/const/const";
 import { EntityItem } from "@common/const/type";
 
 type SystemInsidePublishOnlineProps = {
-    systemId:string
+    serviceId:string
+    teamId:string
     id:string
 }
 
 export type SystemInsidePublishOnlineItems = {
-    partition:EntityItem
     cluster:EntityItem
     status:'done' | 'error' | 'publishing'
     error:string
 }
 export default function SystemInsidePublishOnline(props:SystemInsidePublishOnlineProps ){
-    const {systemId, id} = props
+    const {serviceId, teamId, id} = props
     const {message} = App.useApp()
     const [dataSource, setDataSource] = useState<[]>()
     const {fetchData} = useFetch()
     const [isStopped, setIsStopped] = useState(false);
 
     const getOnlineStatus = ()=>{
-        fetchData<BasicResponse<{publishStatusList:SystemInsidePublishOnlineItems[]}>>('project/publish/status',{method:'GET',eoParams:{project:systemId, id}, eoTransformKeys:['publish_status_list']}).then(response=>{
+        fetchData<BasicResponse<{publishStatusList:SystemInsidePublishOnlineItems[]}>>('service/publish/status',{method:'GET',eoParams:{service:serviceId,team:teamId, id}, eoTransformKeys:['publish_status_list']}).then(response=>{
             const {code,data,msg} = response
             if(code === STATUS_CODE.SUCCESS){
                 setDataSource(data.publishStatusList)

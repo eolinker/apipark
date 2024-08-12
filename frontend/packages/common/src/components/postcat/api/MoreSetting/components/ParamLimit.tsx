@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:11
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 10:49:35
- * @FilePath: \frontend\packages\common\src\components\postcat\api\MoreSetting\components\ParamLimit.tsx
- */
+
 import { ChangeEvent, useEffect, useState } from 'react'
 import { FormControl, TextField, Box } from '@mui/material'
 

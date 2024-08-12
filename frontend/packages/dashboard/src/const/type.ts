@@ -48,7 +48,6 @@ import { GetProps, DatePicker } from "antd"
   export interface QueryData {
     startTime: number
     endTime: number
-    partitionId: string
     apiId?:string,
     clusters?:Array<string>,
     appId?:string,
@@ -67,7 +66,6 @@ import { GetProps, DatePicker } from "antd"
     strategyName: string
     warnDimension: string | Array<string>
     status: string | number
-    partitionId: string
     pageNum: number
     pageSize: number
     total: number
@@ -76,7 +74,6 @@ import { GetProps, DatePicker } from "antd"
   export interface StrategyHistoryQueryData {
     startTime: number
     endTime: number
-    partitionId: string
     pageNum: number
     pageSize: number
     total: number
@@ -111,7 +108,6 @@ import { GetProps, DatePicker } from "antd"
     continuity: number
     hourMax: number
     users: Array<string>
-    partitionId?: string
   }
   
   export interface MonitorAlarmStrategyListData {

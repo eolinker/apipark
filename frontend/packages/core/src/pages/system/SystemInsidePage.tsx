@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:11
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-07-12 20:58:39
- * @FilePath: \frontend\packages\core\src\pages\system\SystemInsidePage.tsx
- */
+
 import  {FC, useEffect, useMemo, useState} from "react";
 import {Outlet, useLocation, useNavigate, useParams} from "react-router-dom";
 import {RouterParams} from "@core/components/aoplatform/RenderRoutes.tsx";
@@ -22,21 +17,20 @@ import { cloneDeep } from "lodash-es";
 
 const SystemInsidePage:FC = ()=> {
     const { message } = App.useApp()
-    const {orgId, teamId,systemId,partitionId,apiId} = useParams<RouterParams>();
+    const { teamId,serviceId,apiId} = useParams<RouterParams>();
     const location = useLocation()
     const currentUrl = location.pathname
     const {fetchData} = useFetch()
-    const { setPartitionList,setPrefixForce,setApiPrefix ,systemInfo,setSystemInfo} = useSystemContext()
-    const { accessData,checkPermission,projectDataFlushed} = useGlobalContext()
+    const { setPrefixForce,setApiPrefix ,systemInfo,setSystemInfo} = useSystemContext()
+    const { accessData,checkPermission} = useGlobalContext()
     const [activeMenu, setActiveMenu] = useState<string>()
     const navigateTo = useNavigate()
 
     const getSystemInfo = ()=>{
-        fetchData<BasicResponse<{ project:SystemConfigFieldType }>>('project/info',{method:'GET',eoParams:{project:systemId}}).then(response=>{
+        fetchData<BasicResponse<{ service:SystemConfigFieldType }>>('service/info',{method:'GET',eoParams:{team:teamId, service:serviceId}}).then(response=>{
             const {code,data,msg} = response
             if(code === STATUS_CODE.SUCCESS){
-                setSystemInfo(data.project)
-                setPartitionList(data.project.partition)
+                setSystemInfo(data.service)
             }else{
                 message.error(msg || '操作失败')
             }
@@ -46,7 +40,7 @@ const SystemInsidePage:FC = ()=> {
     const getApiDefine = ()=>{
         setApiPrefix('')
         setPrefixForce(false)
-        fetchData<BasicResponse<{ prefix:string, force:boolean }>>('project/api/define',{method:'GET',eoParams:{project:systemId}}).then(response=>{
+        fetchData<BasicResponse<{ prefix:string, force:boolean }>>('service/api/define',{method:'GET',eoParams:{service:serviceId,team:teamId}}).then(response=>{
             const {code,data,msg} = response
             if(code === STATUS_CODE.SUCCESS){
                 setApiPrefix(data.prefix)
@@ -72,52 +66,52 @@ const SystemInsidePage:FC = ()=> {
         }
         const filteredMenu = filterMenu(SYSTEM_PAGE_MENU_ITEMS as MenuItemGroupType<MenuItemType>[])
         setActiveMenu((pre)=>{
-            if(!pre && projectDataFlushed){
+            if(!pre){
                 const activeMenu = filteredMenu?.[0]?.children?.[0]?.key as string
                 return activeMenu
             }
             return pre
         })
         return  filteredMenu || []
-    },[accessData,projectDataFlushed])
+    },[accessData])
     
     const onMenuClick: MenuProps['onClick'] = ({key}) => {
         setActiveMenu(key)
     };
     
     useEffect(() => {
-        if(partitionId !== undefined){
-            setActiveMenu('upstream')
-        }else if(apiId !== undefined){
+        if(apiId !== undefined){
             setActiveMenu('api')
-        }else if(systemId !== currentUrl.split('/')[currentUrl.split('/').length - 1]){ 
+        }else if(serviceId !== currentUrl.split('/')[currentUrl.split('/').length - 1]){ 
             setActiveMenu(currentUrl.split('/')[currentUrl.split('/').length - 1])
+        }else{
+            setActiveMenu('upstream')
         }
     }, [currentUrl]);
 
     useEffect(()=>{
-        if(accessData && accessData.get('system') && accessData.get('system')?.indexOf('project.mySystem.api.view') !== -1){
+        if(accessData && accessData.get('team') && accessData.get('team')?.indexOf('team.service.api.view') !== -1){
             getApiDefine()
         }
     },[accessData])
 
     useEffect(()=>{
-        if( activeMenu && systemId === currentUrl.split('/')[currentUrl.split('/').length - 1]){
-            navigateTo(`/system/${orgId}/${teamId}/inside/${systemId}/${activeMenu}`)
+        if( activeMenu && serviceId === currentUrl.split('/')[currentUrl.split('/').length - 1]){
+            navigateTo(`/service/${teamId}/inside/${serviceId}/${activeMenu}`)
         }
     },[activeMenu])
 
     useEffect(() => {
-        systemId && getSystemInfo()
-    }, [systemId]);
+        serviceId && getSystemInfo()
+    }, [serviceId]);
 
     return (
         <>
         <InsidePage pageTitle={systemInfo?.name || '-'} 
                 tagList={[{label:
-                    <Paragraph className="mb-0" copyable={systemId ? { text: systemId } : false}>服务 ID：{systemId || '-'}</Paragraph>
+                    <Paragraph className="mb-0" copyable={serviceId ? { text: serviceId } : false}>服务 ID：{serviceId || '-'}</Paragraph>
                 }]}
-                backUrl="/system/list">
+                backUrl="/service/list">
                 <div className="flex flex-1 h-full">
                     <Menu
                         onClick={onMenuClick}
@@ -127,7 +121,7 @@ const SystemInsidePage:FC = ()=> {
                         mode="inline"
                         items={menuData as unknown as ItemType<MenuItemType>[] } 
                     />
-                    <div  className={` ${activeMenu?.indexOf('setting')  !== -1   ? 'pt-[20px] pl-[10px] pr-btnrbase' :''} w-full h-full flex flex-1 flex-col overflow-auto bg-MAIN_BG`}>
+                    <div  className={` ${['setting', 'upstream'].indexOf(activeMenu!) !== -1   ? 'pt-[20px] pl-btnbase pr-btnrbase' :''} w-full h-full flex flex-1 flex-col overflow-auto bg-MAIN_BG`}>
                             <Outlet/>
                     </div>
                 </div>

@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:10
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 11:18:47
- * @FilePath: \frontend\packages\common\src\components\postcat\api\ApiPreview\components\ApiMatch\index.tsx
- */
+
 import { Box, useTheme } from "@mui/material"
 import { DataGridPro, GridColDef } from '@mui/x-data-grid-pro'
 import { useMemo } from 'react'

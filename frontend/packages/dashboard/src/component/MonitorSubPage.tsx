@@ -36,7 +36,6 @@ export default function MonitorSubPage(props:MonitorSubPageProps){
     const [queryData, setQueryData] = useState<MonitorSubQueryData>({type:'provider'});
     const [exportLoading, setExportLoading] = useState(false);
     const [datePickerValue, setDatePickerValue] = useState<RangeValue>();
-    const { partitionId } = useParams<RouterParams>()
     const monitorAppTableRef = useRef<MonitorTableHandler>(null)
     const {exportExcel} = useExcelExport<MonitorSubscriberData>()
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
@@ -45,10 +44,8 @@ export default function MonitorSubPage(props:MonitorSubPageProps){
     const [queryBtnLoading, setQueryBtnLoading] = useState<boolean>(false)
 
     useEffect(() => {
-        if(partitionId){
-          getMonitorData();
-          getProjectList()
-        }
+        getMonitorData();
+        getProjectList()
       }, []);
 
     const getMonitorData = () => {
@@ -62,7 +59,7 @@ export default function MonitorSubPage(props:MonitorSubPageProps){
     };
 
     const getProjectList = ()=>{
-      return fetchData<{projects:EntityItem[]}>('simple/projects',{method:'GET',eoParams:{partition:partitionId}}).then((resp) => {
+      return fetchData<{projects:EntityItem[]}>('simple/projects',{method:'GET'}).then((resp) => {
         const {code,data,msg} = resp
         if(code === STATUS_CODE.SUCCESS){
           setListOfProjects(data.projects?.map((x:EntityItem)=>({label:x.name, value:x.id})))
@@ -181,7 +178,7 @@ export default function MonitorSubPage(props:MonitorSubPageProps){
             
         <Drawer 
           destroyOnClose={true} 
-          className={fullScreen? 'h-[calc(100%-50px)] mt-[50px]':''} 
+          className={fullScreen? 'h-calc-100vh-minus-navbar mt-navbar-height':''} 
           mask={!fullScreen} 
           title={<>
               {fullScreen && <a className="mr-btnrbase text-[14px]" onClick={()=>{setFullScreen?.(false)}}>

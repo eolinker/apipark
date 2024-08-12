@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:11
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-04-28 16:52:04
- * @FilePath: \frontend\packages\core\src\pages\serviceHub\ApiTestGroup.tsx
- */
+
 import {Empty, Input} from "antd";
 import {debounce} from "lodash-es";
 import {SearchOutlined} from "@ant-design/icons";

@@ -2,10 +2,11 @@ import {App, Form, Input, Upload, UploadFile, UploadProps} from "antd";
 import  {forwardRef, useEffect, useImperativeHandle, useState} from "react";
 import {useFetch} from "@common/hooks/http.ts";
 import {RcFile, UploadChangeParam} from "antd/es/upload";
-import {LoadingOutlined, PlusOutlined} from "@ant-design/icons";
+import {LoadingOutlined} from "@ant-design/icons";
 import {BasicResponse, STATUS_CODE} from "@common/const/const.ts";
 import { UserInfoType, UserProfileHandle, UserProfileProps } from "@common/const/type";
 import { getImgBase64 } from "@common/utils/dataTransfer";
+import { Icon } from "@iconify/react/dist/iconify.js";
 
 export const UserProfile = forwardRef<UserProfileHandle,UserProfileProps>((props,ref)=>{
     const { message } = App.useApp()
@@ -60,7 +61,7 @@ export const UserProfile = forwardRef<UserProfileHandle,UserProfileProps>((props
     const uploadButton = (
         <div>
             <div className="h-[68px] w-[68px] border-[1px] border-dashed border-BORDER flex items-center justify-center rounded bg-bar-theme cursor-pointer" style={{ marginTop: 8 }}>
-            {loading ? <LoadingOutlined /> : <PlusOutlined />}</div>
+            {loading ? <LoadingOutlined /> : <Icon icon="ic:baseline-add" width="18" height="18" className='mr-[2px]'/>}</div>
         </div>
     );
 

@@ -14,8 +14,7 @@ import SystemInsideApiProxy from "./SystemInsideApiProxy.tsx";
 
 const SystemInsideApiCreate = forwardRef<SystemInsideApiCreateHandle,SystemInsideApiCreateProps>((props, ref) => {
     const { message } = App.useApp()
-    const {type, entity, modalApiPrefix:apiPrefix, modalPrefixForce:prefixForce} = props
-    const { systemId } = useParams<RouterParams>();
+    const {type, entity, serviceId,teamId, modalApiPrefix:apiPrefix, modalPrefixForce:prefixForce} = props
     const [form] = Form.useForm();
     const {fetchData} = useFetch()
     const proxyRef = useRef<SystemInsideApiProxyHandle>(null)
@@ -23,7 +22,7 @@ const SystemInsideApiCreate = forwardRef<SystemInsideApiCreateHandle,SystemInsid
     const onFinish = ()=>{
         return Promise.all([proxyRef.current?.validate?.(), form.validateFields()]).then(([,formValue])=>{
             const body = {...formValue,path:formValue.path.trim(),proxy:{...formValue.proxy,path:formValue.proxy.path ? (formValue.proxy.path.startsWith('/')? formValue.proxy.path: '/'+ formValue.proxy.path) : undefined}}
-            return fetchData<BasicResponse<{api:SystemApiProxyFieldType}>>('project/api',{method:'POST',eoBody:(body), eoParams: {project:systemId},eoTransformKeys:['matchType']}).then(response=>{
+            return fetchData<BasicResponse<{api:SystemApiProxyFieldType}>>('service/api',{method:'POST',eoBody:(body), eoParams: {service:serviceId,team:teamId},eoTransformKeys:['matchType']}).then(response=>{
                 const {code,msg} = response
                 if(code === STATUS_CODE.SUCCESS){
                     message.success(msg || '操作成功，即将刷新页面')
@@ -39,7 +38,7 @@ const SystemInsideApiCreate = forwardRef<SystemInsideApiCreateHandle,SystemInsid
     const copy: ()=>Promise<boolean | string> =  ()=>{
         return new Promise((resolve, reject)=>{
             return form.validateFields().then((value)=>{
-                fetchData<BasicResponse<{api:SystemApiProxyFieldType}>>('project/api/copy',{method:'POST',eoParams:{project:entity!.systemId, api:entity!.id},eoBody:({...value,path:value.path.trim()})}).then(response=>{
+                fetchData<BasicResponse<{api:SystemApiProxyFieldType}>>('service/api/copy',{method:'POST',eoParams:{service:serviceId,team:teamId, api:entity!.id},eoBody:({...value,path:value.path.trim()})}).then(response=>{
                     const {code,data,msg} = response
                     if(code === STATUS_CODE.SUCCESS){
                         message.success(msg || '操作成功，即将刷新页面')
@@ -86,8 +85,6 @@ const SystemInsideApiCreate = forwardRef<SystemInsideApiCreateHandle,SystemInsid
                 form={form}
                 className="mx-auto  flex flex-col  h-full"
                 name="systemInsideApiCreate"
-                // labelCol={{ offset:1, span: 4 }}
-                // wrapperCol={{ span: 19}}
                 onFinish={onFinish}
                 autoComplete="off"
             >
@@ -147,11 +144,9 @@ const SystemInsideApiCreate = forwardRef<SystemInsideApiCreateHandle,SystemInsid
                     <Row className="mb-btnybase mt-[40px]"><Col  ><span className="font-bold mr-[13px]">转发规则设置 </span></Col></Row>
                     <Form.Item<SystemApiProxyFieldType>
                         className="mb-0 bg-transparent border-none p-0"
-                        // labelCol={{span:0,offset:0}}
-                        // wrapperCol={{span:24,offset:0}}
                         name="proxy"
                     >
-                        <SystemInsideApiProxy systemId={systemId!} ref={proxyRef} />
+                        <SystemInsideApiProxy serviceId={serviceId!} teamId={teamId!} ref={proxyRef} />
                     </Form.Item>
                     </>}
                     </div>

@@ -1,9 +1,3 @@
-/*
- * @Date: 2024-03-13 14:57:49
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-05-29 18:14:22
- * @FilePath: \frontend\packages\core\src\utils\dashboard.ts
- */
 
 import { RangeValue } from "@common/components/aoplatform/TimeRangeSelector";
 

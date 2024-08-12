@@ -154,7 +154,6 @@ export function MessageDataGrid(props: MessageDataGridProps<RenderMessageBody>) 
   }, [tableApiRef])
 
   useEffect(() => {
-    //console.log(initialRows,loaded,innerLoaded)
     if (initialRows && loaded && !innerLoaded) {
       let updateRows = [...initialRows,EmptyRow()]
       if (!updateRows?.length && contentType !== 'XML') {
@@ -185,7 +184,6 @@ export function MessageDataGrid(props: MessageDataGridProps<RenderMessageBody>) 
         break
       }
     }
-    //console.log(rows,neoRenderRows)
     setRenderRows(neoRenderRows)
     setRowModesModel(neoRenderRows.reduce((acc, cur) => ({ ...acc, [cur.id]: { mode: GridRowModes.Edit } }), {}))
   }, [rows])
@@ -330,7 +328,6 @@ export function MessageDataGrid(props: MessageDataGridProps<RenderMessageBody>) 
             onChange={(e, v) => {
               tableApiRef.current.setEditCellValue({ id: params.row.id, field: 'name', value: v }, e)
               const rowIndex = params.row.__globalIndex__ as number
-              //console.log(rowIndex, renderRows.length)
               if (renderRows.length === rowIndex + 1) {
                 const newRow = EmptyRow()
                   setRows((preRows)=>[...preRows,newRow])
@@ -574,7 +571,6 @@ export function MessageDataGrid(props: MessageDataGridProps<RenderMessageBody>) 
       },
       'childList'
     )
-    //console.log(rows)
     return rows.filter((row) => row.name) as BodyParamsType[]
   }
 

@@ -40,14 +40,11 @@ const GlobalContext = createContext<{
     pluginAccessDictionary:{[k:string]:string};
     getGlobalAccessData:()=>void;
     getTeamAccessData:(teamId:string)=>void;
-    getProjectAccessData:(systemId:string)=>void;
     getPluginAccessDictionary:(pluginData:{[k:string]:string})=>void
     resetAccess:()=>void
     cleanTeamAccessData:()=>void
-    cleanProjectAccessData:()=>void
     checkPermission:(access:keyof typeof PERMISSION_DEFINITION[0] | Array<keyof typeof PERMISSION_DEFINITION[0]>)=>boolean
     teamDataFlushed:boolean
-    projectDataFlushed:boolean
     accessInit:boolean
 
 } | undefined>(undefined);
@@ -106,12 +103,11 @@ export const GlobalProvider: FC<{children:ReactNode}> = ({ children }) => {
         version: '1.0.0',
         updateDate: '2024-07-01',
         powered:'Powered by https://apipark.com',
-        mainPage:'/system/list'
+        mainPage:'/service/list'
     });
     const [accessData,setAccessData] = useState<Map<string,string[]>>(new Map())
     const [pluginAccessDictionary, setPluginAccessDictionary] = useState<{[k:string]:string}>({})
     const [teamDataFlushed, setTeamDataFlushed] = useState<boolean>(false)
-    const [projectDataFlushed, setProjectDataFlushed] = useState<boolean>(false)
     const [accessInit, setAccessInit] = useState<boolean>(false)
 
     const getGlobalAccessData = ()=>{
@@ -138,27 +134,11 @@ export const GlobalProvider: FC<{children:ReactNode}> = ({ children }) => {
             })
         }
 
-    const getProjectAccessData = (systemId:string)=>{
-        fetchData<BasicResponse<{ access:string[]}>>('profile/permission/project',{method:'GET',eoParams:{project:systemId}},).then(response=>{
-            const {code,data,msg} = response
-            if(code === STATUS_CODE.SUCCESS){
-                setAccessData(prevData => new Map(prevData).set('project', data.access))
-                setProjectDataFlushed(true)
-            }else{
-                message.error(msg || '操作失败')
-            }
-            })
-        }
-
     const cleanTeamAccessData = ()=>{
         setTeamDataFlushed(false)
         setAccessData(prevData => prevData.set('team',[]))
     }
 
-    const cleanProjectAccessData = ()=>{
-        setProjectDataFlushed(false)
-        setAccessData(prevData => prevData.set('project',[]))
-    }
 
     const getPluginAccessDictionary = (pluginData:{[k:string]:string})=>{
         setPluginAccessDictionary(pluginData)
@@ -185,8 +165,7 @@ export const GlobalProvider: FC<{children:ReactNode}> = ({ children }) => {
             { state, dispatch,accessData,pluginAccessDictionary,
             getGlobalAccessData,getPluginAccessDictionary,
             getTeamAccessData,teamDataFlushed,
-            getProjectAccessData,projectDataFlushed,
-            cleanTeamAccessData,cleanProjectAccessData,
+            cleanTeamAccessData,
             resetAccess ,checkPermission,accessInit}}>
             {children}
         </GlobalContext.Provider>

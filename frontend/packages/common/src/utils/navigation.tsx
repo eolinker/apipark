@@ -1,11 +1,25 @@
-/*
- * @Date: 2024-02-02 14:37:42
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-05-29 18:14:33
- * @FilePath: \frontend\packages\core\src\utils\navigation.tsx
- */
 
 import { MenuItem } from "@common/components/aoplatform/Navigation";
+
+export function getNavItem(
+  label: React.ReactNode,
+  key: React.Key,
+  path:string,
+  icon?: React.ReactNode,
+  children?: MenuItem[],
+  type?: 'group',
+  access?:string[] | string
+): MenuItem {
+  return {
+    key,
+    icon :icon ?? <span className="w-[20px]"></span>,
+    path,
+    routes:children,
+    name:label,
+    type,
+    access
+  } as MenuItem;
+}
 
 export function getItem(
     label: React.ReactNode,

@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:11
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-07-09 11:01:30
- * @FilePath: \frontend\packages\core\src\pages\member\MemberPage.tsx
- */
+
 import Tree, {DataNode} from "antd/es/tree";
 import {Outlet, useNavigate, useParams } from "react-router-dom";
 import  {Key, useEffect, useMemo, useRef, useState} from "react";
@@ -115,11 +110,11 @@ const MemberPage = ()=>{
 
         const isActionAllowed = (type:'addDep'|'addChild'|'addMember'|'rename'|'delete') => {
             const actionToPermissionMap = {
-              'addDep': 'system.member.department.add',
-              'addChild': 'system.member.department.add',
-              'addMember': 'system.member.member.add',
-              'rename': 'system.member.department.edit',
-              'delete': 'system.member.department.delete'
+              'addDep': 'system.organization.member.department.add',
+              'addChild': 'system.organization.member.department.add',
+              'addMember': 'system.organization.member.add',
+              'rename': 'system.organization.member.department.edit',
+              'delete': 'system.organization.member.department.delete'
             };
           
             const action = actionToPermissionMap[type] as keyof typeof PERMISSION_DEFINITION[0];
@@ -131,7 +126,7 @@ const MemberPage = ()=>{
             entity.id !== '-1' &&  {
                 key: 'addDep',
                 label: (
-                    <WithPermission access="system.member.department.add" key="addDepPermission"><Button key="addDep" type="text" className="border-none p-0 flex items-center bg-transparent " onClick={()=>openModal('addDep',entity)}>
+                    <WithPermission access="system.organization.member.department.add" key="addDepPermission"><Button key="addDep" type="text" className="border-none p-0 flex items-center bg-transparent " onClick={()=>openModal('addDep',entity)}>
                         添加部门
                     </Button></WithPermission>
                 ),
@@ -139,7 +134,7 @@ const MemberPage = ()=>{
             {
                 key: 'addChild',
                 label: (
-                    <WithPermission access="system.member.department.add" key="addChildPermission"><Button key="addChild" type="text" className=" border-none p-0 flex items-center bg-transparent " onClick={()=>openModal('addChild',entity)}>
+                    <WithPermission access="system.organization.member.department.add" key="addChildPermission"><Button key="addChild" type="text" className=" border-none p-0 flex items-center bg-transparent " onClick={()=>openModal('addChild',entity)}>
                         添加子部门
                     </Button></WithPermission>
                 ),
@@ -147,7 +142,7 @@ const MemberPage = ()=>{
             entity.id !== '-1' && {
                 key: 'addMember',
                 label: (
-                    <WithPermission access="system.member.member.add" key="addMemberPermission"><Button key="addMember" type="text" className=" border-none p-0 flex items-center bg-transparent " onClick={()=>openModal('addMember',{...entity,...(entity.departmentIds ? {departmentIds:[entity.departmentIds?.[entity.departmentIds.length - 1]]}:{})})}>
+                    <WithPermission access="system.organization.member.add" key="addMemberPermission"><Button key="addMember" type="text" className=" border-none p-0 flex items-center bg-transparent " onClick={()=>openModal('addMember',{...entity,...(entity.departmentIds ? {departmentIds:[entity.departmentIds?.[entity.departmentIds.length - 1]]}:{})})}>
                         添加账号
                     </Button></WithPermission>
                 ),
@@ -155,7 +150,7 @@ const MemberPage = ()=>{
             entity.id !== '-1' && {
                 key: 'rename',
                 label: (
-                    <WithPermission access="system.member.department.edit"  key="renamePermission"><Button type="text" key="rename" className=" border-none p-0 flex items-center bg-transparent " onClick={()=>openModal('rename',entity)}>
+                    <WithPermission access="system.organization.member.department.edit"  key="renamePermission"><Button type="text" key="rename" className=" border-none p-0 flex items-center bg-transparent " onClick={()=>openModal('rename',entity)}>
                         重命名
                     </Button></WithPermission>
                 ),
@@ -163,7 +158,7 @@ const MemberPage = ()=>{
             {
                 key: 'delete',
                 label: (
-                    <WithPermission access="system.member.department.delete"  key="deletePermission"><Button key="delete" type="text" className=" border-none p-0 flex items-center bg-transparent " onClick={()=>openModal('delete',entity)}>
+                    <WithPermission access="system.organization.member.department.delete"  key="deletePermission"><Button key="delete" type="text" className=" border-none p-0 flex items-center bg-transparent " onClick={()=>openModal('delete',entity)}>
                         删除
                     </Button></WithPermission>
                 ),

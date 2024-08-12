@@ -1,9 +1,3 @@
-/*
- * @Date: 2024-03-15 10:53:52
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-07-12 20:01:30
- * @FilePath: \frontend\packages\systemRunning\src\pages\SystemRunning.tsx
- */
 
 import { useRef, useState, useEffect, useCallback } from "react";
 import { useFetch } from "@common/hooks/http.ts";
@@ -77,7 +71,7 @@ export default function SystemRunning(){
     const {message} = App.useApp()
     const graphRef = useRef<Graph>(null);
     const graphContainerRef = useRef<HTMLDivElement>(null);
-    const {partitionId,topologyId} = useParams<RouterParams>()
+    const {topologyId} = useParams<RouterParams>()
     const [graph, setGraph] = useState<Graph | null>(null);
     const [graphData, setGraphData] = useState<GraphData>();
     const [currentNode, setCurrentNode] = useState<string>()
@@ -237,7 +231,7 @@ export default function SystemRunning(){
     
     const getNodeData = ()=>{
       setLoading(true)
-        fetchData<BasicResponse<TopologyItem>>('topology',{method:'GET',eoParams:{id:partitionId},eoTransformKeys:['invoke_services','is_app','is_server']},).then(response=>{
+        fetchData<BasicResponse<TopologyItem>>('topology',{method:'GET',eoTransformKeys:['invoke_services','is_app','is_server']},).then(response=>{
             const {code,data,msg} = response
             if(code === STATUS_CODE.SUCCESS){
               const newGraphData = relativeFormatter(data)
@@ -558,7 +552,7 @@ export default function SystemRunning(){
         {
         showGraph ?
           <div className="h-full overflow-hidden w-full">
-          <div className="mt-[10px] ml-[10px] absolute top-[50px] right-0">
+          <div className="mt-[10px] ml-[10px] absolute top-navbar-height right-0">
             <div className="flex justify-between">
               <div>
               </div>
@@ -573,7 +567,7 @@ export default function SystemRunning(){
             
             </div>
         </div>
-        :<Spin wrapperClassName="h-[calc(100vh-50px)]" indicator={<LoadingOutlined style={{ fontSize: 24 }} spin/>} spinning={loading}>{!loading && <SystemRunningInstruction />}</Spin>
+        :<Spin wrapperClassName="h-calc-100vh-minus-navbar" indicator={<LoadingOutlined style={{ fontSize: 24 }} spin/>} spinning={loading}>{!loading && <SystemRunningInstruction />}</Spin>
               }</>)
     }
 

@@ -19,7 +19,7 @@ import { PERMISSION_DEFINITION } from "@common/const/permissions.ts";
 
 const CertConfigModal = forwardRef<PartitionCertConfigHandle,PartitionCertConfigProps>((props, ref) => {
     const { message } = App.useApp()
-    const {type,entity,partitionId} = props
+    const {type,entity} = props
     const [form] = Form.useForm();
     const [, forceUpdate] = useState<unknown>(null);
     const {fetchData} = useFetch()
@@ -31,7 +31,7 @@ const CertConfigModal = forwardRef<PartitionCertConfigHandle,PartitionCertConfig
                     key:Base64.encode(value.key),
                     pem:Base64.encode(value.pem)
                 }
-                fetchData<BasicResponse<null>>('partition/certificate',{method:type === 'add'? 'POST' : 'PUT',eoBody:(body), eoParams:type === 'add' ? {partition:partitionId}:{id:entity!.id}}).then(response=>{
+                fetchData<BasicResponse<null>>('certificate',{method:type === 'add'? 'POST' : 'PUT',eoBody:(body), eoParams:type === 'add' ? {}:{id:entity!.id}}).then(response=>{
                     const {code,msg} = response
                     if(code === STATUS_CODE.SUCCESS){
                         message.success(msg || '操作成功！')
@@ -58,7 +58,7 @@ const CertConfigModal = forwardRef<PartitionCertConfigHandle,PartitionCertConfig
         }
     }, []);
 
-    return (<WithPermission access={type === 'edit' ? 'system.partition.cert.edit':'system.partition.cert.add'}>
+    return (<WithPermission access={type === 'edit' ? 'system.devops.ssl_certificate.edit':'system.devops.ssl_certificate.add'}>
         <Form
             layout='vertical'
             labelAlign='left'
@@ -150,7 +150,6 @@ const PartitionInsideCert:FC = ()=>{
     const { modal,message } = App.useApp()
     const [init, setInit] = useState<boolean>(true)
     const {fetchData} = useFetch()
-    const { partitionId } = useParams<RouterParams>()
     const addRef = useRef<PartitionCertConfigHandle>(null)
     const editRef = useRef<PartitionCertConfigHandle>(null)
     const pageListRef = useRef<ActionType>(null);
@@ -158,7 +157,7 @@ const PartitionInsideCert:FC = ()=>{
     const {accessData} = useGlobalContext()
 
     const getPartitionCertList =(): Promise<{ data: PartitionCertTableListItem[], success: boolean }>=> {
-        return fetchData<BasicResponse<{certificates:PartitionCertTableListItem}>>('partition/certificates',{method:'GET',eoParams:{partition:partitionId},eoTransformKeys:['partition_id','update_time','not_before','not_after']}).then(response=>{
+        return fetchData<BasicResponse<{certificates:PartitionCertTableListItem}>>('certificates',{method:'GET',eoTransformKeys:['partition_id','update_time','not_before','not_after']}).then(response=>{
             const {code,data,msg} = response
             if(code === STATUS_CODE.SUCCESS){
                 setInit((prev)=>prev ? false : prev)
@@ -174,7 +173,7 @@ const PartitionInsideCert:FC = ()=>{
 
     const deleteCert = (entity:PartitionCertTableListItem)=>{
         return new Promise((resolve, reject)=>{
-            fetchData<BasicResponse<null>>('partition/certificate',{method:'DELETE',eoParams:{id:entity.id,partition:partitionId}}).then(response=>{
+            fetchData<BasicResponse<null>>('certificate',{method:'DELETE',eoParams:{id:entity.id}}).then(response=>{
                 const {code,msg} = response
                 if(code === STATUS_CODE.SUCCESS){
                     message.success(msg || '操作成功！')
@@ -193,15 +192,15 @@ const PartitionInsideCert:FC = ()=>{
         switch (type){
             case 'add':
                 title='添加证书'
-                content= <CertConfigModal partitionId={partitionId}  ref={addRef} type="add"/>
+                content= <CertConfigModal   ref={addRef} type="add"/>
                 break;
             case 'edit':{
                 title='修改证书'
                 message.loading('正在加载数据')
-                const {code,data,msg} = await fetchData<BasicResponse<{cert:{key:string, pem:string}}>>('partition/certificate',{method:'GET',eoParams:{id:entity!.id}})
+                const {code,data,msg} = await fetchData<BasicResponse<{cert:{key:string, pem:string}}>>('certificate',{method:'GET',eoParams:{id:entity!.id}})
                 message.destroy()
                 if(code === STATUS_CODE.SUCCESS){
-                    content= <CertConfigModal ref={editRef} partitionId={partitionId} type="edit" entity={{...data.cert,id:entity!.id}}/>
+                    content= <CertConfigModal ref={editRef}  type="edit" entity={{...data.cert,id:entity!.id}}/>
                 }else{
                     message.error(msg || '操作失败')
                     return
@@ -229,7 +228,7 @@ const PartitionInsideCert:FC = ()=>{
             width:600,
             okText:'确认',
             okButtonProps:{
-                disabled : !checkAccess( `system.partition.cert.${type}` as keyof typeof PERMISSION_DEFINITION[0], accessData)
+                disabled : !checkAccess( `system.devops.ssl_certificate.${type}` as keyof typeof PERMISSION_DEFINITION[0], accessData)
             },
             cancelText:'取消',
             closable:true,
@@ -250,20 +249,19 @@ const PartitionInsideCert:FC = ()=>{
             fixed:'right',
             valueType: 'option',
             render: (_: React.ReactNode, entity: PartitionCertTableListItem) => [
-                <TableBtnWithPermission  access="system.partition.cert.edit" key="edit" onClick={()=>{openModal('edit',entity)}} btnTitle="编辑"/>,
+                <TableBtnWithPermission  access="system.devops.ssl_certificate.edit" key="edit" onClick={()=>{openModal('edit',entity)}} btnTitle="编辑"/>,
                 <Divider type="vertical" className="mx-0"  key="div1"/>,
-                <TableBtnWithPermission  access="system.partition.cert.delete" key="delete" onClick={()=>{openModal('delete',entity)}} btnTitle="删除"/>]
+                <TableBtnWithPermission  access="system.devops.ssl_certificate.delete" key="delete" onClick={()=>{openModal('delete',entity)}} btnTitle="删除"/>]
         }
     ]
 
     useEffect(() => {
         setBreadcrumb([
-            {title:<Link to="/partition/list">部署管理</Link>},
             {title:'证书管理'}
         ])
         getMemberList()
         manualReloadTable()
-    }, [partitionId]);
+    }, []);
 
     const getMemberList = async ()=>{
         setMemberValueEnum({})
@@ -291,10 +289,10 @@ const PartitionInsideCert:FC = ()=>{
             request={()=>getPartitionCertList()}
             showPagination={false}
             addNewBtnTitle="添加证书"
-            addNewBtnAccess="system.partition.cert.add"
+            addNewBtnAccess="system.devops.ssl_certificate.add"
             onAddNewBtnClick={()=>{openModal('add')}}
             onRowClick={(row:PartitionCertTableListItem)=>openModal('edit',row)}
-            tableClickAccess="system.partition.cert.edit"
+            tableClickAccess="system.devops.ssl_certificate.edit"
         />
     )
 

@@ -1,21 +1,14 @@
-/*
- * @Date: 2024-03-11 15:12:43
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-07-29 16:27:56
- * @FilePath: \frontend\packages\common\src\utils\permission.ts
- */
+
 import { PERMISSION_DEFINITION } from "@common/const/permissions"
 import { AccessDataType } from "@common/const/type"
 
 
 export const checkAccess:(access:AccessDataType, accessData:Map<string,string[]>)=>boolean = (access, accessData)=>{
-  // TODO 暂时隐藏权限
-    return true
     if(!access){
       return true
     }
     const accLevel = access.split('.')[0]
-    if(['system','team','project'].indexOf(accLevel) === -1){
+    if(['system','team'].indexOf(accLevel) === -1){
         console.warn('权限字段有误：',access)
         return false
     }

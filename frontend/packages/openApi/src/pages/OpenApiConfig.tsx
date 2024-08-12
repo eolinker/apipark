@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:11
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 11:55:42
- * @FilePath: \frontend\packages\core\src\pages\openApi\OpenApiConfig.tsx
- */
+
 import {App, Form, Input} from "antd";
 import  {forwardRef, useEffect, useImperativeHandle} from "react";
 import {BasicResponse, STATUS_CODE} from "@common/const/const.ts";

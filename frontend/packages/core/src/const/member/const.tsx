@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-02-04 10:01:02
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-05-14 09:52:10
- * @FilePath: \frontend\packages\core\src\const\member\const.tsx
- */
+
 import { ProColumns } from "@ant-design/pro-components";
 import { MemberTableListItem } from "./type";
 
@@ -39,11 +34,11 @@ export const MEMBER_TABLE_COLUMNS: ProColumns<MemberTableListItem>[] = [
         filterSearch: true,
     },
     {
-        title: '用户组',
-        dataIndex: 'userGroup',
+        title: '角色',
+        dataIndex: 'roles',
         copyable: true,
         ellipsis:true,
-        renderText:(_,entity:MemberTableListItem)=>entity.userGroup?.map((x)=>x.name).join('，') || '-'
+        width:200
     },
     {
         title:'状态',

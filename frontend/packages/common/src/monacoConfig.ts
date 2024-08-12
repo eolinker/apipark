@@ -1,10 +1,3 @@
-/*
- * @Date: 2024-06-04 13:53:46
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 13:54:14
- * @FilePath: \frontend\packages\common\src\monacoConfig.ts
- */
-
 import { loader } from '@monaco-editor/react';
 import * as monaco from 'monaco-editor';
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';

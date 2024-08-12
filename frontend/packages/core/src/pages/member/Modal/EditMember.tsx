@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-06-04 08:54:24
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 11:55:27
- * @FilePath: \frontend\packages\core\src\pages\member\Modal\EditMember.tsx
- */
+
 import { App, Form, Input, TreeSelect } from "antd";
 import { forwardRef, useState, useImperativeHandle, useEffect } from "react";
 import WithPermission from "@common/components/aoplatform/WithPermission";

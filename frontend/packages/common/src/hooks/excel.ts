@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-03-21 10:52:59
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-06 18:19:04
- * @FilePath: \frontend\packages\common\src\hooks\excel.ts
- */
+
 import * as ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import { ProColumnType } from '@ant-design/pro-components';

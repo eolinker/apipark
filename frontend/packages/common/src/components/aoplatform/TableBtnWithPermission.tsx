@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-03-08 10:28:15
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-05-29 18:26:28
- * @FilePath: \frontend\packages\core\src\components\TableBtnWithPermission.tsx
- */
+
 import { Button, Tooltip } from "antd"
 import { useState, useMemo, useEffect } from "react"
 import { useGlobalContext } from "@common/contexts/GlobalStateContext"

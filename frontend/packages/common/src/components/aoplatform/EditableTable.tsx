@@ -33,23 +33,6 @@ const EditableTable = <T extends { _id: string }>({
   );
 
     useEffect(() => {
-        // let newValue = 
-        // if(extendsId && extendsId.length > 0 && value){
-        //     newValue = []
-        //     value.forEach((item:{[k:string]:unknown, _id:string}, index) => {
-        //         newValue.push(item);
-        //         const nextItem:{[k:string]:unknown, _id:string}= value[index + 1];
-        //         // 如果下一个元素不存在，或者当前元素的cluster与下一个元素的不同
-        //         if (!nextItem || (item[extendsId[0]] !== nextItem[extendsId[0]])) {
-        //             const tmpValue:{[k:string]:unknown, _id:string}= { _id:uuidv4()}
-        //             extendsId.forEach(field => {
-        //                 tmpValue[field] = item[field];
-        //             });
-        //             newValue.push(tmpValue);
-        //         }
-        //       })
-        // }
-        // console.log(value,newValue, extendsId)
         setConfigurations(value?.map((x)=>x._id ? x : {...x,_id:uuidv4()}) || [{_id:uuidv4()}]);
     }, [value]);
 

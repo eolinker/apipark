@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-05-10 16:48:31
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-05-10 17:03:37
- * @FilePath: \frontend\packages\core\__tests__\hooks\crypto.test.ts
- */
+
 import {useCrypto} from '../../src/hooks/crypto';
 import CryptoJS from 'crypto-js';
 

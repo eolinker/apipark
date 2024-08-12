@@ -68,7 +68,7 @@ export const ServiceHubCategoryConfig = forwardRef<ServiceHubCategoryConfigHandl
 
 
     return (
-    <WithPermission access={type === 'addCate'? 'system.serviceHub.category.add': 'system.serviceHub.category.edit'}>
+    <WithPermission access={type === 'addCate'? 'system.api_market.service_classification.add': 'system.api_market.service_classification.edit'}>
         <Form
             layout='vertical'
             scrollToFirstError

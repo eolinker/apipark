@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:11
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-05-06 15:16:13
- * @FilePath: \frontend\packages\core\src\components\api\Collapse\index.tsx
- */
+
 import { AccordionDetails, Chip, Stack, Typography, useTheme } from '@mui/material'
 import MuiAccordion, { AccordionProps } from '@mui/material/Accordion';
 import MuiAccordionSummary, {

@@ -1,6 +1,6 @@
 
 :root {
-  --layout-header-height: 50px;
+  --layout-header-height: 72px;
   --layout-footer-height: 30px;
 
   --btn-icon-margin: 5px;
@@ -969,6 +969,10 @@ p{
   }
 }
 
+.apipark-layout-layout .ant-drawer-content-wrapper{
+  min-width:unset !important;
+}
+
 .table-border {
   .ant-table:not(.ant-table-bordered){
     border:1px solid var(--border-color) !important;
@@ -1008,7 +1012,7 @@ p{
 .ant-form-item-explain{
   font-size: 12px !important;
 }
-.ant-form .ant-form-item {
+.ant-form:not(.no-bg-form) .ant-form-item {
   .ant-input-number.ant-input-number-in-form-item{
     width:100% !important;
   }
@@ -1208,4 +1212,9 @@ p{
 .ant-form-item-label,
 .ant-formily-item-label{
   font-weight: bold;
+}
+
+.eo_page_list.role_table .ant-pro-table-list-toolbar-container{
+  padding-left:0 !important;
+  padding-right:0 !important;
 }

@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-03-06 16:58:39
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-07-12 09:54:18
- * @FilePath: \frontend\packages\common\src\utils\dataTransfer.ts
- */
+
 import { ColumnFilterItem } from 'antd/es/table/interface'
 import {DepartmentListItem} from '@core/const/member/type'
 import { RcFile } from 'antd/es/upload';

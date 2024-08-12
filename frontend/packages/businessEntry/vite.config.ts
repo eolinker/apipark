@@ -1,9 +1,3 @@
-/*
- * @Date: 2024-01-31 15:00:39
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-07-12 19:53:09
- * @FilePath: \frontend\packages\businessEntry\vite.config.ts
- */
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'

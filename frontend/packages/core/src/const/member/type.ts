@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-02-04 10:01:11
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 11:18:49
- * @FilePath: \frontend\packages\core\src\const\member\type.ts
- */
+
 import { EntityItem } from "@common/const/type"
 
 export type DepartmentListItem = {
@@ -23,6 +18,7 @@ export type MemberTableListItem = {
     userGroup:Array<EntityItem>;
     enable:boolean
     departmentId:string
+    roles:EntityItem[]
 };
 
 export type AddToDepartmentProps = {

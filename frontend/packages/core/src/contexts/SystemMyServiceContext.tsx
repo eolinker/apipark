@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:11
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-04-01 16:51:17
- * @FilePath: \frontend\packages\core\src\contexts\SystemMyServiceContext.tsx
- */
+
 import  { createContext, useContext, useState, ReactNode, FC } from 'react';
 import { MyServiceFieldType } from '../const/system/type.ts';
 

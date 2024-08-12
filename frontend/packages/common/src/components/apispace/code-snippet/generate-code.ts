@@ -55,9 +55,7 @@ export function generateCode(
   multipart: boolean,
   { protocol, URL, headers, params, method, requestType, apiRequestParamJsonType, raw }: unknown,
 ) {
-  console.log(type, multipart,protocol, URL, headers, params, method, requestType, apiRequestParamJsonType, raw)
   requestType=ApiBodyType[requestType]
-  console.log(requestType)
   let code: string = ''
   const indent = '    '
   let urlObj: unknown = {}
@@ -82,7 +80,6 @@ export function generateCode(
     raw
   })
 
-  console.log('requestParam', requestParam)
   const langTmp: unknown = {
     headerStr: '',
     paramsStr: ''

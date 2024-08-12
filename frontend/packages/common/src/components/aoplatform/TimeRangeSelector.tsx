@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-03-18 10:52:38
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-07 09:16:13
- * @FilePath: \frontend\packages\common\src\components\aoplatform\TimeRangeSelector.tsx
- */
+
 import { useState } from 'react';
 import { Radio, DatePicker, GetProps, RadioChangeEvent } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';

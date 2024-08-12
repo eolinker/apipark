@@ -1,12 +1,6 @@
 import { PERMISSION_DEFINITION } from "./permissions"
 import { MatchPositionEnum, MatchTypeEnum } from "@core/const/system/const"
 
-/*
- * @Date: 2024-01-31 15:00:11
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-04 11:23:49
- * @FilePath: \frontend\packages\common\src\const\type.ts
- */
 export type UserInfoType = {
     username: string
     nickname: string
@@ -60,22 +54,11 @@ export type DashboardPartitionItem = {
     enableMonitor:boolean
 }
 
-export type PartitionItem = {
-    id:string;
-    name:string
-}
-
-export type OrganizationItem = {
-    id:string
-    name:string
-    description:string
-}
 
 export type SimpleTeamItem = {
     id:string
     name:string
     description:string
-    organization:EntityItem
     appNum:number
 }
 
@@ -101,6 +84,13 @@ export type DynamicMenuItem = {
 export type AccessDataType = keyof typeof PERMISSION_DEFINITION[0]
 
 
+
+export type NewSimpleMemberItem = {
+    user:EntityItem
+    email:string
+    department:string
+    avatar:string
+}
 
 export type SimpleMemberItem = {
     id:string

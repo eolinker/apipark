@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-03-13 17:27:29
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-04-01 16:41:51
- * @FilePath: \frontend\packages\core\src\components\ScrollableSection.tsx
- */
+
 import  {FC, useRef, useEffect, Children, cloneElement, isValidElement } from 'react';
 
 interface ScrollableSectionProps {

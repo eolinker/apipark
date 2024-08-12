@@ -153,7 +153,7 @@ export type ResponseList = {
 
 export type ApiDetail = {
   id: string,
-  project: string,
+  service: string,
   name: string,
   protocol: Protocol,
   method:HTTPMethod,

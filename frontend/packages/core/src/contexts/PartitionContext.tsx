@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:11
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-04-16 18:00:04
- * @FilePath: \frontend\packages\core\src\contexts\PartitionContext.tsx
- */
+
 import  {FC, createContext, useContext, useState, ReactNode } from 'react';
 import { PartitionConfigFieldType } from '../const/partitions/types.ts';
 

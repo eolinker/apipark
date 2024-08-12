@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-06-04 08:54:24
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-06-06 12:09:34
- * @FilePath: \frontend\packages\market\src\components\aoplatform\RenderRoutes.tsx
- */
+
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Login from "@core/pages/Login.tsx"
 import BasicLayout from '@common/components/aoplatform/BasicLayout';
@@ -24,12 +19,10 @@ type RouteConfig = {
 }
 
 export type RouterParams  = {
-    orgId:string
     teamId:string
     systemId:string
     apiId:string
     serviceId:string
-    partitionId:string
     clusterId:string;
     memberGroupId:string
     userGroupId:string
@@ -93,7 +86,7 @@ const PUBLIC_ROUTES:RouteConfig[] = [
                         lazy:lazy(() => import(/* webpackChunkName: "[request]" */ '@market/pages/serviceHub/management/ManagementInsidePage.tsx')),
                         children:[
                             {
-                                path:'service/:partitionId',
+                                path:'service',
                                 // component:<ServiceHubList/>,
                                 key:uuidv4(),
                                 lazy:lazy(() => import(/* webpackChunkName: "[request]" */ '@market/pages/serviceHub/management/ManagementInsideService.tsx')),

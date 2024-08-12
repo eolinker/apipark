@@ -3,7 +3,7 @@ import {ActionType, ProColumns} from "@ant-design/pro-components";
 import  {FC, useEffect, useMemo, useRef, useState} from "react";
 import {Link, useParams} from "react-router-dom";
 import {useBreadcrumb} from "@common/contexts/BreadcrumbContext.tsx";
-import {App, Button, Modal} from "antd";
+import {App, Button, Modal, Select} from "antd";
 import {TransferTableHandle} from "@common/components/aoplatform/TransferTable.tsx";
 import {BasicResponse, STATUS_CODE} from "@common/const/const.ts";
 import {useFetch} from "@common/hooks/http.ts";
@@ -16,9 +16,26 @@ import { checkAccess } from "@common/utils/permission.ts";
 import { useGlobalContext } from "@common/contexts/GlobalStateContext.tsx";
 import MemberTransfer from "@common/components/aoplatform/MemberTransfer.tsx";
 import { DepartmentListItem } from "../../const/member/type.ts";
-import { addMemberToDepartment, getDepartmentWithMember } from "../user/UserList.tsx";
 import {v4 as uuidv4} from 'uuid'
 import WithPermission from "@common/components/aoplatform/WithPermission.tsx";
+
+export const getDepartmentWithMember = (department:(DepartmentListItem & {type?:'department'|'member'})[],departmentMap:Map<string, (MemberItem & {type:'department'|'member'})[]>) : (DepartmentWithMemberItem | undefined)[] =>{
+    return department.map((x:DepartmentListItem & {type?:'department'|'member'})=>{
+        const res =  ({
+            ...x,
+            key:x.id,
+            title:x.name,
+            type: x.type || 'department',
+            children:((x.type === 'member' || (!x.children||x.children.length === 0 )&& (!departmentMap.get(x.id) || departmentMap.get(x.id)!.length === 0))? undefined : [...(x.children && x.children.length > 0 ? getDepartmentWithMember(x.children,departmentMap) : []),...departmentMap.get(x.id) || []])
+        });
+        return res}).filter(node=>node.type === 'member' ||( node.children && node.children.length > 0))
+}
+
+export const addMemberToDepartment = (departmentMap: Map<string, (MemberItem & {type:'department'|'member'})[]>, departmentId: string, member: MemberItem) => {
+    const members = departmentMap.get(departmentId) || [];
+    members.push({...member, type: 'member'});
+    departmentMap.set(departmentId, members);
+  }
 
 const TeamInsideMember:FC = ()=>{
     const [searchWord, setSearchWord] = useState<string>('')
@@ -35,6 +52,7 @@ const TeamInsideMember:FC = ()=>{
     const [modalVisible, setModalVisible] = useState<boolean>(false)
     const [addMemberBtnDisabled, setAddMemberBtnDisabled] = useState<boolean>(true)
     const [allMemberSelectedDepartIds, setAllMemberSelectedDepartIds] = useState<string[]>([])
+    const [columns,setColumns] = useState<ProColumns<TeamMemberTableListItem>[]>([])
 
     const operation:ProColumns<TeamMemberTableListItem>[] =[
         {
@@ -44,7 +62,7 @@ const TeamInsideMember:FC = ()=>{
             fixed:'right',
             valueType: 'option',
             render: (_: React.ReactNode, entity: TeamMemberTableListItem) => [
-                !entity.role?.includes('负责人') &&<TableBtnWithPermission disabled={!entity.canDelete} tooltip="暂无权限" access="team.myTeam.member.edit" key="removeMember" onClick={()=>{openModal('remove',entity)}} btnTitle="移出团队"/>]
+                <TableBtnWithPermission disabled={!entity.isDelete} tooltip="暂无权限" access="team.team.member.edit" key="removeMember" onClick={()=>{openModal('remove',entity)}} btnTitle="移出团队"/>]
         }
     ]
 
@@ -101,11 +119,11 @@ const TeamInsideMember:FC = ()=>{
       }
       
     const getMemberList = ()=>{
-        return fetchData<BasicResponse<{members:TeamMemberTableListItem}>>('team/members',{method:'GET',eoParams:{keyword:searchWord, team:teamId},eoTransformKeys:['user_group','attach_time','user_id','can_delete']}).then(response=>{
+        return fetchData<BasicResponse<{members:TeamMemberTableListItem}>>('team/members',{method:'GET',eoParams:{keyword:searchWord, team:teamId},eoTransformKeys:['attach_time','is_delete']}).then(response=>{
             const {code,data,msg} = response
             if(code === STATUS_CODE.SUCCESS){
                 if(!searchWord){
-                    setAllMemberIds(data.members?.map((x:TeamMemberTableListItem)=>x.userId) || [])
+                    setAllMemberIds(data.members?.map((x:TeamMemberTableListItem)=>x.user.id) || [])
                 }
                 return  {data:data.members, success: true}
             }else{
@@ -140,7 +158,7 @@ const TeamInsideMember:FC = ()=>{
 
     const removeMember = (entity:TeamMemberTableListItem) =>{
         return new Promise((resolve, reject)=>{
-            fetchData<BasicResponse<null>>(`team/member`,{method:'DELETE',eoParams:{team:teamId,user:entity.userId}}).then(response=>{
+            fetchData<BasicResponse<null>>(`team/member`,{method:'DELETE',eoParams:{team:teamId,user:entity.user.id}}).then(response=>{
                 const {code,msg} = response
                 if(code === STATUS_CODE.SUCCESS){
                     message.success(msg || '操作成功！')
@@ -181,7 +199,7 @@ const TeamInsideMember:FC = ()=>{
             width:600,
             okText:'确认',
             okButtonProps:{
-                disabled: !checkAccess(`team.myTeam.member.edit`,accessData)
+                disabled: !checkAccess(`team.team.member.edit`,accessData)
             },
             cancelText:'取消',
             closable:true,
@@ -194,7 +212,64 @@ const TeamInsideMember:FC = ()=>{
         pageListRef.current?.reload()
     };
 
+    
+    const changeMemberInfo = (value:string[],entity:TeamMemberTableListItem )=>{
+        //console.log(value)
+        return new Promise((resolve, reject) => {
+            fetchData<BasicResponse<null>>(`team/member/role`, {method: 'PUT',eoBody:({roles:value, users:[entity.user.id]}), eoParams: {team:teamId}}).then(response => {
+                const {code, msg} = response
+                if (code === STATUS_CODE.SUCCESS) {
+                    message.success(msg || '操作成功！')
+                    resolve(true)
+                } else {
+                    message.error(msg || '操作失败')
+                    reject(msg || '操作失败')
+                }
+            }).catch((errorInfo)=> reject(errorInfo))
+        })
+    }
+    
+    const getRoleList = ()=>{
+        fetchData<BasicResponse<{roles:Array<{id:string,name:string}>}>>('simple/roles', {method: 'GET', eoParams: {group:'team'}}).then(response => {
+            const {code, data,msg} = response
+            if (code === STATUS_CODE.SUCCESS) {
+
+                const newCol = [...TEAM_MEMBER_TABLE_COLUMNS]
+                for(const col of newCol){
+                    //console.log(col)
+                    if(col.dataIndex === 'roles'){
+                        col.render = (_,entity)=>(
+                            <WithPermission access="team.team.member.edit">
+                                <Select
+                                    className="w-full"
+                                    mode="multiple"
+                                    value={entity.roles?.map((x:EntityItem)=>x.id)}
+                                    options={data.roles?.map((x:{id:string,name:string})=>({label:x.name, value:x.id}))}
+                                    onChange={(value)=>{
+                                        changeMemberInfo(value,entity ).then((res)=>{
+                                            if(res) manualReloadTable()
+                                        })
+                                    }}
+                                />
+                            </WithPermission>
+                        )
+                        col.filters = data.roles?.map((x:{id:string,name:string})=>({text:x.name, value:x.id}))
+                        col.onFilter = (value: unknown, record:TeamMemberTableListItem) =>{
+                            return record.roles ? record.roles?.map((x)=>x.id).indexOf(value as string) !== -1 : false;}
+                    
+                    }
+                }
+                setColumns(newCol)
+                return
+            } else {
+                message.error(msg || '操作失败')
+            }
+        })
+    }
+
+
     useEffect(() => {
+        getRoleList()
         setBreadcrumb([
             {title:<Link to="/team/list">团队</Link>},
             {title:'成员'}
@@ -209,14 +284,14 @@ const TeamInsideMember:FC = ()=>{
         <PageList
             id="global_team_member"
             ref={pageListRef}
-            columns = {[...TEAM_MEMBER_TABLE_COLUMNS,...operation]}
+            columns = {[...columns,...operation]}
             request={()=>getMemberList()}
-            primaryKey="userId"
+            primaryKey="user.id"
             addNewBtnTitle="添加成员"
             searchPlaceholder="输入姓名查找"
             onAddNewBtnClick={()=>{openModal('add')}}
-            addNewBtnAccess="team.myTeam.member.add"
-            tableClickAccess="team.myTeam.member.edit"
+            addNewBtnAccess="team.team.member.add"
+            tableClickAccess="team.team.member.edit"
             onSearchWordChange={(e)=>{setSearchWord(e.target.value)}}
         />
         <Modal
@@ -230,7 +305,7 @@ const TeamInsideMember:FC = ()=>{
                        <Button key="back" onClick={() => cleanModalData()}>
                            取消
                        </Button>,
-                       <WithPermission access="team.myTeam.member.add"><Button
+                       <WithPermission access="team.team.member.add"><Button
                            key="submit"
                            type="primary"
                            disabled={addMemberBtnDisabled}

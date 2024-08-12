@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:10
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-04-17 16:46:52
- * @FilePath: \frontend\packages\core\src\components\TreeWithMore.tsx
- */
+
 import {CheckOutlined, LoadingOutlined, MoreOutlined} from "@ant-design/icons";
 import {Dropdown, Input, InputRef, MenuProps} from "antd";
 import { ReactNode, useEffect, useRef, useState} from "react";

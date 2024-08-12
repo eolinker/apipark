@@ -1,9 +1,4 @@
-/*
- * @Date: 2024-01-31 15:00:11
- * @LastEditors: maggieyyy
- * @LastEditTime: 2024-07-02 17:13:12
- * @FilePath: \frontend\node_modules\.pnpm\node_modules\core\src\pages\system\approval\SystemInsideApprovalList.tsx
- */
+
 import {ActionType, ProColumns} from "@ant-design/pro-components";
 import  {FC, useEffect, useMemo, useRef, useState} from "react";
 import {Link, useLocation, useParams} from "react-router-dom";
@@ -33,7 +28,7 @@ import { SubscribeApprovalInfoType } from "@common/const/approval/type.tsx";
 const SystemInsideApprovalList:FC = ()=>{
     const { setBreadcrumb } = useBreadcrumb()
     const { modal,message } = App.useApp()
-    const {systemId} = useParams<RouterParams>();
+    const {serviceId, teamId} = useParams<RouterParams>();
     const [init, setInit] = useState<boolean>(true)
     const {fetchData} = useFetch()
     const [tableHttpReload, setTableHttpReload] = useState(true);
@@ -42,19 +37,18 @@ const SystemInsideApprovalList:FC = ()=>{
     const query =new URLSearchParams(useLocation().search)
     const [pageStatus,setPageStatus] = useState<0|1>(Number(query.get('status') ||0) as 0|1)
     const subscribeRef = useRef<SubscribeApprovalModalHandle>(null)
-    const {partitionList} = useSystemContext()
     const [approvalBtnLoading,setApprovalBtnLoading] = useState<boolean>(false)
     const [memberValueEnum, setMemberValueEnum] = useState<{[k:string]:{text:string}}>({})
     const {accessData} = useGlobalContext()
 
     const openModal = async (type:'approval'|'view',entity:SubscribeApprovalTableListItem)=>{
         message.loading('正在加载数据')
-        const {code,data,msg} = await fetchData<BasicResponse<{approval:SubscribeApprovalInfoType}>>('project/approval/subscribe',{method:'GET',eoParams:{application:entity!.id, project:systemId},eoTransformKeys:['apply_project','apply_team','apply_time','approval_time']})
+        const {code,data,msg} = await fetchData<BasicResponse<{approval:SubscribeApprovalInfoType}>>('service/approval/subscribe',{method:'GET',eoParams:{apply:entity!.id, service:serviceId,team:teamId},eoTransformKeys:['apply_project','apply_team','apply_time','approval_time']})
         message.destroy()
         if(code === STATUS_CODE.SUCCESS){
             const modalIns = modal.confirm({
                 title:type === 'approval' ? '审批' : '查看',
-                content:<SubscribeApprovalModalContent ref={subscribeRef} data={{...data.approval,areasList:partitionList,partition:data.approval?.partition?.map((x:EntityItem)=>x.id)}  as SubscribeApprovalInfoType} type={type} systemId={systemId} inSystem/>,
+                content:<SubscribeApprovalModalContent ref={subscribeRef} data={{...data.approval}  as SubscribeApprovalInfoType} type={type} serviceId={serviceId!} teamId={teamId!} inSystem/>,
                 onOk:()=>{
                     return subscribeRef.current?.save('pass').then((res)=>res === true && manualReloadTable())
                 },
@@ -62,7 +56,7 @@ const SystemInsideApprovalList:FC = ()=>{
                 okText:type === 'approval' ? '通过' : '确认',
                 cancelText:type === 'approval' ?'取消':'关闭',
                 okButtonProps:{
-                    disabled : type === 'approval' ? !checkAccess('project.mySystem.publish.approval', accessData): false
+                    disabled : type === 'approval' ? !checkAccess('team.service.release.approval', accessData): false
                 },
                 closable:true,
                 onCancel:()=>{setApprovalBtnLoading(false)},
@@ -72,7 +66,7 @@ const SystemInsideApprovalList:FC = ()=>{
                         <>
                             {type === 'approval' ? <>
                                     <CancelBtn/>
-                                    <WithPermission access="project.mySystem.publish.approval"><Button type="primary" danger loading={approvalBtnLoading} onClick={()=>{setApprovalBtnLoading(true);subscribeRef.current?.save('refuse').then((res)=>{if(res === true ){manualReloadTable();modalIns?.destroy()}}).finally(()=>{setApprovalBtnLoading(false)})}}>拒绝</Button></WithPermission>
+                                    <WithPermission access="team.service.release.approval"><Button type="primary" danger loading={approvalBtnLoading} onClick={()=>{setApprovalBtnLoading(true);subscribeRef.current?.save('refuse').then((res)=>{if(res === true ){manualReloadTable();modalIns?.destroy()}}).finally(()=>{setApprovalBtnLoading(false)})}}>拒绝</Button></WithPermission>
                                     <OkBtn/>
                                 </> :
                                 <>
@@ -99,8 +93,8 @@ const SystemInsideApprovalList:FC = ()=>{
             valueType: 'option',
             render: (_: React.ReactNode, entity: SubscribeApprovalTableListItem) => [
                 pageStatus === 0 ? 
-                <TableBtnWithPermission  access="project.mySystem.subscribeApproval.approval" key="approval" onClick={()=>{openModal('approval',entity)}} btnTitle="审批"/>
-                :<TableBtnWithPermission  access="project.mySystem.subscribeApproval.view" key="view" onClick={()=>{openModal('view',entity)}} btnTitle="查看"/>,
+                <TableBtnWithPermission  access="team.service.subscription.approval" key="approval" onClick={()=>{openModal('approval',entity)}} btnTitle="审批"/>
+                :<TableBtnWithPermission  access="team.service.subscription.view" key="view" onClick={()=>{openModal('view',entity)}} btnTitle="查看"/>,
             ],
         }
     ]
@@ -113,7 +107,7 @@ const SystemInsideApprovalList:FC = ()=>{
                 success: true,
             });
         }
-        return fetchData<BasicResponse<{approvals:SubscribeApprovalTableListItem[]}>>('project/approval/subscribes',{method:'GET',eoParams:{project:systemId, status:(query.get('status') || 0)},eoTransformKeys:['apply_time','apply_project','approval_time']}).then(response=>{
+        return fetchData<BasicResponse<{approvals:SubscribeApprovalTableListItem[]}>>('service/approval/subscribes',{method:'GET',eoParams:{service:serviceId,team:teamId, status:(query.get('status') || 0)},eoTransformKeys:['apply_time','apply_project','approval_time']}).then(response=>{
             const {code,data,msg} = response
             if(code === STATUS_CODE.SUCCESS){
                 setTableListDataSource(data.approvals)
@@ -154,7 +148,7 @@ const SystemInsideApprovalList:FC = ()=>{
     useEffect(() => {
         setBreadcrumb([
             {
-                title:<Link to={`/system/list`}>内部数据服务</Link>
+                title:<Link to={`/service/list`}>内部数据服务</Link>
             },
             {
                 title:'订阅审批'
@@ -162,7 +156,7 @@ const SystemInsideApprovalList:FC = ()=>{
         ])
         getMemberList()
         manualReloadTable()
-    }, [systemId]);
+    }, [serviceId]);
 
     const manualReloadTable = () => {
         setTableHttpReload(true); // 表格数据需要从后端接口获取
@@ -187,7 +181,7 @@ const SystemInsideApprovalList:FC = ()=>{
                     setTableHttpReload(false)
                 }}
                 onRowClick={(row:SubscribeApprovalTableListItem)=>openModal(pageStatus === 0 ? 'approval': 'view',row)}
-                tableClickAccess={pageStatus === 0 ?'project.mySystem.subscribeApproval.approval':'project.mySystem.subscribeApproval.view'}
+                tableClickAccess={pageStatus === 0 ?'team.service.subscription.approval':'team.service.subscription.view'}
             />
         </div>
     )
