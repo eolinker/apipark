@@ -265,6 +265,21 @@ func (i *imlServiceModule) Create(ctx context.Context, teamID string, input *ser
 	}
 	input.Prefix = strings.Trim(strings.Trim(input.Prefix, " "), "/")
 	err := i.transaction.Transaction(ctx, func(ctx context.Context) error {
+		if input.Tags != nil {
+			tags, err := i.getTagUuids(ctx, input.Tags)
+			if err != nil {
+				return err
+			}
+			for _, t := range tags {
+				err = i.serviceTagService.Create(ctx, &service_tag.CreateTag{
+					Tid: t,
+					Sid: input.Id,
+				})
+				if err != nil {
+					return err
+				}
+			}
+		}
 		return i.serviceService.Create(ctx, mo)
 	})
 	if err != nil {

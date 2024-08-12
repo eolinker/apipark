@@ -1,15 +1,16 @@
 package service_dto
 
 type CreateService struct {
-	Id          string `json:"id"`
-	Name        string `json:"name"`
-	Prefix      string `json:"prefix"`
-	Description string `json:"description"`
-	ServiceType string `json:"service_type"`
-	Logo        string `json:"logo"`
-	Catalogue   string `json:"catalogue" aocheck:"catalogue"`
-	AsApp       *bool  `json:"as_app"`
-	AsServer    *bool  `json:"as_server"`
+	Id          string   `json:"id"`
+	Name        string   `json:"name"`
+	Prefix      string   `json:"prefix"`
+	Description string   `json:"description"`
+	ServiceType string   `json:"service_type"`
+	Logo        string   `json:"logo"`
+	Tags        []string `json:"tags"`
+	Catalogue   string   `json:"catalogue" aocheck:"catalogue"`
+	AsApp       *bool    `json:"as_app"`
+	AsServer    *bool    `json:"as_server"`
 }
 
 type EditService struct {
