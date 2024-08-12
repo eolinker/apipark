@@ -401,7 +401,7 @@ func (i *imlSubscribeApprovalModule) onlineSubscriber(ctx context.Context, clust
 	return client.Subscribe().Online(ctx, sub)
 }
 func (i *imlSubscribeApprovalModule) Reject(ctx context.Context, pid string, id string, approveInfo *subscribe_dto.Approve) error {
-	applyInfo, err := i.subscribeApplyService.Get(ctx, id)
+	_, err := i.subscribeApplyService.Get(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -417,7 +417,8 @@ func (i *imlSubscribeApprovalModule) Reject(ctx context.Context, pid string, id 
 		if err != nil {
 			return err
 		}
-		return i.subscribeService.UpdateSubscribeStatus(ctx, applyInfo.Application, applyInfo.Service, status)
+		return nil
+		//return i.subscribeService.UpdateSubscribeStatus(ctx, applyInfo.Application, applyInfo.Service, status)
 	})
 }
 
